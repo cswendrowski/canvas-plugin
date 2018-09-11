@@ -7,7 +7,7 @@ import octoprint.plugin
 
 class CanvasPlugin(octoprint.plugin.StartupPlugin):
     def on_after_startup(self):
-        self._logger.info("Canvas v0.0.1 Plugin Started")
+        self._logger.info("Canvas Plugin Started")
 
     def get_latest(self, target, check, full_data=False, online=True):
         resp = requests.get("http://emerald.mosaicmanufacturing.com/canvas-hub-canvas-test/latest")
