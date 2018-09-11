@@ -1,29 +1,34 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-### (Don't forget to remove me)
-# This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
-# as well as the plugin mixins it's subclassing from. This is really just a basic skeleton to get you started.
-
+import requests
+from distutils.version import LooseVersion
 import octoprint.plugin
 
 class CanvasPlugin(octoprint.plugin.StartupPlugin):
     def on_after_startup(self):
         self._logger.info("Canvas Plugin Started")
 
-    def get_latest(self, target, check, online=True):
-        information =dict(
+    def get_latest(self, target, check, full_data=False, online=True):
+        resp = requests.get("http://emerald.mosaicmanufacturing.com/canvas-hub-canvas-test/latest")
+        version_data = resp.json()
+        version = version_data["versions"][0]["version"]
+        current_version = check.get("current")
+        information = dict(
 		local=dict(
-			name="0.1.0",
-		    value="0.1.0",
+			name=current_version,
+		        value=current_version,
 		),
 		remote=dict(
-			name="0.5.0",
-			value="0.5.0"
+			name=version,
+			value=version
 		)
 	)
-        is_current = False
-        return information, is_current
+        self._logger.info("current version: %s" % current_version)
+        self._logger.info("remote version: %s" % version)
+        needs_update = LooseVersion(current_version) < LooseVersion(version)
+        self._logger.info("needs update: %s" % needs_update)
+        return information, not needs_update
 
     def get_update_information(self):
         # Define the configuration for your plugin to use with the Software Update
@@ -34,8 +39,8 @@ class CanvasPlugin(octoprint.plugin.StartupPlugin):
 	        displayName="Canvas Plugin",
                 displayVersion=self._plugin_version,
                 current=self._plugin_version,
-                python_checker=self.get_latest,
-	        #type="commandline",
+                python_checker=self,
+	        type="python_checker",
 	        command="/home/pi/test-version.sh",
 
 	        # update method: pip
