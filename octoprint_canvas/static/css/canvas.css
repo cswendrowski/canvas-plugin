@@ -1,0 +1,94 @@
+.btn {
+  background: rgba(54, 54, 54, 1);
+  border-radius: 3px;
+  opacity: 1;
+  text-shadow: none;
+  color: white;
+}
+
+.fa-wrench,
+.accordion-heading i,
+.nav.pull-right i {
+  color: white;
+}
+
+.fa-check,
+.dropdown-menu i {
+  color: rgba(54, 54, 54, 1);
+}
+
+.dropdown-submenu > a:after {
+  border-left-color: rgba(54, 54, 54, 1);
+}
+
+.octoprint-container .tab-content {
+  border: 1px solid rgba(54, 54, 54, 1);
+  border-radius: 0px;
+}
+
+.nav-tabs {
+  border: none;
+}
+
+.nav-tabs > li {
+  margin-bottom: 0;
+}
+
+.nav-tabs > li > a,
+#footer_version small {
+  color: #484747;
+}
+
+.nav-tabs > .active > a {
+  color: white;
+  background: rgba(54, 54, 54, 1);
+}
+
+#navbar .navbar-inner {
+  background-image: none !important;
+  border: none !important;
+  background-color: rgba(54, 54, 54, 1);
+  color: white;
+}
+
+.accordion-group {
+  margin-bottom: 10px;
+  border: 1px solid black;
+  border-radius: 0px;
+}
+
+.accordion-heading {
+  background-color: rgba(54, 54, 54, 1);
+  border-bottom: 1px solid rgba(54, 54, 54, 1);
+}
+
+.accordion-toggle {
+  color: white;
+}
+
+.fa-list:before,
+.accordion-heading .fa-info-circle:before,
+.fa-signal:before,
+.print-control .fa-print:before,
+.fa-pause:before,
+.fa-stop:before,
+.fa-folder:before,
+.fa-upload:before {
+  content: none;
+}
+
+.progress .bar {
+  background-color: rgba(54, 54, 54, 0.7);
+}
+
+#files .form-search {
+  text-align: left;
+}
+
+input.search-query {
+  border-radius: 3px;
+}
+
+#temperature-graph {
+  background-image: none !important;
+}
