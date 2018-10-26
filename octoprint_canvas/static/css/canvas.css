@@ -1,3 +1,4 @@
+/* 1. Switch Octoprint Logo for Canvas Logo */
 .brand span {
   color: white;
   font-weight: 700;
@@ -7,6 +8,7 @@
   background-position-y: -3px;
 }
 
+/* 2. Button Styling */
 .btn {
   background: rgba(54, 54, 54, 1) !important;
   border-radius: 3px !important;
@@ -36,10 +38,22 @@
   background-color: white !important;
 }
 
+/* 3. Icon Styling */
 .fa-wrench,
 .accordion-heading i,
 .nav.pull-right i {
   color: white;
+}
+
+.fa-list:before,
+.accordion-heading .fa-info-circle:before,
+.fa-signal:before,
+.print-control .fa-print:before,
+.fa-pause:before,
+.fa-stop:before,
+.fa-folder:before,
+.fa-upload:before {
+  content: none;
 }
 
 .nav.pull-right a:hover i {
@@ -54,6 +68,8 @@
 .dropdown-submenu > a:after {
   border-left-color: rgba(54, 54, 54, 1);
 }
+
+/* 4. Tabs + Tab Content Styling */
 
 .octoprint-container .tab-content {
   border: 1px solid rgba(54, 54, 54, 1);
@@ -79,6 +95,41 @@
   background: rgba(54, 54, 54, 1);
 }
 
+.nav-tabs .active .dropdown-toggle,
+.nav-tabs .dropdown-toggle,
+.nav-tabs .dropdown-toggle:hover,
+.nav-tabs .active .dropdown-toggle:hover {
+  margin-right: 0;
+  background-color: rgba(54, 54, 54, 1);
+  border: 1px solid rgba(54, 54, 54, 1);
+  color: white;
+}
+
+.nav-tabs .active .dropdown-toggle .caret,
+.nav-tabs .active .dropdown-toggle .caret:hover,
+.nav .dropdown-toggle .caret,
+.nav .dropdown-toggle .caret:hover,
+.nav .dropdown-toggle:hover .caret {
+  border-top-color: white;
+  border-bottom-color: white;
+}
+
+.dropdown-menu li > a:hover,
+.dropdown-menu li > a:focus,
+.dropdown-submenu:hover > a,
+.dropdown-menu .active > a,
+.dropdown-menu .active > a:hover {
+  background-color: rgba(54, 54, 54, 1);
+  background-image: none;
+}
+
+.nav > li.dropdown.open.active > a:hover,
+.nav-tabs .open .dropdown-toggle {
+  background-color: rgba(54, 54, 54, 1);
+  border-color: rgba(54, 54, 54, 1);
+}
+
+/* 5. Top Navigation Bar Styling */
 #navbar .navbar-inner {
   background-image: none !important;
   border: none !important;
@@ -86,6 +137,7 @@
   color: white;
 }
 
+/* 6. Accordion Styling */
 .accordion-group {
   margin-bottom: 10px;
   border: 1px solid black;
@@ -97,10 +149,7 @@
   border-bottom: 1px solid rgba(54, 54, 54, 1);
 }
 
-.accordion-heading a:hover {
-  color: white;
-}
-
+.accordion-heading a:hover,
 .accordion-toggle {
   color: white;
 }
@@ -118,6 +167,7 @@
   padding-bottom: 1px;
 }
 
+/* TO BE CHANGED */
 .title.clickable::after {
   content: "Palette";
   float: right;
@@ -129,17 +179,11 @@
   cursor: auto;
 }
 
-.fa-list:before,
-.accordion-heading .fa-info-circle:before,
-.fa-signal:before,
-.print-control .fa-print:before,
-.fa-pause:before,
-.fa-stop:before,
-.fa-folder:before,
-.fa-upload:before {
-  content: none;
+#files .form-search {
+  text-align: left;
 }
 
+/* 8. OTHER STYLING */
 .progress .bar,
 .slider .slider-selection {
   background-color: rgba(54, 54, 54, 0.7);
@@ -155,10 +199,6 @@
   background-color: rgba(54, 54, 54, 0.5);
 }
 
-#files .form-search {
-  text-align: left;
-}
-
 input.search-query {
   border-radius: 3px;
 }
@@ -167,20 +207,32 @@ input.search-query {
   background-image: none !important;
 }
 
-#settings_dialog a {
+/* 9. Specific Canvas Tab Styling */
+.label-spacing {
+  display: flex;
+  justify-content: space-between;
+  width: 51%;
+}
+
+/* 10. Settings Modal Styling */
+#settings_dialog a,
+#plugin_announcements_dialog a {
   color: rgba(54, 54, 54, 0.7);
 }
 
-#settings_dialog a:hover {
+#settings_dialog a:hover,
+#settings_dialog .nav-header,
+#plugin_announcements_dialog a:hover,
+#plugin_announcements_dialog_content a {
   color: rgba(54, 54, 54, 1);
 }
 
 #settings_dialog .nav-list > .active > a,
-#settings_dialog .nav-pills > .active > a {
+#settings_dialog .nav-pills > .active > a,
+#plugin_announcements_dialog .nav-list > .active > a {
   color: white;
   background-color: rgba(54, 54, 54, 1);
 }
-
-#settings_dialog .nav-header {
+.configurelink:hover .fa-wrench {
   color: rgba(54, 54, 54, 1);
 }

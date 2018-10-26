@@ -1,7 +1,7 @@
 # coding=utf-8
 
 ########################################################################################################################
-### Do not forget to adjust the following variables to your own plugin.
+# Do not forget to adjust the following variables to your own plugin.
 
 # The plugin's identifier, has to be unique
 plugin_identifier = "canvas"
@@ -11,7 +11,7 @@ plugin_package = "octoprint_%s" % plugin_identifier
 
 # The plugin's human readable name. Can be overwritten within OctoPrint's internal data via __plugin_name__ in the
 # plugin module
-plugin_name = "Canvas Plugin"
+plugin_name = "Canvas"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
 plugin_version = "0.1.0"
@@ -44,22 +44,22 @@ plugin_additional_data = []
 from setuptools import setup
 
 try:
-	import octoprint_setuptools
+    import octoprint_setuptools
 except:
-	print("Could not import OctoPrint's setuptools, are you sure you are running that under "
-	      "the same python installation that OctoPrint is installed under?")
-	import sys
-	sys.exit(-1)
+    print("Could not import OctoPrint's setuptools, are you sure you are running that under "
+          "the same python installation that OctoPrint is installed under?")
+    import sys
+    sys.exit(-1)
 
 setup(**octoprint_setuptools.create_plugin_setup_parameters(
-	identifier=plugin_identifier,
-	name=plugin_name,
-	version=plugin_version,
-	description=plugin_description,
-	author=plugin_author,
-	mail=plugin_author_email,
-	url=plugin_url,
-	license=plugin_license,
-	requires=plugin_requires,
-	additional_data=plugin_additional_data
+    identifier=plugin_identifier,
+    name=plugin_name,
+    version=plugin_version,
+    description=plugin_description,
+    author=plugin_author,
+    mail=plugin_author_email,
+    url=plugin_url,
+    license=plugin_license,
+    requires=plugin_requires,
+    additional_data=plugin_additional_data
 ))

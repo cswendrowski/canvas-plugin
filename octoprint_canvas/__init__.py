@@ -8,7 +8,9 @@ import octoprint.plugin
 
 class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.AssetPlugin,
-                   octoprint.plugin.StartupPlugin):
+                   octoprint.plugin.StartupPlugin,
+                   octoprint.plugin.SimpleApiPlugin,
+                   octoprint.plugin.EventHandlerPlugin):
 
     def on_after_startup(self):
         self._logger.info("Canvas Plugin Started")
@@ -59,11 +61,39 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             )
         )
 
+    # POST, runs first before on_api_commands, responds to commands from palette,js, any strings inside array = mandatory
+    def get_api_commands(self):
+        return dict(
+            connectCanvas=["test"]
+        )
+
+    # POST, to handle commands from get_api_commands
+    def on_api_command(self, command, data):
+        if command == "connectCanvas":
+            self._logger.info(data["test"])
+
+    # GET, not really needed
+    def on_api_get(self, request):
+        self._plugin_manager.send_plugin_message(
+            self._identifier, "Omega Message")
+        return flask.jsonify(foo="bar")
+
+    # EVENTHANDLERPLUGIN: To be able to go from BE to FE
+    def on_event(self, event, payload):
+        if "ClientOpened" in event:
+            self.updateUI()
+
+    # example for EVENTHANDLERPLUGIN
+    def updateUI(self):
+        self._logger.info("Sending UIUpdate")
+        self._plugin_manager.send_plugin_message(
+            self._identifier, "Got here from init.py")
+
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
-__plugin_name__ = "Canvas Plugin"
+__plugin_name__ = "Canvas"
 __plugin_description__ = "A plugin to handle connecting and communicating with CANVAS (Beta)"
 
 
