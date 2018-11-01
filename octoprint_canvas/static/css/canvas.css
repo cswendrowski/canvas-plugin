@@ -236,3 +236,11 @@ input.search-query {
 .configurelink:hover .fa-wrench {
   color: rgba(54, 54, 54, 1);
 }
+
+a.canvas-register,
+a.canvas-register:visited {
+  text-decoration: underline;
+  font-weight: 400;
+  opacity: 1;
+  color: rgba(54, 54, 54, 1);
+}

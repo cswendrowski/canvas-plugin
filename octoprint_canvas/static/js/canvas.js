@@ -43,6 +43,13 @@ canvasApp.tagPaletteFiles = () => {
   // }
 };
 
+canvasApp.toggleTheme = () => {
+  // $("html").eq(0).addClass("Cyborg")
+  // if ($("#touch body").length == 1) {
+  //   $("html").removeClass("Cyborg");
+  // }
+};
+
 /* ======================
   INIT + RUN
   ======================= */
@@ -57,9 +64,35 @@ $(function() {
   function CanvasViewModel(parameters) {
     var self = this;
 
+    // OBSERVABLE VALUES
+    self.userEmail = ko.observable();
+    self.password = ko.observable();
+
+    self.downloadPrint = function() {
+      console.log("ATTEMPTING DOWNLOAD");
+      var payload = {
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDEwMTI4MTAsImV4cCI6MTU0MTYxNzYxMCwiaXNzIjoiQ2FudmFzIiwic3ViIjoiODM3OGViOTViYmU0OTk1NjBkOGE2NmI4ZDUwYjg4N2EifQ.nIeuSLWN_g3khHcL4zxigMp5Ke5LPOHM5zOhBur4oPY"
+      };
+
+      $.ajax({
+        url: "https://slice.api.canvas3d.io/projects/ab6225f37b511d671bd27756af3cb299/download",
+        type: "GET",
+        dataType: "json",
+        data: JSON.stringify(payload),
+        contentType: "application/json; charset=UTF-8",
+        success: self.fromResponse
+      }).then(res => {
+        console.log("Successful download");
+      });
+    };
+
     self.connectCanvas = function() {
-      console.log("Connect Canvas");
-      var payload = { command: "connectCanvas", test: "hello" };
+      var payload = {
+        command: "connectCanvas",
+        email: self.userEmail(),
+        password: self.password()
+      };
 
       $.ajax({
         url: API_BASEURL + "plugin/canvas",
@@ -77,23 +110,19 @@ $(function() {
 
     self.onAfterBinding = function() {
       console.log("From Canvas2.js: HELLO");
-
-      // var payload = { command: "uiUpdate" };
-
-      // $.ajax({
-      //   url: API_BASEURL + "plugin/palette2",
-      //   type: "POST",
-      //   dataType: "json",
-      //   data: JSON.stringify(payload),
-      //   contentType: "application/json; charset=UTF-8",
-      //   success: self.fromResponse
-      // });
     };
 
     // you just need this, to check if we are responding to the plugin identifier that was sent by us.
     self.onDataUpdaterPluginMessage = function(pluginIdent, message) {
       if (pluginIdent === "canvas") {
         console.log("succesfully got into onDataUpdaterPluginMessage");
+        console.log(message);
+        if (message.command === "DisplayRegisteredUsers") {
+          $(".accounts").html("");
+          message.data.forEach(user => {
+            $(".accounts").append(`<li>${user}</li>`);
+          });
+        }
       }
     };
   }
