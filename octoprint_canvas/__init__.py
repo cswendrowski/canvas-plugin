@@ -1,24 +1,12 @@
 # coding=utf-8
 from __future__ import absolute_import
 from distutils.version import LooseVersion
-from flask import make_response, render_template
-from ruamel.yaml import YAML
-yaml = YAML(typ="safe")
-
-import os
-import requests
-import zipfile
-import StringIO
-import json
-import octoprint.plugin
-from websocket import create_connection
+# from flask import make_response, render_template
 from octoprint.filemanager.destinations import FileDestinations
-# import websocket
-# try:
-#     import thread
-# except ImportError:
-#     import _thread as thread
-# import time
+
+import requests
+import octoprint.plugin
+from . import Canvas
 
 
 class CanvasPlugin(octoprint.plugin.TemplatePlugin,
@@ -26,14 +14,26 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.StartupPlugin,
                    octoprint.plugin.SimpleApiPlugin,
                    octoprint.plugin.EventHandlerPlugin,
-                   octoprint.plugin.UiPlugin):
+                   octoprint.plugin.UiPlugin,
+                   octoprint.plugin.ShutdownPlugin):
 
     # STARTUPPLUGIN
     def on_after_startup(self):
-        self._logger.info("Canvas Plugin Started")
-        self.chub_yaml = self.loadChubData()
-        # self.downloadPrintFiles("ab6225f37b511d671bd27756af3cb299")
-        self.enableWebsocketConnection()
+        self._logger.info("Canvas Plugin STARTED")
+        self.canvas = Canvas.Canvas(self)
+        self.canvas.enableWebsocketConnection()
+
+        # temp = {
+        #     "type": "DOWNLOAD",
+        #     "userId": "8378eb95bbe499560d8a66b8d50b887a",
+        #     "projectId": "ab6225f37b511d671bd27756af3cb299",
+        #     "filename": "hello"
+        # }
+        # self.downloadPrintFiles(temp)
+
+    def on_shutdown(self):
+        self._logger.info("Canvas Plugin CLOSED")
+        self.canvas.ws.close()
 
     # ASSETPLUGIN
 
@@ -92,134 +92,28 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     # SIMPLEAPIPLUGIN POST, to handle commands listed in get_api_commands
     def on_api_command(self, command, data):
         if command == "connectCanvas":
-            self.connectToCanvas(data["email"], data["password"])
+            self.canvas.connectToCanvas(data["email"], data["password"])
 
     # SIMPLEAPIPLUGIN GET, not really needed
-    def on_api_get(self, request):
-        self._plugin_manager.send_plugin_message(
-            self._identifier, "Omega Message")
-        return flask.jsonify(foo="bar")
+    # def on_api_get(self, request):
+    #     self._plugin_manager.send_plugin_message(
+    #         self._identifier, "Omega Message")
+    #     return flask.jsonify(foo="bar")
 
     # EVENTHANDLERPLUGIN: To be able to go from BE to FE
     def on_event(self, event, payload):
         if "ClientOpened" in event:
+            self._logger.info("YOOOOOOOOOOOOOOOOOOOOOOO")
             list_of_users = map(
-                lambda user: user['username'], self.chub_yaml["canvas-users"].values())
+                lambda user: user['username'], self.canvas.chub_yaml["canvas-users"].values())
             data = {"command": "DisplayRegisteredUsers",
                     "data": list_of_users}
-            self.updateUI(data)
-        elif "DisplayRegisteredUsers" in event:
-            data = {"command": "DisplayRegisteredUsers", "data": payload}
-            self.updateUI(data)
-
-    # example for EVENTHANDLERPLUGIN
-
-    def updateUI(self, data):
-        self._logger.info("Sending UIUpdate")
-        dummy = ["cat", "dog", "turtle"]
-        dummyObj = {"name": "John", "age": "25"}
-        self._plugin_manager.send_plugin_message(
-            self._identifier, data)
+            self.canvas.updateUI(data)
 
     def get_template_configs(self):
         return [
             dict(type="tab", custom_bindings=True)
         ]
-
-
-############
-# CANVAS FUNCTIONS
-####################
-
-
-    def connectToCanvas(self, email, password):
-        # Make POST request to canvas API to log in user
-        url = "https://api.canvas3d.io/users/login"
-        data = {"email": email, "password": password}
-
-        try:
-            response = requests.post(url, json=data).json()
-            if response.get("status") >= 400:
-                self._logger.info("Error: Try Logging In Again")
-                # send message back to front-end that login was unsuccessful
-            else:
-                self._logger.info("API response valid!")
-                self.downloadPrintFiles("ab6225f37b511d671bd27756af3cb299")
-                # self.enableWebsocketConnection()
-
-                # self.verifyUserInYAML(response)
-
-        except requests.exceptions.RequestException as e:
-            print e
-
-    def enableWebsocketConnection(self):
-        if "canvas-users" in self.chub_yaml:
-            self._logger.info("There are registered users!")
-            ws = create_connection("ws://hub-dev.canvas3d.co")
-            print("Sending 'Hello, World'...")
-            # make function to send C.HUB serial number
-            ws.send("Hello, World")
-            print("Sent")
-            print("Receiving...")
-            result = ws.recv()
-            # make function call for printing here
-            print("Received '%s'" % result)
-            ws.close()
-        else:
-            self._logger.info(
-                "There are no registered users. Please register a Canvas account.")
-
-    def loadChubData(self):
-        chub_path = os.path.expanduser('~') + "/.mosaicdata"
-
-        # if /.mosaicdata doesn't exist yet, make the directory and the YML file
-        if not os.path.exists(chub_path):
-            os.mkdir(chub_path)
-            f = open(chub_path + "/canvas-hub-data.yml", "w")
-            f.close()
-
-        # access yaml file with all the info
-        chub_file_path = chub_path + "/canvas-hub-data.yml"
-        chub_data = open(chub_file_path, "r")
-        chub_yaml = yaml.load(chub_data)
-        chub_data.close()
-
-        return chub_yaml
-
-    def verifyUserInYAML(self, data):
-        # get list of all registered users on the C.HUB YML file
-        registeredUsers = self.chub_yaml["canvas-users"]
-
-        # if user is not registered in C.HUB YML file yet
-        if data.get("id") not in registeredUsers:
-            self._logger.info("Saving New User in C.HUB YML")
-            # save new user to YML file
-            registeredUsers[data.get("id")] = data
-            chub_data_path = os.path.expanduser(
-                '~') + "/.mosaicdata/canvas-hub-data.yml"
-            chub_data = open(chub_data_path, "w")
-            yaml.dump(self.chub_yaml, chub_data)
-            chub_data.close()
-
-        # update UI with new list of users
-        list_of_users = map(
-            lambda user: user['username'], self.chub_yaml["canvas-users"].values())
-        self.on_event("DisplayRegisteredUsers", list_of_users)
-
-    def downloadPrintFiles(self, project_id):
-        # need user ID to locate token
-        token = "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDEwMTI4MTAsImV4cCI6MTU0MTYxNzYxMCwiaXNzIjoiQ2FudmFzIiwic3ViIjoiODM3OGViOTViYmU0OTk1NjBkOGE2NmI4ZDUwYjg4N2EifQ.nIeuSLWN_g3khHcL4zxigMp5Ke5LPOHM5zOhBur4oPY"
-        headers = {"Authorization": token}
-        url = "https://slice.api.canvas3d.io/projects/" + project_id + "/download"
-
-        r = requests.get(url, headers=headers)
-        if r.ok:
-            z = zipfile.ZipFile(StringIO.StringIO(r.content))
-            z.extractall()
-            self._logger.info(FileDestinations.LOCAL)
-
-        # save to uploads folder
-
 
     # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
     # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
