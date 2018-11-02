@@ -1,5 +1,4 @@
-/* 1. Switch Octoprint Logo for Canvas Logo */
-.brand span {
+.canvas-theme .brand span {
   color: white;
   font-weight: 700;
   font-size: 95%;
@@ -7,240 +6,224 @@
   background-image: url(../img/Mosaic_Icon_Square.png) !important;
   background-position-y: -3px;
 }
-
-/* 2. Button Styling */
-.btn {
-  background: rgba(54, 54, 54, 1) !important;
+.canvas-theme .btn {
+  background: #363636 !important;
   border-radius: 3px !important;
   opacity: 1;
   text-shadow: none !important;
   color: white !important;
+  -webkit-transition: 0.1s;
+  -o-transition: 0.1s;
   transition: 0.1s;
 }
-
-.btn:hover:not(:disabled),
-.btn:hover:not([disabled]) {
+.canvas-theme .btn:hover:not(:disabled),
+.canvas-theme .btn:hover:not([disabled]) {
   background-color: rgba(54, 54, 54, 0.1) !important;
-  color: rgba(54, 54, 54, 1) !important;
+  color: #363636 !important;
+  -webkit-transition: 0.1s;
+  -o-transition: 0.1s;
   transition: 0.1s;
 }
-
-.btn.disabled:hover {
+.canvas-theme .btn.disabled:hover {
   background-color: white !important;
-  color: rgba(134, 134, 134, 1) !important;
+  color: #868686 !important;
   cursor: default;
 }
-
-.btn-primary[disabled],
-.btn.disabled {
-  border: 1px solid rgba(134, 134, 134, 1) !important;
-  color: rgba(134, 134, 134, 1) !important;
+.canvas-theme .btn-primary[disabled],
+.canvas-theme .btn.disabled {
+  border: 1px solid #868686 !important;
+  color: #868686 !important;
   background-color: white !important;
 }
-
-/* 3. Icon Styling */
-.fa-wrench,
-.accordion-heading i,
-.nav.pull-right i {
+.canvas-theme .accordion-heading i,
+.canvas-theme .fa-wrench,
+.canvas-theme .nav.pull-right i {
   color: white;
 }
-
-.fa-list:before,
-.accordion-heading .fa-info-circle:before,
-.fa-signal:before,
-.print-control .fa-print:before,
-.fa-pause:before,
-.fa-stop:before,
-.fa-folder:before,
-.fa-upload:before {
+.canvas-theme .accordion-heading .fa-info-circle:before,
+.canvas-theme .fa-folder:before,
+.canvas-theme .fa-list:before,
+.canvas-theme .fa-pause:before,
+.canvas-theme .fa-signal:before,
+.canvas-theme .fa-stop:before,
+.canvas-theme .fa-upload:before,
+.canvas-theme .print-control .fa-print:before {
   content: none;
 }
-
-.nav.pull-right a:hover i {
-  color: rgba(54, 54, 54, 1);
+.canvas-theme .nav.pull-right a:hover i {
+  color: #363636;
 }
-
-.fa-check,
-.dropdown-menu i {
-  color: rgba(54, 54, 54, 1);
+.canvas-theme .dropdown-menu i,
+.canvas-theme .fa-check {
+  color: #363636;
 }
-
-.dropdown-submenu > a:after {
-  border-left-color: rgba(54, 54, 54, 1);
+.canvas-theme .dropdown-submenu > a:after {
+  border-left-color: #363636;
 }
-
-/* 4. Tabs + Tab Content Styling */
-
-.octoprint-container .tab-content {
-  border: 1px solid rgba(54, 54, 54, 1);
+.canvas-theme .octoprint-container .tab-content {
+  border: 1px solid #363636;
   border-radius: 0px;
 }
-
-.nav-tabs {
+.canvas-theme .nav-tabs {
   border: none;
 }
-
-.nav-tabs li {
+.canvas-theme .nav-tabs li {
   margin-bottom: 0;
 }
-
-.nav-tabs li a,
-#footer_version small {
+.canvas-theme #footer_version small,
+.canvas-theme .nav-tabs li a {
   color: #484747;
 }
-
-.nav-tabs > .active > a,
-.nav-tabs > .active > a:hover {
+.canvas-theme .nav-tabs > .active > a,
+.canvas-theme .nav-tabs > .active > a:hover {
   color: white;
-  background: rgba(54, 54, 54, 1);
+  background: #363636;
 }
-
-.nav-tabs .active .dropdown-toggle,
-.nav-tabs .dropdown-toggle,
-.nav-tabs .dropdown-toggle:hover,
-.nav-tabs .active .dropdown-toggle:hover {
+.canvas-theme .nav-tabs .active .dropdown-toggle,
+.canvas-theme .nav-tabs .active .dropdown-toggle:hover,
+.canvas-theme .nav-tabs .dropdown-toggle,
+.canvas-theme .nav-tabs .dropdown-toggle:hover {
   margin-right: 0;
-  background-color: rgba(54, 54, 54, 1);
-  border: 1px solid rgba(54, 54, 54, 1);
+  background-color: #363636;
+  border: 1px solid #363636;
   color: white;
 }
-
-.nav-tabs .active .dropdown-toggle .caret,
-.nav-tabs .active .dropdown-toggle .caret:hover,
-.nav .dropdown-toggle .caret,
-.nav .dropdown-toggle .caret:hover,
-.nav .dropdown-toggle:hover .caret {
+.canvas-theme .nav-tabs .active .dropdown-toggle .caret,
+.canvas-theme .nav-tabs .active .dropdown-toggle .caret:hover,
+.canvas-theme .nav .dropdown-toggle .caret,
+.canvas-theme .nav .dropdown-toggle .caret:hover,
+.canvas-theme .nav .dropdown-toggle:hover .caret {
   border-top-color: white;
   border-bottom-color: white;
 }
-
-.dropdown-menu li > a:hover,
-.dropdown-menu li > a:focus,
-.dropdown-submenu:hover > a,
-.dropdown-menu .active > a,
-.dropdown-menu .active > a:hover {
-  background-color: rgba(54, 54, 54, 1);
+.canvas-theme .dropdown-menu .active > a,
+.canvas-theme .dropdown-menu .active > a:hover,
+.canvas-theme .dropdown-menu li > a:focus,
+.canvas-theme .dropdown-menu li > a:hover,
+.canvas-theme .dropdown-submenu:hover > a {
+  background-color: #363636;
   background-image: none;
 }
-
-.nav > li.dropdown.open.active > a:hover,
-.nav-tabs .open .dropdown-toggle {
-  background-color: rgba(54, 54, 54, 1);
-  border-color: rgba(54, 54, 54, 1);
+.canvas-theme .nav-tabs .open .dropdown-toggle,
+.canvas-theme .nav > li.dropdown.open.active > a:hover {
+  background-color: #363636;
+  border-color: #363636;
 }
-
-/* 5. Top Navigation Bar Styling */
-#navbar .navbar-inner {
+.canvas-theme #navbar .navbar-inner {
   background-image: none !important;
   border: none !important;
-  background-color: rgba(54, 54, 54, 1);
+  background-color: #363636;
   color: white;
 }
-
-/* 6. Accordion Styling */
-.accordion-group {
+.canvas-theme .accordion-group {
   margin-bottom: 10px;
   border: 1px solid black;
   border-radius: 0px;
 }
-
-.accordion-heading {
-  background-color: rgba(54, 54, 54, 1);
-  border-bottom: 1px solid rgba(54, 54, 54, 1);
+.canvas-theme .accordion-heading {
+  background-color: #363636;
+  border-bottom: 1px solid #363636;
 }
-
-.accordion-heading a:hover,
-.accordion-toggle {
+.canvas-theme .accordion-heading a:hover,
+.canvas-theme .accordion-toggle {
   color: white;
 }
-
-.icon-sd-black-14 {
+.canvas-theme .icon-sd-black-14 {
   background: url(../img/sd-card.png) no-repeat;
   width: 16px;
   height: 13px;
   margin-top: 4px;
   background-size: contain;
 }
-
-.title.clickable {
+.canvas-theme .title.clickable {
   padding-top: 1px;
   padding-bottom: 1px;
 }
-
-/* TO BE CHANGED */
-.title.clickable::after {
+.canvas-theme .title.clickable:after {
   content: "Palette";
   float: right;
-  background-color: rgba(54, 54, 54, 1);
+  background-color: #363636;
   padding: 0px 20px;
   color: white;
   font-weight: 700;
   border-radius: 1px;
   cursor: auto;
 }
-
-#files .form-search {
+.canvas-theme #files .form-search {
   text-align: left;
 }
-
-/* 8. OTHER STYLING */
-.progress .bar,
-.slider .slider-selection {
+.canvas-theme .progress .bar,
+.canvas-theme .slider .slider-selection {
   background-color: rgba(54, 54, 54, 0.7);
   background-image: -moz-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(rgba(54, 54, 54, 0.5)), to(rgba(54, 54, 54, 0.95)));
   background-image: -webkit-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
   background-image: -o-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(rgba(54, 54, 54, 0.1)),
+    to(rgba(54, 54, 54, 0.95))
+  );
   background-image: linear-gradient(to bottom, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
 }
-
-.slider .slider-selection:hover,
-.slider .slider-selection:active {
+.canvas-theme .slider .slider-selection:active,
+.canvas-theme .slider .slider-selection:hover {
   background-color: rgba(54, 54, 54, 0.5);
 }
-
-input.search-query {
+.canvas-theme input.search-query {
   border-radius: 3px;
 }
-
-#temperature-graph {
+.canvas-theme #temperature-graph {
   background-image: none !important;
 }
-
-/* 9. Specific Canvas Tab Styling */
-.label-spacing {
+.canvas-theme .label-spacing {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
   justify-content: space-between;
   width: 51%;
 }
-
-/* 10. Settings Modal Styling */
-#settings_dialog a,
-#plugin_announcements_dialog a {
+.canvas-theme #plugin_announcements_dialog a,
+.canvas-theme #settings_dialog a {
   color: rgba(54, 54, 54, 0.7);
 }
-
-#settings_dialog a:hover,
-#settings_dialog .nav-header,
-#plugin_announcements_dialog a:hover,
-#plugin_announcements_dialog_content a {
-  color: rgba(54, 54, 54, 1);
+.canvas-theme #plugin_announcements_dialog_content a,
+.canvas-theme #plugin_announcements_dialog a:hover,
+.canvas-theme #settings_dialog .nav-header,
+.canvas-theme #settings_dialog a:hover {
+  color: #363636;
 }
-
-#settings_dialog .nav-list > .active > a,
-#settings_dialog .nav-pills > .active > a,
-#plugin_announcements_dialog .nav-list > .active > a {
+.canvas-theme #plugin_announcements_dialog .nav-list > .active > a,
+.canvas-theme #settings_dialog .nav-list > .active > a,
+.canvas-theme #settings_dialog .nav-pills > .active > a {
   color: white;
-  background-color: rgba(54, 54, 54, 1);
+  background-color: #363636;
 }
-.configurelink:hover .fa-wrench {
-  color: rgba(54, 54, 54, 1);
+.canvas-theme .configurelink:hover .fa-wrench {
+  color: #363636;
 }
-
-a.canvas-register,
-a.canvas-register:visited {
+.canvas-theme a.canvas-register,
+.canvas-theme a.canvas-register:visited {
   text-decoration: underline;
   font-weight: 400;
   opacity: 1;
-  color: rgba(54, 54, 54, 1);
+  color: #363636;
+}
+.canvas-theme #connection-state-msg-canvas {
+  color: red;
+}
+.canvas-theme .registered-accounts {
+  margin-left: 0;
+}
+.canvas-theme .valid-token {
+  color: green;
+  list-style: none;
+}
+.canvas-theme .invalid-token {
+  color: red;
+  list-style: none;
 }

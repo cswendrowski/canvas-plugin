@@ -11,7 +11,6 @@ try:
 except ImportError:
     import _thread as thread
 from ruamel.yaml import YAML
-# from __init__ import on_event
 yaml = YAML(typ="safe")
 
 
@@ -31,6 +30,7 @@ class Canvas():
         self._identifier = plugin._identifier
 
         self.chub_yaml = self.loadChubData()
+        self.ws_connection = False
 
     def connectToCanvas(self, email, password):
         # Make POST request to canvas API to log in user
@@ -55,9 +55,10 @@ class Canvas():
         if is_json(message) is True:
             response = json.loads(message)
             print(response["type"])
-            if response["type"] is "TOKEN_VERIFICATION":
-                self.token_validation_list = response["tokens"]
-            elif response['type'] is "DOWNLOAD":
+            if "TOKEN_VERIFICATION" in response["type"]:
+                token_validation_list = response["tokens"]
+                self.updateTokenValidationInYAML(token_validation_list)
+            elif "DOWNLOAD" in response["type"]:
                 self.downloadPrintFiles(response)
 
     def ws_on_error(self, ws, error):
@@ -65,18 +66,20 @@ class Canvas():
 
     def ws_on_close(self, ws):
         print("### Closing Websocket ###")
+        self.updateUI({"command": "Websocket", "data": False})
+        self.ws_connection = False
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
+        self.updateUI({"command": "Websocket", "data": True})
         list_of_tokens = json.dumps(self.getListOfTokens())
         print("Sending tokens: " + list_of_tokens)
-        self.ws.send(list_of_tokens)
+        self.verifyTokens(list_of_tokens)
         print("Sent")
 
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
         if self.chub_yaml["canvas-users"]:
-            self._logger.info("There are registered users!")
             self.ws = websocket.WebSocketApp("ws://hub-dev.canvas3d.co",
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
@@ -84,6 +87,7 @@ class Canvas():
                                              on_open=self.ws_on_open)
             # self.ws.on_open = self.on_open
             thread.start_new_thread(self.ws.run_forever, ())
+            self.ws_connection = True
         else:
             self._logger.info(
                 "There are no registered users. Please register a Canvas account.")
@@ -127,37 +131,72 @@ class Canvas():
             self._logger.info("Saving New User in C.HUB YML")
             # save new user to YML file
             registeredUsers[data.get("id")] = data
-            chub_data_path = os.path.expanduser(
-                '~') + "/.mosaicdata/canvas-hub-data.yml"
-            chub_data = open(chub_data_path, "w")
-            yaml.dump(self.chub_yaml, chub_data)
-            chub_data.close()
+            self.updateYAMLInfo()
 
-        # update UI with new list of users
+           # if websocket is not already enabled, enable it
+            if not self.ws_connection:
+                self.enableWebsocketConnection()
+                self.updateRegisteredUsers()
+
+            else:
+                list_of_tokens = json.dumps(self.getListOfTokens())
+                self.verifyTokens(list_of_tokens)
+                self.updateRegisteredUsers()
+        else:
+            self._logger.info("User already registered! You are good.")
+
+    def verifyTokens(self, data):
+        self.ws.send(data)
+
+    def updateTokenValidationInYAML(self, data):
+        registeredUsers = self.chub_yaml["canvas-users"]
+
+        # assign token status to each user account
+        for user, userInfo in registeredUsers.iteritems():
+            user_data = filter(
+                lambda token_info: token_info["token"] == userInfo["token"], data)
+            token_status = user_data[0]["valid"]
+            registeredUsers[user]["token_valid"] = token_status
+
+        # write this information to the YAML file
+        self.updateYAMLInfo()
+
+    def updateRegisteredUsers(self):
+        # make a list of usernames and their token_valid status
         list_of_users = map(
-            lambda user: user['username'], self.chub_yaml["canvas-users"].values())
+            lambda user: {key: user[key] for key in ["username", "token_valid"]}, self.chub_yaml["canvas-users"].values())
         self.updateUI(
             {"command": "DisplayRegisteredUsers", "data": list_of_users})
 
+    def updateYAMLInfo(self):
+        chub_data_path = os.path.expanduser(
+            '~') + "/.mosaicdata/canvas-hub-data.yml"
+        chub_data = open(chub_data_path, "w")
+        yaml.dump(self.chub_yaml, chub_data)
+        chub_data.close()
+
     def downloadPrintFiles(self, data):
-        token = self.chub_yaml["canvas-users"][data["userId"]]["token"]
-        authorization = "Bearer " + token
-        headers = {"Authorization": authorization}
-        url = "https://slice.api.canvas3d.io/projects/" + \
-            data["projectId"] + "/download"
+        user = self.chub_yaml["canvas-users"][data["userId"]]
 
-        r = requests.get(url, headers=headers)
-        if r.ok:
-            z = zipfile.ZipFile(StringIO.StringIO(r.content))
-            z.extractall()
-            # self._logger.info(FileDestinations.LOCAL)
+        # user must have a valid token to enable the download
+        if user["token_valid"]:
+            token = user["token"]
+            authorization = "Bearer " + token
+            headers = {"Authorization": authorization}
+            url = "https://slice.api.canvas3d.io/projects/" + \
+                data["projectId"] + "/download"
 
-        # save to uploads folder
+            response = requests.get(url, headers=headers)
+            if response.ok:
+                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
+                z = zipfile.ZipFile(StringIO.StringIO(response.content))
+                watched_path = self._settings.global_get_basefolder("watched")
+                z.extractall(watched_path)
+        else:
+            self._logger.info("Token is invalid. Download will not initiate")
 
-    # example for EVENTHANDLERPLUGIN
     def updateUI(self, data):
-        self._logger.info("Sending UIUpdate")
-        # dummy = ["cat", "dog", "turtle"]
-        # dummyObj = {"name": "John", "age": "25"}
+        self._logger.info("Sending UIUpdate from Canvas")
+        self._logger.info(data)
         self._plugin_manager.send_plugin_message(
             self._identifier, data)

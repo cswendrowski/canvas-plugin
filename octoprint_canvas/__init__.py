@@ -1,7 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import
 from distutils.version import LooseVersion
-# from flask import make_response, render_template
 from octoprint.filemanager.destinations import FileDestinations
 
 import requests
@@ -15,21 +14,13 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.SimpleApiPlugin,
                    octoprint.plugin.EventHandlerPlugin,
                    octoprint.plugin.UiPlugin,
-                   octoprint.plugin.ShutdownPlugin):
+                   octoprint.plugin.ShutdownPlugin,
+                   octoprint.plugin.SettingsPlugin):
 
     # STARTUPPLUGIN
     def on_after_startup(self):
         self._logger.info("Canvas Plugin STARTED")
         self.canvas = Canvas.Canvas(self)
-        self.canvas.enableWebsocketConnection()
-
-        # temp = {
-        #     "type": "DOWNLOAD",
-        #     "userId": "8378eb95bbe499560d8a66b8d50b887a",
-        #     "projectId": "ab6225f37b511d671bd27756af3cb299",
-        #     "filename": "hello"
-        # }
-        # self.downloadPrintFiles(temp)
 
     def on_shutdown(self):
         self._logger.info("Canvas Plugin CLOSED")
@@ -40,7 +31,8 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def get_assets(self):
         return dict(
             css=["css/canvas.css"],
-            js=["js/canvas.js"]
+            js=["js/canvas.js"],
+            less=["less/canvas.less"]
         )
 
     def get_latest(self, target, check, full_data=False, online=True):
@@ -94,26 +86,15 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if command == "connectCanvas":
             self.canvas.connectToCanvas(data["email"], data["password"])
 
-    # SIMPLEAPIPLUGIN GET, not really needed
-    # def on_api_get(self, request):
-    #     self._plugin_manager.send_plugin_message(
-    #         self._identifier, "Omega Message")
-    #     return flask.jsonify(foo="bar")
-
     # EVENTHANDLERPLUGIN: To be able to go from BE to FE
+
     def on_event(self, event, payload):
         if "ClientOpened" in event:
-            self._logger.info("YOOOOOOOOOOOOOOOOOOOOOOO")
-            list_of_users = map(
-                lambda user: user['username'], self.canvas.chub_yaml["canvas-users"].values())
-            data = {"command": "DisplayRegisteredUsers",
-                    "data": list_of_users}
-            self.canvas.updateUI(data)
+            self.canvas.updateRegisteredUsers()
+            self.canvas.enableWebsocketConnection()
+        if "FileAdded" in event:
+            self._logger.info("File added!")
 
-    def get_template_configs(self):
-        return [
-            dict(type="tab", custom_bindings=True)
-        ]
 
     # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
     # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that

@@ -5,32 +5,31 @@ const canvasApp = {};
   ======================= */
 
 /* 1. Replaces Octoprint Name with Canvas Hub */
-canvasApp.replaceBrandName = () => {
-  // MUST FIND BETTER WAY TO REPLACE
-  $(".brand")
-    .find("span")
-    .removeAttr("data-bind");
-  $(".brand")
-    .find("span")
-    .text("CANVAS Hub");
+canvasApp.toggleBrandName = name => {
+  if (name === "CANVAS Hub") {
+    $(".brand")
+      .find("span")
+      .removeAttr("data-bind");
+    $(".brand")
+      .find("span")
+      .text(name);
+  } else {
+    $(".brand")
+      .find("span")
+      .text(name);
+  }
 };
 
 /* 2. Display Color for Connection Status */
 canvasApp.displayConnectionColor = () => {
-  let palette2Connection = { id: "#connection-state-msg" };
-  let canvasConnection = { id: "#connection-state-msg-canvas" };
-  let connections = [palette2Connection, canvasConnection];
+  let palette2ConnectionId = "#connection-state-msg";
+  let palette2ConnectionText = $(palette2ConnectionId).text();
 
-  palette2Connection.status = $(palette2Connection.id).text();
-  canvasConnection.status = $(canvasConnection.id).text();
-
-  connections.forEach(connection => {
-    if (connection.status === "Connected") {
-      $(connection.id).css("color", "green");
-    } else {
-      $(connection.id).css("color", "red");
-    }
-  });
+  if (palette2ConnectionText === "Connected") {
+    $(palette2ConnectionId).css("color", "green");
+  } else {
+    $(palette2ConnectionId).css("color", "red");
+  }
 };
 
 /* 3. Add Palette Tag to .mcf.gcode files */
@@ -44,88 +43,113 @@ canvasApp.tagPaletteFiles = () => {
 };
 
 canvasApp.toggleTheme = () => {
-  // $("html").eq(0).addClass("Cyborg")
-  // if ($("#touch body").length == 1) {
-  //   $("html").removeClass("Cyborg");
-  // }
+  $("html").addClass("canvas-theme");
+  canvasApp.toggleBrandName("CANVAS Hub");
+
+  $(".theme-input").on("change", event => {
+    let checked = event.target.checked;
+
+    if (checked) {
+      $("html").addClass("canvas-theme");
+      canvasApp.toggleBrandName("CANVAS Hub");
+    } else {
+      $("html").removeClass("canvas-theme");
+      canvasApp.tagPaletteFiles();
+      canvasApp.toggleBrandName("OctoPrint");
+    }
+  });
 };
+
+canvasApp.handleUserDisplay = data => {
+  $(".registered-accounts").html("");
+  data.data.forEach(user => {
+    if (user.token_valid) {
+      $(".registered-accounts").append(`<li class="valid-token">${user.username}</li>`);
+    } else {
+      $(".registred-accounts").append(`<li class="invalid-token">${user.username}</li>`);
+    }
+  });
+};
+
+canvasApp.handleWebsocketConnection = data => {
+  if (data.data === true) {
+    $("#connection-state-msg-canvas")
+      .html("Connected")
+      .css("color", "green");
+  }
+};
+
+function CanvasViewModel(parameters) {
+  // var self = this;
+
+  // OBSERVABLE VALUES
+  this.userEmail = ko.observable();
+  this.password = ko.observable();
+
+  this.connectCanvas = function() {
+    // let payload = {
+    //   email: this.userEmail(),
+    //   password: this.password()
+    // };
+    // $.ajax({
+    //   url: "https://api.canvas3d.io/users/login",
+    //   type: "POST",
+    //   dataType: "json",
+    //   data: JSON.stringify(payload),
+    //   // "Cache-control": "no-cache",
+    //   // "Access-Control-Allow-Headers": "Content-Type",
+    //   // "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+    //   // "Access-Control-Allow-Origin": "*",
+    //   contentType: "application/json; charset=UTF-8",
+    //   success: "Succes!"
+    // }).then(res => {
+    //   console.log(res);
+    // });
+    var payload = { command: "connectCanvas", email: this.userEmail(), password: this.password() };
+
+    $.ajax({
+      url: API_BASEURL + "plugin/canvas",
+      type: "POST",
+      dataType: "json",
+      data: JSON.stringify(payload),
+      contentType: "application/json; charset=UTF-8",
+      success: this.fromResponse
+    });
+  };
+
+  this.fromResponse = function() {
+    console.log("SUCCESS");
+  };
+
+  this.onAfterBinding = function() {
+    console.log("From Canvas2.js: HELLO");
+  };
+
+  // you just need this, to check if we are responding to the plugin identifier that was sent by us.
+  this.onDataUpdaterPluginMessage = function(pluginIdent, message) {
+    if (pluginIdent === "canvas") {
+      console.log("succesfully got into onDataUpdaterPluginMessage");
+      console.log(message);
+      if (message.command === "DisplayRegisteredUsers") {
+        canvasApp.handleUserDisplay(message);
+      } else if (message.command === "Websocket") {
+        canvasApp.handleWebsocketConnection(message);
+      }
+    }
+  };
+}
 
 /* ======================
   INIT + RUN
   ======================= */
 canvasApp.init = () => {
-  canvasApp.replaceBrandName();
+  canvasApp.toggleTheme();
   canvasApp.displayConnectionColor();
-  canvasApp.tagPaletteFiles();
 };
 
 $(function() {
   canvasApp.init();
-  function CanvasViewModel(parameters) {
-    var self = this;
-
-    // OBSERVABLE VALUES
-    self.userEmail = ko.observable();
-    self.password = ko.observable();
-
-    self.downloadPrint = function() {
-      console.log("ATTEMPTING DOWNLOAD");
-      var payload = {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDEwMTI4MTAsImV4cCI6MTU0MTYxNzYxMCwiaXNzIjoiQ2FudmFzIiwic3ViIjoiODM3OGViOTViYmU0OTk1NjBkOGE2NmI4ZDUwYjg4N2EifQ.nIeuSLWN_g3khHcL4zxigMp5Ke5LPOHM5zOhBur4oPY"
-      };
-
-      $.ajax({
-        url: "https://slice.api.canvas3d.io/projects/ab6225f37b511d671bd27756af3cb299/download",
-        type: "GET",
-        dataType: "json",
-        data: JSON.stringify(payload),
-        contentType: "application/json; charset=UTF-8",
-        success: self.fromResponse
-      }).then(res => {
-        console.log("Successful download");
-      });
-    };
-
-    self.connectCanvas = function() {
-      var payload = {
-        command: "connectCanvas",
-        email: self.userEmail(),
-        password: self.password()
-      };
-
-      $.ajax({
-        url: API_BASEURL + "plugin/canvas",
-        type: "POST",
-        dataType: "json",
-        data: JSON.stringify(payload),
-        contentType: "application/json; charset=UTF-8",
-        success: self.fromResponse
-      });
-    };
-
-    self.fromResponse = function() {
-      console.log("SUCCESS");
-    };
-
-    self.onAfterBinding = function() {
-      console.log("From Canvas2.js: HELLO");
-    };
-
-    // you just need this, to check if we are responding to the plugin identifier that was sent by us.
-    self.onDataUpdaterPluginMessage = function(pluginIdent, message) {
-      if (pluginIdent === "canvas") {
-        console.log("succesfully got into onDataUpdaterPluginMessage");
-        console.log(message);
-        if (message.command === "DisplayRegisteredUsers") {
-          $(".accounts").html("");
-          message.data.forEach(user => {
-            $(".accounts").append(`<li>${user}</li>`);
-          });
-        }
-      }
-    };
-  }
+  CanvasViewModel();
   OCTOPRINT_VIEWMODELS.push([
     // This is the constructor to call for instantiating the plugin
     CanvasViewModel, // here is the order in which the dependencies will be injected into your view model upon // This is a list of dependencies to inject into the plugin, the order which you request
