@@ -28,6 +28,7 @@ class Canvas():
         self._logger = plugin._logger
         self._plugin_manager = plugin._plugin_manager
         self._identifier = plugin._identifier
+        self._settings = plugin._settings
 
         self.chub_yaml = self.loadChubData()
         self.ws_connection = False
@@ -58,6 +59,7 @@ class Canvas():
             if "TOKEN_VERIFICATION" in response["type"]:
                 token_validation_list = response["tokens"]
                 self.updateTokenValidationInYAML(token_validation_list)
+                self.updateRegisteredUsers()
             elif "DOWNLOAD" in response["type"]:
                 self.downloadPrintFiles(response)
 
@@ -136,12 +138,10 @@ class Canvas():
            # if websocket is not already enabled, enable it
             if not self.ws_connection:
                 self.enableWebsocketConnection()
-                self.updateRegisteredUsers()
 
             else:
                 list_of_tokens = json.dumps(self.getListOfTokens())
                 self.verifyTokens(list_of_tokens)
-                self.updateRegisteredUsers()
         else:
             self._logger.info("User already registered! You are good.")
 

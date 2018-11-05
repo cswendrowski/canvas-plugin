@@ -1,11 +1,11 @@
 # coding=utf-8
 from __future__ import absolute_import
 from distutils.version import LooseVersion
-from octoprint.filemanager.destinations import FileDestinations
 
 import requests
 import octoprint.plugin
 from . import Canvas
+import time
 
 
 class CanvasPlugin(octoprint.plugin.TemplatePlugin,
@@ -22,9 +22,23 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("Canvas Plugin STARTED")
         self.canvas = Canvas.Canvas(self)
 
+        # temp = {
+        #     "type": "DOWNLOAD",
+        #     "userId": "10f1e816b36de32ae1de1cdc29ba42bc",
+        #     "projectId": "ab6225f37b511d671bd27756af3cb299",
+        #     "filename": "test2"
+        # }
+        # self.canvas.downloadPrintFiles(temp)
+
     def on_shutdown(self):
         self._logger.info("Canvas Plugin CLOSED")
         self.canvas.ws.close()
+
+    def get_template_configs(self):
+        return [
+            dict(type="navbar", custom_bindings=True),
+            dict(type="settings", custom_bindings=True)
+        ]
 
     # ASSETPLUGIN
 
@@ -92,13 +106,11 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if "ClientOpened" in event:
             self.canvas.updateRegisteredUsers()
             self.canvas.enableWebsocketConnection()
-        if "FileAdded" in event:
-            self._logger.info("File added!")
 
 
-    # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
-    # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
-    # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
+            # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
+            # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
+            # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "Canvas"
 __plugin_description__ = "A plugin to handle connecting and communicating with CANVAS (Beta)"
 

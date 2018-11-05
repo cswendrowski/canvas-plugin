@@ -112,8 +112,22 @@
 .canvas-theme #navbar .navbar-inner {
   background-image: none !important;
   border: none !important;
-  background-color: #363636;
+  background-color: #363636 !important;
   color: white;
+}
+.canvas-theme #navbar .navbar-inner .brand,
+.canvas-theme #navbar .navbar-inner .nav > li > a {
+  text-shadow: 0 1px 0 #ccc !important;
+}
+.canvas-theme #navbar .navbar-inner .nav > li > a:hover,
+.canvas-theme #navbar .navbar-inner.transparent .nav > li > a:hover {
+  background-color: #dedede;
+  background-image: -moz-linear-gradient(top, #f2f2f2, #bfbfbf);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f2f2f2), to(#bfbfbf));
+  background-image: -webkit-linear-gradient(top, #f2f2f2, #bfbfbf);
+  background-image: -o-linear-gradient(top, #f2f2f2, #bfbfbf);
+  background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
+  background-repeat: repeat-x;
 }
 .canvas-theme .accordion-group {
   margin-bottom: 10px;
@@ -139,10 +153,11 @@
   padding-top: 1px;
   padding-bottom: 1px;
 }
-.canvas-theme .title.clickable:after {
+
+.canvas-theme .palette-tag::after {
   content: "Palette";
   float: right;
-  background-color: #363636;
+  background-color: rgba(54, 54, 54, 1);
   padding: 0px 20px;
   color: white;
   font-weight: 700;
@@ -222,8 +237,12 @@
 .canvas-theme .valid-token {
   color: green;
   list-style: none;
+  margin: 7.5px 0;
+  font-weight: 500;
 }
 .canvas-theme .invalid-token {
   color: red;
   list-style: none;
+  margin: 7.5px 0;
+  font-weight: 500;
 }
