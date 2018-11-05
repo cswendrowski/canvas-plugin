@@ -33,21 +33,38 @@ class Canvas():
         self.chub_yaml = self.loadChubData()
         self.ws_connection = False
 
-    def connectToCanvas(self, email, password):
-        # Make POST request to canvas API to log in user
-        url = "https://api.canvas3d.io/users/login"
-        data = {"email": email, "password": password}
+    ##############
+    # 1. INITIAL FUNCTIONS
+    ##############
 
-        try:
-            response = requests.post(url, json=data).json()
-            if response.get("status") >= 400:
-                self._logger.info("Error: Try Logging In Again")
-                # send message back to front-end that login was unsuccessful
-            else:
-                self._logger.info("API response valid!")
-                self.verifyUserInYAML(response)
-        except requests.exceptions.RequestException as e:
-            print e
+    def loadChubData(self):
+        chub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
+        chub_file_path = chub_dir_path + "/canvas-hub-data.yml"
+
+        # if /.mosaicdata doesn't exist yet, make the directory
+        if not os.path.exists(chub_dir_path):
+            os.mkdir(chub_path)
+
+        # if the YML file doesn't exist, make the file
+        if not os.path.isfile(chub_file_path):
+            f = open(chub_file_path, "w")
+            chub_template = ({'versions': {'turquoise': '1.0.0', 'global': '0.1.0', 'canvas-plugin': '0.1.0',
+                                           'palette-plugin': '0.2.0', 'data-version': '0.0.1'},
+                              'canvas-hub': {},
+                              'canvas-users': {}})
+            yaml.dump(chub_template, f)
+            f.close()
+
+        # access yaml file with all the info
+        chub_data = open(chub_file_path, "r")
+        chub_yaml = yaml.load(chub_data)
+        chub_data.close()
+
+        return chub_yaml
+
+    ##############
+    # 2. WEBSOCKET FUNCTIONS
+    ##############
 
     def ws_on_message(self, ws, message):
         print("Just received a message from Canvas Server!")
@@ -94,35 +111,65 @@ class Canvas():
             self._logger.info(
                 "There are no registered users. Please register a Canvas account.")
 
-    def getListOfTokens(self):
-        list_of_tokens = map(
-            lambda user: user['token'], self.chub_yaml["canvas-users"].values())
-        return {"type": "TOKENS", "tokens": list_of_tokens}
+    def verifyTokens(self, data):
+        self.ws.send(data)
 
-    def loadChubData(self):
-        chub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
-        chub_file_path = chub_dir_path + "/canvas-hub-data.yml"
+    def updateTokenValidationInYAML(self, data):
+        registeredUsers = self.chub_yaml["canvas-users"]
 
-        # if /.mosaicdata doesn't exist yet, make the directory
-        if not os.path.exists(chub_dir_path):
-            os.mkdir(chub_path)
+        # assign token status to each user account
+        for user, userInfo in registeredUsers.iteritems():
+            user_data = filter(
+                lambda token_info: token_info["token"] == userInfo["token"], data)
+            token_status = user_data[0]["valid"]
+            registeredUsers[user]["token_valid"] = token_status
 
-        # if the YML file doesn't exist, make the file
-        if not os.path.isfile(chub_file_path):
-            f = open(chub_file_path, "w")
-            chub_template = ({'versions': {'turquoise': '1.0.0', 'global': '0.1.0', 'canvas-plugin': '0.1.0',
-                                           'palette-plugin': '0.2.0', 'data-version': '0.0.1'},
-                              'canvas-hub': {},
-                              'canvas-users': {}})
-            yaml.dump(chub_template, f)
-            f.close()
+        # write this information to the YAML file
+        self.updateYAMLInfo()
 
-        # access yaml file with all the info
-        chub_data = open(chub_file_path, "r")
-        chub_yaml = yaml.load(chub_data)
-        chub_data.close()
+    ##############
+    # 3. USER FUNCTIONS
+    ##############
 
-        return chub_yaml
+    def connectToCanvas(self, email, password):
+        # Make POST request to canvas API to log in user
+        url = "https://api.canvas3d.io/users/login"
+        data = {"email": email, "password": password}
+
+        try:
+            response = requests.post(url, json=data).json()
+            if response.get("status") >= 400:
+                self._logger.info("Error: Try Logging In Again")
+                # send message back to front-end that login was unsuccessful
+            else:
+                self._logger.info("API response valid!")
+                self.verifyUserInYAML(response)
+        except requests.exceptions.RequestException as e:
+            print e
+
+    def downloadPrintFiles(self, data):
+        user = self.chub_yaml["canvas-users"][data["userId"]]
+
+        # user must have a valid token to enable the download
+        if user["token_valid"]:
+            token = user["token"]
+            authorization = "Bearer " + token
+            headers = {"Authorization": authorization}
+            url = "https://slice.api.canvas3d.io/projects/" + \
+                data["projectId"] + "/download"
+
+            response = requests.get(url, headers=headers)
+            if response.ok:
+                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
+                z = zipfile.ZipFile(StringIO.StringIO(response.content))
+                watched_path = self._settings.global_get_basefolder("watched")
+                z.extractall(watched_path)
+        else:
+            self._logger.info("Token is invalid. Download will not initiate")
+
+    ##############
+    # 4. HELPER FUNCTIONS
+    ##############
 
     def verifyUserInYAML(self, data):
         # get list of all registered users on the C.HUB YML file
@@ -145,22 +192,6 @@ class Canvas():
         else:
             self._logger.info("User already registered! You are good.")
 
-    def verifyTokens(self, data):
-        self.ws.send(data)
-
-    def updateTokenValidationInYAML(self, data):
-        registeredUsers = self.chub_yaml["canvas-users"]
-
-        # assign token status to each user account
-        for user, userInfo in registeredUsers.iteritems():
-            user_data = filter(
-                lambda token_info: token_info["token"] == userInfo["token"], data)
-            token_status = user_data[0]["valid"]
-            registeredUsers[user]["token_valid"] = token_status
-
-        # write this information to the YAML file
-        self.updateYAMLInfo()
-
     def updateRegisteredUsers(self):
         # make a list of usernames and their token_valid status
         list_of_users = map(
@@ -175,25 +206,10 @@ class Canvas():
         yaml.dump(self.chub_yaml, chub_data)
         chub_data.close()
 
-    def downloadPrintFiles(self, data):
-        user = self.chub_yaml["canvas-users"][data["userId"]]
-
-        # user must have a valid token to enable the download
-        if user["token_valid"]:
-            token = user["token"]
-            authorization = "Bearer " + token
-            headers = {"Authorization": authorization}
-            url = "https://slice.api.canvas3d.io/projects/" + \
-                data["projectId"] + "/download"
-
-            response = requests.get(url, headers=headers)
-            if response.ok:
-                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
-                z = zipfile.ZipFile(StringIO.StringIO(response.content))
-                watched_path = self._settings.global_get_basefolder("watched")
-                z.extractall(watched_path)
-        else:
-            self._logger.info("Token is invalid. Download will not initiate")
+    def getListOfTokens(self):
+        list_of_tokens = map(
+            lambda user: user['token'], self.chub_yaml["canvas-users"].values())
+        return {"type": "TOKENS", "tokens": list_of_tokens}
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")

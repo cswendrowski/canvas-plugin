@@ -74,9 +74,15 @@ canvasApp.toggleTheme = () => {
     if (checked) {
       $("html").addClass("canvas-theme");
       canvasApp.toggleBrandName("CANVAS Hub");
+      $(".theme-input-label")
+        .find("span")
+        .text("Turn Off");
     } else {
       $("html").removeClass("canvas-theme");
       canvasApp.toggleBrandName("OctoPrint");
+      $(".theme-input-label")
+        .find("span")
+        .text("Turn On");
     }
   });
 };
@@ -102,7 +108,10 @@ canvasApp.handleWebsocketConnection = data => {
   }
 };
 
-/* CanvasViewModel for OctoPrint */
+/* ======================
+  CANVAS VIEW MODEL FOR OCTOPRINT
+  ======================= */
+
 function CanvasViewModel(parameters) {
   // OBSERVABLE VALUES
   this.userEmail = ko.observable();

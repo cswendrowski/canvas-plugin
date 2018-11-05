@@ -5,7 +5,6 @@ from distutils.version import LooseVersion
 import requests
 import octoprint.plugin
 from . import Canvas
-import time
 
 
 class CanvasPlugin(octoprint.plugin.TemplatePlugin,
