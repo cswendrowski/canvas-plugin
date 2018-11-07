@@ -232,6 +232,10 @@
   opacity: 1;
   color: #363636;
 }
+
+.canvas-theme #settings_dialog .pull-right .btn:hover i {
+  color: rgba(54, 54, 54, 1);
+}
 .canvas-theme #connection-state-msg-canvas {
   color: red;
 }
