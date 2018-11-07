@@ -31,7 +31,8 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     def on_shutdown(self):
         self._logger.info("Canvas Plugin CLOSED")
-        self.canvas.ws.close()
+        if self.canvas.ws_connection is True:
+            self.canvas.ws.close()
 
     def get_template_configs(self):
         return [

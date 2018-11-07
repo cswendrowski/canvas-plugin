@@ -98,7 +98,7 @@ class Canvas():
 
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
-        if self.chub_yaml["canvas-users"]:
+        if "canvas-users" in self.chub_yaml and self.chub_yaml["canvas-users"]:
             self.ws = websocket.WebSocketApp("ws://hub-dev.canvas3d.co",
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
@@ -194,10 +194,11 @@ class Canvas():
 
     def updateRegisteredUsers(self):
         # make a list of usernames and their token_valid status
-        list_of_users = map(
-            lambda user: {key: user[key] for key in ["username", "token_valid"]}, self.chub_yaml["canvas-users"].values())
-        self.updateUI(
-            {"command": "DisplayRegisteredUsers", "data": list_of_users})
+        if "canvas-users" in self.chub_yaml:
+            list_of_users = map(
+                lambda user: {key: user[key] for key in ["username", "token_valid"]}, self.chub_yaml["canvas-users"].values())
+            self.updateUI(
+                {"command": "DisplayRegisteredUsers", "data": list_of_users})
 
     def updateYAMLInfo(self):
         chub_data_path = os.path.expanduser(
