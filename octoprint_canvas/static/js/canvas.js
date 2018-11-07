@@ -162,44 +162,17 @@ function CanvasViewModel(parameters) {
   };
 
   this.connectCanvas = function() {
-    let payload = { email: this.userEmail(), password: this.password() };
+    let payload = { command: "connectCanvas", email: this.userEmail(), password: this.password() };
     $.ajax({
-      url: "https://api.canvas3d.io/users/login",
+      url: API_BASEURL + "plugin/canvas",
       type: "POST",
       dataType: "json",
       data: JSON.stringify(payload),
-      // "Cache-control": "no-cache",
-      // "Access-Control-Allow-Headers": "Content-Type",
-      // "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-      // "Access-Control-Allow-Origin": "*",
-      contentType: "application/json; charset=UTF-8",
-      success: "Succes!"
+      contentType: "application/json; charset=UTF-8"
     }).then(res => {
-      console.log(res);
+      console.log("SUCCESS!");
       $(".connect-canvas input").val("");
-
-      // let payloadToBE = { command: "connectCanvas", data: res };
-      // $.ajax({
-      //   url: API_BASEURL + "plugin/canvas",
-      //   type: "POST",
-      //   dataType: "json",
-      //   data: JSON.stringify(payload),
-      //   contentType: "application/json; charset=UTF-8",
-      //   success: this.fromResponse
-      // }).then(res => {});
     });
-
-    // PREVIOUS BE METHOD. USE FE METHOD INSTEAD
-
-    // var payload = { command: "connectCanvas", email: this.userEmail(), password: this.password() };
-    // $.ajax({
-    //   url: API_BASEURL + "plugin/canvas",
-    //   type: "POST",
-    //   dataType: "json",
-    //   data: JSON.stringify(payload),
-    //   contentType: "application/json; charset=UTF-8",
-    //   success: this.fromResponse
-    // });
   };
 
   this.fromResponse = function() {
