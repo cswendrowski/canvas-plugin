@@ -50,7 +50,8 @@
 .canvas-theme .print-control .fa-print:before {
   content: none;
 }
-.canvas-theme .nav.pull-right a:hover i {
+.canvas-theme .nav.pull-right a:hover i,
+.canvas-theme .nav.pull-right a:active i {
   color: #363636;
 }
 .canvas-theme .dropdown-menu i,
