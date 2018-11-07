@@ -129,6 +129,10 @@
   background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
   background-repeat: repeat-x;
 }
+.canvas-theme #navbar .navbar-inner .nav > li > a .caret {
+  border-bottom-color: white;
+  border-top-color: white;
+}
 .canvas-theme .accordion-group {
   margin-bottom: 10px;
   border: 1px solid black;
