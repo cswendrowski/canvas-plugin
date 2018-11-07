@@ -133,7 +133,8 @@
   border-bottom-color: white;
   border-top-color: white;
 }
-.canvas-theme #navbar .navbar-inner .nav > li > a:hover .caret {
+.canvas-theme #navbar .navbar-inner .nav > li > a:hover .caret,
+.canvas-theme #navbar .navbar-inner .nav > li > a:active .caret {
   border-bottom-color: rgba(54, 54, 54, 1);
   border-top-color: rgba(54, 54, 54, 1);
 }
