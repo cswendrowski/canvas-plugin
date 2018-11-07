@@ -117,7 +117,7 @@ function CanvasViewModel(parameters) {
   this.userEmail = ko.observable();
   this.password = ko.observable();
 
-  this.onAllBound = function() {
+  this.onAllBound = function(allViewModels) {
     console.log("All ViewModels bounded");
     this.FilesViewModel = parameters[0];
 
@@ -129,8 +129,8 @@ function CanvasViewModel(parameters) {
     // If files are changed (i.e added or deleted)
     this.FilesViewModel.onEventUpdatedFiles = () => {
       console.log("File Updated EVENT!");
+      canvasApp.removeFolderBinding();
       setTimeout(function() {
-        canvasApp.removeFolderBinding();
         canvasApp.tagPaletteFiles();
       }, 600);
     };
