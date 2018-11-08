@@ -1,3 +1,16 @@
+.canvas-theme {
+  /* 1. Switch Octoprint Logo for Canvas Logo */
+  /* 2. Button Styling */
+  /* 3. Icon Styling */
+  /* 4. Tabs + Tab Content Styling */
+  /* 5. Top Navigation Bar Styling */
+  /* 6. Accordion Styling */
+  /* 8. OTHER STYLING */
+  /* 9. Specific Canvas Tab Styling */
+  /* 10. Settings Modal Styling */
+  /* EXTRA */
+  /* SWEET ALERT STYLING */
+}
 .canvas-theme .brand span {
   color: white;
   font-weight: 700;
@@ -35,26 +48,26 @@
   color: #868686 !important;
   background-color: white !important;
 }
-.canvas-theme .accordion-heading i,
 .canvas-theme .fa-wrench,
+.canvas-theme .accordion-heading i,
 .canvas-theme .nav.pull-right i {
   color: white;
 }
-.canvas-theme .accordion-heading .fa-info-circle:before,
-.canvas-theme .fa-folder:before,
 .canvas-theme .fa-list:before,
-.canvas-theme .fa-pause:before,
+.canvas-theme .accordion-heading .fa-info-circle:before,
 .canvas-theme .fa-signal:before,
+.canvas-theme .print-control .fa-print:before,
+.canvas-theme .fa-pause:before,
 .canvas-theme .fa-stop:before,
-.canvas-theme .fa-upload:before,
-.canvas-theme .print-control .fa-print:before {
+.canvas-theme .fa-folder:before,
+.canvas-theme .fa-upload:before {
   content: none;
 }
 .canvas-theme .nav.pull-right a:hover i {
   color: #363636;
 }
-.canvas-theme .dropdown-menu i,
-.canvas-theme .fa-check {
+.canvas-theme .fa-check,
+.canvas-theme .dropdown-menu i {
   color: #363636;
 }
 .canvas-theme .dropdown-submenu > a:after {
@@ -70,8 +83,8 @@
 .canvas-theme .nav-tabs li {
   margin-bottom: 0;
 }
-.canvas-theme #footer_version small,
-.canvas-theme .nav-tabs li a {
+.canvas-theme .nav-tabs li a,
+.canvas-theme #footer_version small {
   color: #484747;
 }
 .canvas-theme .nav-tabs > .active > a,
@@ -80,9 +93,9 @@
   background: #363636;
 }
 .canvas-theme .nav-tabs .active .dropdown-toggle,
-.canvas-theme .nav-tabs .active .dropdown-toggle:hover,
 .canvas-theme .nav-tabs .dropdown-toggle,
-.canvas-theme .nav-tabs .dropdown-toggle:hover {
+.canvas-theme .nav-tabs .dropdown-toggle:hover,
+.canvas-theme .nav-tabs .active .dropdown-toggle:hover {
   margin-right: 0;
   background-color: #363636;
   border: 1px solid #363636;
@@ -96,16 +109,16 @@
   border-top-color: white;
   border-bottom-color: white;
 }
-.canvas-theme .dropdown-menu .active > a,
-.canvas-theme .dropdown-menu .active > a:hover,
-.canvas-theme .dropdown-menu li > a:focus,
 .canvas-theme .dropdown-menu li > a:hover,
-.canvas-theme .dropdown-submenu:hover > a {
+.canvas-theme .dropdown-menu li > a:focus,
+.canvas-theme .dropdown-submenu:hover > a,
+.canvas-theme .dropdown-menu .active > a,
+.canvas-theme .dropdown-menu .active > a:hover {
   background-color: #363636;
   background-image: none;
 }
-.canvas-theme .nav-tabs .open .dropdown-toggle,
-.canvas-theme .nav > li.dropdown.open.active > a:hover {
+.canvas-theme .nav > li.dropdown.open.active > a:hover,
+.canvas-theme .nav-tabs .open .dropdown-toggle {
   background-color: #363636;
   border-color: #363636;
 }
@@ -116,7 +129,7 @@
   color: white;
 }
 .canvas-theme #navbar .navbar-inner .brand,
-.canvas-theme #navbar .navbar-inner .nav > li > a {
+.canvas-theme #navbar .navbar-inner.red .nav > li > a {
   text-shadow: 0 1px 0 #ccc !important;
 }
 .canvas-theme #navbar .navbar-inner .nav > li > a:hover,
@@ -126,6 +139,7 @@
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f2f2f2), to(#bfbfbf));
   background-image: -webkit-linear-gradient(top, #f2f2f2, #bfbfbf);
   background-image: -o-linear-gradient(top, #f2f2f2, #bfbfbf);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f2f2f2), to(#bfbfbf));
   background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
   background-repeat: repeat-x;
 }
@@ -135,11 +149,11 @@
 }
 .canvas-theme #navbar .navbar-inner .nav > li > a:hover .caret,
 .canvas-theme #navbar .navbar-inner .nav > li.dropdown.open > .dropdown-toggle .caret {
-  border-bottom-color: rgba(54, 54, 54, 1);
-  border-top-color: rgba(54, 54, 54, 1);
+  border-bottom-color: #363636;
+  border-top-color: #363636;
 }
 .canvas-theme #navbar .navbar-inner .nav > li.dropdown.open > .dropdown-toggle i {
-  color: rgba(54, 54, 54, 1);
+  color: #363636;
 }
 .canvas-theme .accordion-group {
   margin-bottom: 10px;
@@ -165,11 +179,10 @@
   padding-top: 1px;
   padding-bottom: 1px;
 }
-
 .canvas-theme .palette-tag::after {
   content: "Palette";
   float: right;
-  background-color: rgba(54, 54, 54, 1);
+  background-color: #363636;
   padding: 0px 20px;
   color: white;
   font-weight: 700;
@@ -186,17 +199,11 @@
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(rgba(54, 54, 54, 0.5)), to(rgba(54, 54, 54, 0.95)));
   background-image: -webkit-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
   background-image: -o-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
-  background-image: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from(rgba(54, 54, 54, 0.1)),
-    to(rgba(54, 54, 54, 0.95))
-  );
+  background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(54, 54, 54, 0.1)), to(rgba(54, 54, 54, 0.95)));
   background-image: linear-gradient(to bottom, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
 }
-.canvas-theme .slider .slider-selection:active,
-.canvas-theme .slider .slider-selection:hover {
+.canvas-theme .slider .slider-selection:hover,
+.canvas-theme .slider .slider-selection:active {
   background-color: rgba(54, 54, 54, 0.5);
 }
 .canvas-theme input.search-query {
@@ -214,19 +221,19 @@
   justify-content: space-between;
   width: 51%;
 }
-.canvas-theme #plugin_announcements_dialog a,
-.canvas-theme #settings_dialog a {
+.canvas-theme #settings_dialog a,
+.canvas-theme #plugin_announcements_dialog a {
   color: rgba(54, 54, 54, 0.7);
 }
-.canvas-theme #plugin_announcements_dialog_content a,
-.canvas-theme #plugin_announcements_dialog a:hover,
+.canvas-theme #settings_dialog a:hover,
 .canvas-theme #settings_dialog .nav-header,
-.canvas-theme #settings_dialog a:hover {
+.canvas-theme #plugin_announcements_dialog a:hover,
+.canvas-theme #plugin_announcements_dialog_content a {
   color: #363636;
 }
-.canvas-theme #plugin_announcements_dialog .nav-list > .active > a,
 .canvas-theme #settings_dialog .nav-list > .active > a,
-.canvas-theme #settings_dialog .nav-pills > .active > a {
+.canvas-theme #settings_dialog .nav-pills > .active > a,
+.canvas-theme #plugin_announcements_dialog .nav-list > .active > a {
   color: white;
   background-color: #363636;
 }
@@ -240,9 +247,8 @@
   opacity: 1;
   color: #363636;
 }
-
 .canvas-theme #settings_dialog .pull-right .btn:hover i {
-  color: rgba(54, 54, 54, 1);
+  color: #363636;
 }
 .canvas-theme #connection-state-msg-canvas {
   color: red;
@@ -259,8 +265,6 @@
 .canvas-theme .invalid-token {
   color: red;
   list-style: none;
-  margin: 7.5px 0;
-  font-weight: 500;
 }
 .canvas-theme .canvas-plugin {
   display: none;
@@ -271,4 +275,42 @@
 }
 .canvas-theme #settings_plugin_pluginmanager_repositorydialog a:hover {
   color: black;
+}
+.canvas-theme .swal2-popup {
+  border-radius: 1px;
+  border: 1px solid #363636;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0px 0.1em 0.4em 0.1em;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0.1em 0.4em 0.1em;
+}
+.canvas-theme .swal2-popup .swal2-title {
+  color: #363636;
+  font-size: 1.6rem;
+}
+.canvas-theme .swal2-popup .swal2-styled.swal2-confirm {
+  border-radius: 2px;
+  background-color: #363636;
+}
+.canvas-theme .swal2-popup .swal2-content {
+  color: #363636;
+  letter-spacing: 0.4px;
+}
+.canvas-theme .swal2-icon.swal2-info {
+  border-color: #363636;
+  color: #363636;
+}
+.canvas-theme .swal2-icon.swal2-success {
+  border-color: #363636;
+  color: #363636;
+}
+.canvas-theme .swal2-icon.swal2-success [class^="swal2-success-line"] {
+  background-color: #363636;
+}
+.canvas-theme .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: #363636;
+}
+.canvas-theme .swal2-icon.swal2-error {
+  border-color: #363636;
+}
+.canvas-theme .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+  background-color: #363636;
 }

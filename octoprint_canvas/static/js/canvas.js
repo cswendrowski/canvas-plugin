@@ -106,6 +106,10 @@ canvasApp.handleWebsocketConnection = data => {
     $("#connection-state-msg-canvas")
       .html("Connected")
       .css("color", "green");
+  } else {
+    $("#connection-state-msg-canvas")
+      .html("Not Connected")
+      .css("color", "red");
   }
 };
 
@@ -143,7 +147,7 @@ function CanvasViewModel(parameters) {
 
     // If client is still open, and server reconnects
     this.FilesViewModel.onDataUpdaterReconnect = () => {
-      console.log("server Reconnected");
+      console.log("Server Reconnected");
       setTimeout(function() {
         canvasApp.tagPaletteFiles();
       }, 600);
@@ -165,19 +169,13 @@ function CanvasViewModel(parameters) {
       data: JSON.stringify(payload),
       contentType: "application/json; charset=UTF-8"
     }).then(res => {
-      console.log("SUCCESS!");
       $(".add-user input").val("");
     });
-  };
-
-  this.fromResponse = function() {
-    console.log("SUCCESS");
   };
 
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = function(pluginIdent, message) {
     if (pluginIdent === "canvas") {
-      console.log("succesfully got into onDataUpdaterPluginMessage");
       console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
         canvasApp.handleUserDisplay(message);
@@ -185,6 +183,30 @@ function CanvasViewModel(parameters) {
         canvasApp.handleWebsocketConnection(message);
       } else if (message.command === "ChubRegistered") {
         canvasApp.unhideCanvasTabContent();
+      } else if (message.command === "UserConnectedToCHUB") {
+        swal({
+          type: "success",
+          // animation: false,
+          title: "Canvas user successfully connected",
+          text: `${message.data.username} is now registered to this Canvas Hub.`,
+          timer: 10000
+        });
+      } else if (message.command === "UserAlreadyExists") {
+        swal({
+          type: "info",
+          // animation: false,
+          title: "Canvas user already registered",
+          text: `${message.data.username} is already registered to this Canvas Hub.`,
+          timer: 10000
+        });
+      } else if (message.command === "invalidUserCredentials") {
+        swal({
+          type: "error",
+          // animation: false,
+          title: "Incorrect Login Information",
+          text: "User credentials are incorrect. Please try again.",
+          timer: 10000
+        });
       }
     }
   };
@@ -199,7 +221,7 @@ $(function() {
   OCTOPRINT_VIEWMODELS.push({
     // This is the constructor to call for instantiating the plugin
     construct: CanvasViewModel,
-    // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments
+    // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
     dependencies: ["filesViewModel"],
     // Finally, this is the list of selectors for all elements we want this view model to be bound to.
     elements: ["#tab_plugin_canvas"]

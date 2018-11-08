@@ -205,6 +205,7 @@ class Canvas():
             response = requests.post(url, json=data).json()
             if response.get("status") >= 400:
                 self._logger.info("Error: Try Logging In Again")
+                self.updateUI({"command": "invalidUserCredentials"})
                 # send message back to front-end that login was unsuccessful
             else:
                 self._logger.info("API response valid!")
@@ -253,10 +254,13 @@ class Canvas():
                 self.enableWebsocketConnection()
 
             self.registerUserAndCHUB(data)
+            self.updateUI({"command": "UserConnectedToCHUB", "data": data})
             # list_of_tokens = json.dumps(self.getListOfTokens())
             # self.verifyTokens(list_of_tokens)
         else:
             self._logger.info("User already registered! You are good.")
+            self.updateUI({"command": "UserAlreadyExists", "data": data})
+
 
     def updateRegisteredUsers(self):
         # make a list of usernames and their token_valid status

@@ -41,11 +41,10 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         ]
 
     # ASSETPLUGIN
-
     def get_assets(self):
         return dict(
-            css=["css/canvas.css"],
-            js=["js/canvas.js"],
+            css=["css/canvas.css", "css/sweetalert2.min.css"],
+            js=["js/canvas.js", "js/sweetalert2.min.js"],
             less=["less/canvas.less"]
         )
 
@@ -101,7 +100,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.canvas.addUser(data["email"], data["password"])
 
     # EVENTHANDLERPLUGIN: To be able to go from BE to FE
-
     def on_event(self, event, payload):
         if "ClientOpened" in event:
             self.canvas.registerCHUB()
