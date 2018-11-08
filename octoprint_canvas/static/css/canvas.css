@@ -1,16 +1,3 @@
-.canvas-theme {
-  /* 1. Switch Octoprint Logo for Canvas Logo */
-  /* 2. Button Styling */
-  /* 3. Icon Styling */
-  /* 4. Tabs + Tab Content Styling */
-  /* 5. Top Navigation Bar Styling */
-  /* 6. Accordion Styling */
-  /* 8. OTHER STYLING */
-  /* 9. Specific Canvas Tab Styling */
-  /* 10. Settings Modal Styling */
-  /* EXTRA */
-  /* SWEET ALERT STYLING */
-}
 .canvas-theme .brand span {
   color: white;
   font-weight: 700;
@@ -199,7 +186,13 @@
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(rgba(54, 54, 54, 0.5)), to(rgba(54, 54, 54, 0.95)));
   background-image: -webkit-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
   background-image: -o-linear-gradient(top, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
-  background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(54, 54, 54, 0.1)), to(rgba(54, 54, 54, 0.95)));
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(rgba(54, 54, 54, 0.1)),
+    to(rgba(54, 54, 54, 0.95))
+  );
   background-image: linear-gradient(to bottom, rgba(54, 54, 54, 0.1), rgba(54, 54, 54, 0.95));
 }
 .canvas-theme .slider .slider-selection:hover,
