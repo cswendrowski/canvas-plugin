@@ -33,6 +33,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("Canvas Plugin CLOSED")
         if self.canvas.ws_connection is True:
             self.canvas.ws.close()
+            self.canvas.ws_connection = False
 
     def get_template_configs(self):
         return [
@@ -103,8 +104,12 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def on_event(self, event, payload):
         if "ClientOpened" in event:
             self.canvas.registerCHUB()
-            self.canvas.enableWebsocketConnection()
-
+            if self.canvas.ws_connection is False:
+                self.canvas.enableWebsocketConnection()
+        if "ClientClosed" in event:
+            if self.canvas.ws_connection is True:
+                self.canvas.ws.close()
+                self.canvas.ws_connection = False
 
             # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
             # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
