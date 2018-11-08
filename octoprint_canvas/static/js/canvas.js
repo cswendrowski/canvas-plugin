@@ -168,9 +168,9 @@ function CanvasViewModel(parameters) {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
         canvasApp.handleWebsocketConnection(message);
-      } else if (message.command === "ChubRegistered") {
+      } else if (message.command === "HubRegistered") {
         canvasApp.unhideCanvasTabContent();
-      } else if (message.command === "UserConnectedToCHUB") {
+      } else if (message.command === "UserConnectedToHUB") {
         swal({
           type: "success",
           // animation: false,

@@ -88,7 +88,7 @@ class Canvas():
                 self.registerCHUBAPICall(chub_serial_number)
         else:
             self._logger.info("CHUB already registered")
-            self.updateUI({"command": "ChubRegistered"})
+            self.updateUI({"command": "HubRegistered"})
 
     def registerCHUBAPICall(self, chub_identifier):
         self._logger.info(chub_identifier)
@@ -103,7 +103,7 @@ class Canvas():
 
         self.chub_yaml["canvas-hub"].update(temp)
         self.chub_registered = True
-        self.updateUI({"command": "ChubRegistered"})
+        self.updateUI({"command": "HubRegistered"})
 
         # url = "https://api.canvas3d.io/users/login"
         # data = {"email": email, "password": password}
@@ -254,13 +254,12 @@ class Canvas():
                 self.enableWebsocketConnection()
 
             self.registerUserAndCHUB(data)
-            self.updateUI({"command": "UserConnectedToCHUB", "data": data})
+            self.updateUI({"command": "UserConnectedToHUB", "data": data})
             # list_of_tokens = json.dumps(self.getListOfTokens())
             # self.verifyTokens(list_of_tokens)
         else:
             self._logger.info("User already registered! You are good.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
-
 
     def updateRegisteredUsers(self):
         # make a list of usernames and their token_valid status
