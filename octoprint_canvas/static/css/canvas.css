@@ -262,7 +262,13 @@
   margin: 7.5px 0;
   font-weight: 500;
 }
-
 .canvas-theme .canvas-plugin {
   display: none;
+}
+.canvas-theme #settings_plugin_pluginmanager_repositorydialog a {
+  color: rgba(54, 54, 54, 0.8);
+  text-decoration: underline;
+}
+.canvas-theme #settings_plugin_pluginmanager_repositorydialog a:hover {
+  color: black;
 }
