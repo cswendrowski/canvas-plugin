@@ -75,14 +75,12 @@ canvasApp.toggleTheme = () => {
       $(".theme-input-label")
         .find("span")
         .text("Turn Off");
-      swal("Hello World!");
     } else {
       $("html").removeClass("canvas-theme");
       canvasApp.toggleBrandName("OctoPrint");
       $(".theme-input-label")
         .find("span")
         .text("Turn On");
-      swal("Bye World!");
     }
   });
 };
