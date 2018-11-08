@@ -262,3 +262,7 @@
   margin: 7.5px 0;
   font-weight: 500;
 }
+
+.canvas-theme .canvas-plugin {
+  display: none;
+}

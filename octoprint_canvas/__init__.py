@@ -92,19 +92,19 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     # SIMPLEAPIPLUGIN POST, runs first before on_api_commands, responds to commands from palette,js, any strings inside array = mandatory
     def get_api_commands(self):
         return dict(
-            connectCanvas=["email", "password"]
+            addUser=["email", "password"]
         )
 
     # SIMPLEAPIPLUGIN POST, to handle commands listed in get_api_commands
     def on_api_command(self, command, data):
-        if command == "connectCanvas":
-            self.canvas.connectToCanvas(data["email"], data["password"])
+        if command == "addUser":
+            self.canvas.addUser(data["email"], data["password"])
 
     # EVENTHANDLERPLUGIN: To be able to go from BE to FE
 
     def on_event(self, event, payload):
         if "ClientOpened" in event:
-            self.canvas.updateRegisteredUsers()
+            self.canvas.registerCHUB()
             self.canvas.enableWebsocketConnection()
 
 

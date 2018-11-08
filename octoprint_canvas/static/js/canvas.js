@@ -30,19 +30,7 @@ canvasApp.toggleBrandName = name => {
   }
 };
 
-/* 2. Display color for Palette 2 Connection Status */
-canvasApp.displayConnectionColor = () => {
-  let palette2ConnectionId = "#connection-state-msg";
-  let palette2ConnectionText = $(palette2ConnectionId).text();
-
-  if (palette2ConnectionText === "Connected") {
-    $(palette2ConnectionId).css("color", "green");
-  } else {
-    $(palette2ConnectionId).css("color", "red");
-  }
-};
-
-/* 3. Add Palette Tag to .mcf.gcode files */
+/* 2. Add Palette Tag to .mcf.gcode files */
 canvasApp.tagPaletteFiles = () => {
   let allPrintFiles = $("#files .gcode_files .scroll-wrapper .entry").find(".title");
   allPrintFiles.each((index, printFile) => {
@@ -52,7 +40,7 @@ canvasApp.tagPaletteFiles = () => {
   });
 };
 
-/* 3.1 Event listener for clicking back and forth between GCODE folders.
+/* 2.1 Event listener for clicking back and forth between GCODE folders.
 Use this function to keep Palette files tagged */
 canvasApp.handleGCODEFolders = () => {
   canvasApp.removeFolderBinding();
@@ -63,7 +51,7 @@ canvasApp.handleGCODEFolders = () => {
   });
 };
 
-/* 3.2 Specific Fevent listener for clicking and seeing folder dynamic elements */
+/* 2.2 Specific Fevent listener for clicking and seeing folder dynamic elements */
 canvasApp.removeFolderBinding = () => {
   $("#files .gcode_files .scroll-wrapper")
     .find(".folder .title")
@@ -73,7 +61,7 @@ canvasApp.removeFolderBinding = () => {
     });
 };
 
-/* 4. Toggle on/off the Canvas Theme */
+/* 3. Toggle on/off the Canvas Theme */
 canvasApp.toggleTheme = () => {
   $("html").addClass("canvas-theme");
   canvasApp.toggleBrandName("CANVAS Hub");
@@ -87,35 +75,43 @@ canvasApp.toggleTheme = () => {
       $(".theme-input-label")
         .find("span")
         .text("Turn Off");
+      swal("Hello World!");
     } else {
       $("html").removeClass("canvas-theme");
       canvasApp.toggleBrandName("OctoPrint");
       $(".theme-input-label")
         .find("span")
         .text("Turn On");
+      swal("Bye World!");
     }
   });
 };
 
-/* 5. Display all connected Canvas Accounts */
+/* 4. Display all connected Canvas Accounts */
 canvasApp.handleUserDisplay = data => {
   $(".registered-accounts").html("");
   data.data.forEach(user => {
-    if (user.token_valid) {
-      $(".registered-accounts").append(`<li class="valid-token">${user.username}</li>`);
-    } else {
-      $(".registred-accounts").append(`<li class="invalid-token">${user.username}</li>`);
-    }
+    // if (user.token_valid) {
+    $(".registered-accounts").append(`<li class="valid-token">${user.username}</li>`);
+    // }
+    // else {
+    //   $(".registred-accounts").append(`<li class="invalid-token">${user.username}</li>`);
+    // }
   });
 };
 
-/* 6. Display that Websockets are enabled between C.Hub and Canvas */
+/* 5. Display that Websockets are enabled between C.Hub and Canvas */
 canvasApp.handleWebsocketConnection = data => {
   if (data.data === true) {
     $("#connection-state-msg-canvas")
       .html("Connected")
       .css("color", "green");
   }
+};
+
+/* 6. Show Canvas Plugin Tab Content */
+canvasApp.unhideCanvasTabContent = () => {
+  $(".canvas-plugin").css("display", "block");
 };
 
 /* ======================
@@ -156,13 +152,12 @@ function CanvasViewModel(parameters) {
 
   this.onStartupComplete = () => {
     console.log("CanvasViewModel STARTUP COMPLETED");
-    canvasApp.displayConnectionColor();
     canvasApp.toggleTheme();
     canvasApp.handleGCODEFolders();
   };
 
-  this.connectCanvas = function() {
-    let payload = { command: "connectCanvas", email: this.userEmail(), password: this.password() };
+  this.addUser = function() {
+    let payload = { command: "addUser", email: this.userEmail(), password: this.password() };
     $.ajax({
       url: API_BASEURL + "plugin/canvas",
       type: "POST",
@@ -171,7 +166,7 @@ function CanvasViewModel(parameters) {
       contentType: "application/json; charset=UTF-8"
     }).then(res => {
       console.log("SUCCESS!");
-      $(".connect-canvas input").val("");
+      $(".add-user input").val("");
     });
   };
 
@@ -188,6 +183,8 @@ function CanvasViewModel(parameters) {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
         canvasApp.handleWebsocketConnection(message);
+      } else if (message.command === "ChubRegistered") {
+        canvasApp.unhideCanvasTabContent();
       }
     }
   };
