@@ -125,40 +125,29 @@ function CanvasViewModel(parameters) {
   this.userEmail = ko.observable();
   this.password = ko.observable();
 
-  this.onAllBound = function(allViewModels) {
-    console.log("All ViewModels bounded");
-    this.FilesViewModel = parameters[0];
-
-    // When client finishes starting (i.e hard refresh or first time going to OctoPrint UI)
-    this.FilesViewModel.onStartupComplete = () => {
-      canvasApp.tagPaletteFiles();
-    };
-
-    // If files are changed (i.e added or deleted)
-    this.FilesViewModel.onEventUpdatedFiles = () => {
-      console.log("File Updated EVENT!");
-      canvasApp.removeFolderBinding();
-      setTimeout(function() {
-        canvasApp.tagPaletteFiles();
-      }, 600);
-    };
-
-    // If client is still open, and server reconnects
-    this.FilesViewModel.onDataUpdaterReconnect = () => {
-      console.log("Server Reconnected");
-      setTimeout(function() {
-        canvasApp.tagPaletteFiles();
-      }, 600);
-    };
-  };
-
   this.onStartupComplete = () => {
     console.log("CanvasViewModel STARTUP COMPLETED");
     canvasApp.toggleTheme();
     canvasApp.handleGCODEFolders();
+    canvasApp.tagPaletteFiles();
   };
 
-  this.addUser = function() {
+  this.onEventUpdatedFiles = () => {
+    console.log("File Updated EVENT!");
+    setTimeout(function() {
+      canvasApp.removeFolderBinding();
+      canvasApp.tagPaletteFiles();
+    }, 1200);
+  };
+
+  this.onDataUpdaterReconnect = () => {
+    console.log("Server Reconnected");
+    setTimeout(function() {
+      canvasApp.tagPaletteFiles();
+    }, 1200);
+  };
+
+  this.addUser = () => {
     let payload = { command: "addUser", email: this.userEmail(), password: this.password() };
     $.ajax({
       url: API_BASEURL + "plugin/canvas",
@@ -172,7 +161,7 @@ function CanvasViewModel(parameters) {
   };
 
   // Receive messages from the OctoPrint server
-  this.onDataUpdaterPluginMessage = function(pluginIdent, message) {
+  this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
       console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
@@ -220,7 +209,7 @@ $(function() {
     // This is the constructor to call for instantiating the plugin
     construct: CanvasViewModel,
     // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
-    dependencies: ["filesViewModel"],
+    // dependencies: ["filesViewModel"],
     // Finally, this is the list of selectors for all elements we want this view model to be bound to.
     elements: ["#tab_plugin_canvas"]
   });
