@@ -88,12 +88,7 @@ canvasApp.toggleTheme = () => {
 canvasApp.handleUserDisplay = data => {
   $(".registered-accounts").html("");
   data.data.forEach(user => {
-    // if (user.token_valid) {
-    $(".registered-accounts").append(`<li class="valid-token">${user.username}</li>`);
-    // }
-    // else {
-    //   $(".registred-accounts").append(`<li class="invalid-token">${user.username}</li>`);
-    // }
+    $(".registered-accounts").append(`<li class="registered-canvas-user">${user.username}</li>`);
   });
 };
 
