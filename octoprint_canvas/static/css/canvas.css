@@ -275,6 +275,9 @@
 .canvas-theme #settings_plugin_pluginmanager_repositorydialog a:hover {
   color: black;
 }
+.canvas-theme hr {
+  margin-left: -20px;
+}
 .canvas-theme .swal2-popup {
   border-radius: 1px;
   border: 1px solid #363636;
