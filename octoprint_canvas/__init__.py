@@ -110,7 +110,11 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 self.canvas.enableWebsocketConnection()
         if "ClientClosed" in event:
             if self.canvas.ws_connection is True:
+                self._logger.info("Client closed and connection was on")
                 self.canvas.ws.close()
+        if "ConnectivityChanged" in event:
+            self._logger.info(event)
+
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py

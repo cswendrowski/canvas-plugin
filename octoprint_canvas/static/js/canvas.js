@@ -1,3 +1,11 @@
+if (!document.getElementById("material-icons")) {
+  let link = document.createElement("link");
+  link.id = "material-icons";
+  link.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
+  link.rel = "stylesheet";
+  document.head.appendChild(link);
+}
+
 const canvasApp = {};
 
 /* ======================
@@ -88,7 +96,11 @@ canvasApp.toggleTheme = () => {
 canvasApp.handleUserDisplay = data => {
   $(".registered-accounts").html("");
   data.data.forEach(user => {
-    $(".registered-accounts").append(`<li class="registered-canvas-user">${user.username}</li>`);
+    $(".registered-accounts").append(
+      `<li class="registered-canvas-user"><i class="material-icons md-18">person</i><span class="username">${
+        user.username
+      }</span></li>`
+    );
   });
 };
 
@@ -191,24 +203,21 @@ function CanvasViewModel(parameters) {
           type: "success",
           // animation: false,
           title: "Canvas user successfully connected",
-          text: `${message.data.username} is now registered to this Canvas Hub.`,
-          timer: 10000
+          text: `${message.data.username} is now registered to this Canvas Hub.`
         });
       } else if (message.command === "UserAlreadyExists") {
         swal({
           type: "info",
           // animation: false,
           title: "Canvas user already registered",
-          text: `${message.data.username} is already registered to this Canvas Hub.`,
-          timer: 10000
+          text: `${message.data.username} is already registered to this Canvas Hub.`
         });
       } else if (message.command === "invalidUserCredentials") {
         swal({
           type: "error",
           // animation: false,
           title: "Incorrect Login Information",
-          text: "User credentials are incorrect. Please try again.",
-          timer: 10000
+          text: "User credentials are incorrect. Please try again."
         });
       }
     }

@@ -33,6 +33,7 @@ class Canvas():
         # SETTINGS PLUGIN
         self._settings = plugin._settings
 
+
         self.ws_connection = False
         self.chub_registered = False
 
@@ -124,22 +125,20 @@ class Canvas():
         if is_json(message) is True:
             response = json.loads(message)
             print(response["type"])
-            # if "TOKEN_VERIFICATION" in response["type"]:
-            #     print("HANDLING TOKEN_VERIFICATION")
-                # token_validation_list = response["tokens"]
-                # self.updateTokenValidationInYAML(token_validation_list)
-                # self.updateRegisteredUsers()
-            if "DOWNLOAD" in response["type"]:
+            if "CONN/OPEN" in response["type"]:
+                print("Sending Hub Token")
+                self.sendInitialHubToken()
+            elif "CONN/CLOSED" in response["type"]:
+                self.ws.close()
+            elif "DOWNLOAD" in response["type"]:
                 self.downloadPrintFiles(response)
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
+                self.ws.close()
             elif "CONFIRM_TOKEN" in response["type"]:
                 print("HANDLING CONFIRM_TOKEN")
             elif "ERROR" in response["type"]:
                 print("HANDLING ERROR")
-
-
-
 
     def ws_on_error(self, ws, error):
         print(error)
@@ -158,9 +157,8 @@ class Canvas():
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
         self.updateUI({"command": "Websocket", "data": True})
-        print("Sending Hub Token")
-        self.sendInitialHubToken()
-        print("Hub Token Sent")
+        self.ws_connection = True
+
 
     def ws_on_pong(self, ws, pong):
         print("Received Pong")
@@ -170,8 +168,10 @@ class Canvas():
 
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
-        if "canvas-users" in self.chub_yaml and self.chub_yaml["canvas-users"]:
-            self.ws = websocket.WebSocketApp("wss://hub-dev.canvas3d.co:8443",
+        if "canvas-users" in self.chub_yaml and self.chub_yaml["canvas-users"] and self.ws_connection is False:
+            # prod: wss://hub-dev.canvas3d.co:8443
+            # dev: ws://hub-dev.canvas3d.co:8443
+            self.ws = websocket.WebSocketApp("ws://hub-dev.canvas3d.co:8443",
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
                                              on_close=self.ws_on_close,
@@ -179,7 +179,6 @@ class Canvas():
                                              on_pong=self.ws_on_pong
                                              )
             thread.start_new_thread(self.runWebSocket, ())
-            self.ws_connection = True
         else:
             self._logger.info(
                 "There are no registered users. Please register a Canvas account.")
@@ -191,19 +190,8 @@ class Canvas():
         }
         self._logger.info(json.dumps(data))
         self.ws.send(json.dumps(data))
+        print("Hub Token Sent")
 
-    # def updateTokenValidationInYAML(self, data):
-    #     registeredUsers = self.chub_yaml["canvas-users"]
-
-    #     # assign token status to each user account
-    #     for user, userInfo in registeredUsers.iteritems():
-    #         user_data = filter(
-    #             lambda token_info: token_info["token"] == userInfo["token"], data)
-    #         token_status = user_data[0]["valid"]
-    #         registeredUsers[user]["token_valid"] = token_status
-
-        # write this information to the YAML file
-        # self.updateYAMLInfo()
 
     ##############
     # 3. USER FUNCTIONS
@@ -211,19 +199,19 @@ class Canvas():
 
     def addUser(self, email, password):
         # Make POST request to canvas API to log in user
-        url = "https://api.canvas3d.io/users/login"
+        url = "https://api-dev.canvas3d.co/users/login"
+        # PRODUCTION: url = "https://api.canvas3d.io/users/login"
         data = {"email": email, "password": password}
 
         try:
             response = requests.post(url, json=data).json()
             if response.get("status") >= 400:
                 self._logger.info("Error: Try Logging In Again")
+                self._logger.info(response)
                 self.updateUI({"command": "invalidUserCredentials"})
-                # send message back to front-end that login was unsuccessful
             else:
                 self._logger.info("API response valid!")
                 self.verifyUserInYAML(response)
-                # MAKE ANOTHER API REQUEST TO CONNECT USER TOKEN AND CANVAS HUB
         except requests.exceptions.RequestException as e:
             print e
 
@@ -234,6 +222,8 @@ class Canvas():
         token = user["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
+        # DEV: url = "https://slice.api-dev.canvas3d.co/projects/" + \
+            # data["projectId"] + "/download"
         url = "https://slice.api.canvas3d.io/projects/" + \
             data["projectId"] + "/download"
 
@@ -264,8 +254,6 @@ class Canvas():
                 self.enableWebsocketConnection()
 
             self.registerUserAndCHUB(data)
-            # list_of_tokens = json.dumps(self.getListOfTokens())
-            # self.verifyTokens(list_of_tokens)
         else:
             self._logger.info("User already registered! You are good.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
@@ -285,12 +273,8 @@ class Canvas():
         yaml.dump(self.chub_yaml, chub_data)
         chub_data.close()
 
-    # def getListOfTokens(self):
-    #     list_of_tokens = map(
-    #         lambda user: user['token'], self.chub_yaml["canvas-users"].values())
-    #     return {"type": "TOKENS", "tokens": list_of_tokens}
-
     def registerUserAndCHUB(self, data):
+
         self._logger.info("Sending chub_token and user_token to Canvas Server")
         chub_id = self.chub_yaml["canvas-hub"]["hub"]["id"]
         chub_token = self.chub_yaml["canvas-hub"]["token"]
@@ -299,12 +283,10 @@ class Canvas():
         }
 
         url = "https://api-dev.canvas3d.co/hubs/" + chub_id +"/register"
+        #PRODUCTION url = "https://api.canvas3d.io/hubs/" + chub_id +"/register"
+
         authorization = "Bearer " + chub_token
         headers = {"Authorization": authorization}
-
-        self._logger.info(url)
-        self._logger.info(headers)
-        self._logger.info(json.dumps(payload))
 
         try:
             response = requests.post(url, json=payload, headers=headers).json()
@@ -327,19 +309,4 @@ class Canvas():
         self._plugin_manager.send_plugin_message(self._identifier, data)
 
 
-# api-dev.canvas3d.co/hubs
-# PUT REQUEST
-# {"name:" serialnumber or secret key}
 
-# api-dev.canvas3d.co/hubs/${actual hub id}/register
-# POST REQUEST
-# headers: {
-#     "Authorization:" "Bearer <hubtoken>"
-# }
-# payload: {
-#     "userToken": "<token>"
-# }
-
-
-# LISTENING
-# 4 types

@@ -297,8 +297,23 @@
     background-color: rgba(54, 54, 54, 1);
     display: inline-block;
     margin: 7.5px 10px 7.5px 0;
-    padding: 5px 10px;
+    padding: 5px 15px 5px 10px;
     font-weight: 500;
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .username {
+    display: flex;
+    align-self: center;
+  }
+
+  .material-icons {
+    margin-right: 2px;
+
+    &.md-22 {
+      font-size: 22px;
+    }
   }
 
   .canvas-plugin {
@@ -323,18 +338,50 @@
     border-radius: 1px;
     border: 1px solid rgba(54, 54, 54, 1);
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0.1em 0.4em 0.1em;
+    padding: 1.25em 2em 0.5em;
+    width: 30rem;
+  }
+  .swal2-popup .swal2-header {
+    flex-direction: row;
+    align-items: center;
   }
   .swal2-popup .swal2-title {
     color: rgba(54, 54, 54, 1);
     font-size: 1.6rem;
+    width: 70%;
+    text-align: left;
+    margin-left: 1.5rem;
+  }
+  .swal2-popup .swal2-icon {
+    margin: 0 0 1em 0;
+    height: 4.5em;
+    width: 4.5em;
+    line-height: 4.5em;
+
+    & .swal2-icon-text {
+      font-size: 3em;
+    }
   }
   .swal2-popup .swal2-styled.swal2-confirm {
     border-radius: 2px;
     background-color: rgba(54, 54, 54, 1);
+    font-size: 100%;
+    padding: 0.4em 2em;
+    align-self: flex-end;
   }
   .swal2-popup .swal2-content {
+    padding-bottom: 15px;
+    margin: 0 5px;
+    border-bottom: 1px solid rgba(54, 54, 54, 0.5);
     color: rgba(54, 54, 54, 1);
     letter-spacing: 0.4px;
+    border-bottom: 1px solid #363636;
+    font-weight: 400;
+    text-align: left;
+    line-height: 140%;
+  }
+  .swal2-popup #swal2-content {
+    text-align: left;
   }
   .swal2-icon.swal2-info {
     border-color: rgba(54, 54, 54, 1);
@@ -343,6 +390,14 @@
   .swal2-icon.swal2-success {
     border-color: rgba(54, 54, 54, 1);
     color: rgba(54, 54, 54, 1);
+
+    & [class^="swal2-success-line"][class$="tip"] {
+      left: 0.6em;
+    }
+
+    & [class^="swal2-success-line"][class$="long"] {
+      right: 0.2em;
+    }
   }
   .swal2-icon.swal2-success [class^="swal2-success-line"] {
     background-color: rgba(54, 54, 54, 1);
@@ -352,8 +407,130 @@
   }
   .swal2-icon.swal2-error {
     border-color: rgba(54, 54, 54, 1);
+
+    & [class^="swal2-x-mark-line"] {
+      top: 2.15em;
+    }
+
+    & [class^="swal2-x-mark-line"][class$="left"] {
+      left: 0.85em;
+    }
+
+    & [class^="swal2-x-mark-line"][class$="right"] {
+      right: 0.8em;
+    }
   }
   .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
     background-color: rgba(54, 54, 54, 1);
+  }
+  .swal2-popup .swal2-actions {
+    margin: 0.5em 0 0 0;
+    justify-content: flex-end;
+  }
+  .swal2-animate-success-icon .swal2-success-line-tip {
+    -webkit-animation: swal2-animate-success-line-tip-ct 0.75s;
+    animation: swal2-animate-success-line-tip-ct 0.75s;
+  }
+  .swal2-animate-success-icon .swal2-success-line-long {
+    -webkit-animation: swal2-animate-success-line-long-ct 0.75s;
+    animation: swal2-animate-success-line-long-ct 0.75s;
+  }
+  @-webkit-keyframes swal2-animate-success-line-tip-ct {
+    0% {
+      top: 1.1875em;
+      left: 0.0625em;
+      width: 0;
+    }
+    54% {
+      top: 1.0625em;
+      left: 0.125em;
+      width: 0;
+    }
+    70% {
+      top: 2.1875em;
+      left: -0.375em;
+      width: 3.125em;
+    }
+    84% {
+      top: 3em;
+      left: 1.1125em;
+      width: 1.0625em;
+    }
+    100% {
+      top: 2.8125em;
+      left: 0.6em;
+      width: 1.5625em;
+    }
+  }
+  @keyframes swal2-animate-success-line-tip-ct {
+    0% {
+      top: 1.1875em;
+      left: 0.0625em;
+      width: 0;
+    }
+    54% {
+      top: 1.0625em;
+      left: 0.125em;
+      width: 0;
+    }
+    70% {
+      top: 2.1875em;
+      left: -0.375em;
+      width: 3.125em;
+    }
+    84% {
+      top: 3em;
+      left: 1.1125em;
+      width: 1.0625em;
+    }
+    100% {
+      top: 2.8125em;
+      left: 0.6em;
+      width: 1.5625em;
+    }
+  }
+  @-webkit-keyframes swal2-animate-success-line-long-ct {
+    0% {
+      top: 3.375em;
+      right: 2.875em;
+      width: 0;
+    }
+    65% {
+      top: 3.375em;
+      right: 2.875em;
+      width: 0;
+    }
+    84% {
+      top: 2.1875em;
+      right: 0;
+      width: 3.4375em;
+    }
+    100% {
+      top: 2.375em;
+      right: 0.2em;
+      width: 2.9375em;
+    }
+  }
+  @keyframes swal2-animate-success-line-long-ct {
+    0% {
+      top: 3.375em;
+      right: 2.875em;
+      width: 0;
+    }
+    65% {
+      top: 3.375em;
+      right: 2.875em;
+      width: 0;
+    }
+    84% {
+      top: 2.1875em;
+      right: 0;
+      width: 3.4375em;
+    }
+    100% {
+      top: 2.375em;
+      right: 0.2em;
+      width: 2.9375em;
+    }
   }
 }
