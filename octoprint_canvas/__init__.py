@@ -121,6 +121,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             if payload["old"] is False and payload["new"] is True and self.internet_disconnect is True:
                 self._logger.info("ONLINE")
                 self._logger.info(self._connectivity_checker.check_immediately())
+                self.internet_disconnect = False
                 while self.canvas.ws_connection is False:
                     time.sleep(10)
                     self.canvas.enableWebsocketConnection()
