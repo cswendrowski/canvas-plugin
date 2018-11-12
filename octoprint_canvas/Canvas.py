@@ -150,9 +150,9 @@ class Canvas():
         print("### Closing Websocket ###")
         self.ws_connection = False
         self.updateUI({"command": "Websocket", "data": False})
-        while self.ws_connection is False:
-            time.sleep(10)
-            self.enableWebsocketConnection()
+        # while self.ws_connection is False:
+        #     time.sleep(10)
+        #     self.enableWebsocketConnection()
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")

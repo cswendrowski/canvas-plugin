@@ -16,6 +16,9 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.SettingsPlugin
                    ):
 
+    def __init__(self):
+        self.internet_disconnect = False
+
     # STARTUPPLUGIN
     def on_after_startup(self):
         self._logger.info("Canvas Plugin STARTED")
@@ -27,7 +30,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         #     "projectId": "ab6225f37b511d671bd27756af3cb299",
         #     "filename": "test2"
         # }
-        # self.canvas.downloadPrintFiles(temp)
 
     # SHUTDOWNPLUGIN
     def on_shutdown(self):
@@ -108,12 +110,27 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.canvas.updateRegisteredUsers()
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()
-        if "ClientClosed" in event:
+        elif "ClientClosed" in event:
             if self.canvas.ws_connection is True:
                 self._logger.info("Client closed and connection was on")
                 self.canvas.ws.close()
-        if "ConnectivityChanged" in event:
-            self._logger.info(event)
+        elif "ConnectivityChanged" in event:
+            self._logger.info("CONNECT CHANGED")
+            self._logger.info(payload)
+            # INTERNET CONNECTION IS WENT FROM OFF TO ON
+            if payload["old"] is False and payload["new"] is True and self.internet_disconnect is True:
+                self._logger.info("ONLINE")
+                self._logger.info(self._connectivity_checker.check_immediately())
+                while self.canvas.ws_connection is False:
+                    time.sleep(10)
+                    self.canvas.enableWebsocketConnection()
+            elif payload["old"] is True and payload["new"] is False:
+                self._logger.info("OFFLINE")
+                self._logger.info(self._connectivity_checker.check_immediately())
+                self.internet_disconnect = True
+
+
+
 
 
 
