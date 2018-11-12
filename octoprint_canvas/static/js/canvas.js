@@ -32,7 +32,7 @@ canvasApp.toggleBrandName = name => {
 
 /* 2. Add Palette Tag to .mcf.gcode files */
 canvasApp.tagPaletteFiles = () => {
-  let allPrintFiles = $("#files .gcode_files .scroll-wrapper .entry").find(".title");
+  let allPrintFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .title");
   allPrintFiles.each((index, printFile) => {
     if (printFile.innerHTML.includes(".mcf.gcode")) {
       $(printFile).addClass("palette-tag");
@@ -44,10 +44,8 @@ canvasApp.tagPaletteFiles = () => {
 Use this function to keep Palette files tagged */
 canvasApp.handleGCODEFolders = () => {
   canvasApp.removeFolderBinding();
-
   $("#files .gcode_files .entry.back.clickable").on("click", () => {
-    canvasApp.tagPaletteFiles();
-    canvasApp.removeFolderBinding();
+    canvasApp.filesLoaded();
   });
 };
 
@@ -65,6 +63,7 @@ canvasApp.removeFolderBinding = () => {
 canvasApp.toggleTheme = () => {
   $("html").addClass("canvas-theme");
   canvasApp.toggleBrandName("CANVAS Hub");
+  // canvasApp.arrowToggle();
 
   $(".theme-input").on("change", event => {
     let checked = event.target.checked;
@@ -116,6 +115,34 @@ canvasApp.unhideCanvasTabContent = () => {
   $(".canvas-plugin").css("display", "block");
 };
 
+/* 7. FIle LOADING */
+canvasApp.filesLoaded = () => {
+  let checkExist = setInterval(function() {
+    if ($("#files .gcode_files .scroll-wrapper").find(".entry .action-buttons .toggleAdditionalData").length) {
+      canvasApp.tagPaletteFiles();
+      let dynamicFilesFullyLoaded = true;
+      let allFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .action-buttons .toggleAdditionalData");
+      allFiles.each((i, file) => {
+        // if any of the files have a class of disabled on them,
+        // it means that all the files have not finished dynamically being added to the DOM
+        if (file.classList.value.includes("disabled")) {
+          dynamicFilesFullyLoaded = false;
+        }
+      });
+      if (dynamicFilesFullyLoaded) {
+        canvasApp.removeFolderBinding();
+        canvasApp.tagPaletteFiles();
+        canvasApp.handleGCODEFolders();
+        clearInterval(checkExist);
+      }
+    }
+  }, 100);
+};
+
+// canvasApp.arrowToggle = () => {
+//   $(".accordion-heading").append(`<div><i data-toggle="collapse" class="fa fa-angle-down"></i></div>`);
+// };
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -128,23 +155,17 @@ function CanvasViewModel(parameters) {
   this.onStartupComplete = () => {
     console.log("CanvasViewModel STARTUP COMPLETED");
     canvasApp.toggleTheme();
-    canvasApp.handleGCODEFolders();
-    canvasApp.tagPaletteFiles();
+    canvasApp.filesLoaded();
   };
 
   this.onEventUpdatedFiles = () => {
     console.log("File Updated EVENT!");
-    setTimeout(function() {
-      canvasApp.removeFolderBinding();
-      canvasApp.tagPaletteFiles();
-    }, 1200);
+    canvasApp.filesLoaded();
   };
 
   this.onDataUpdaterReconnect = () => {
     console.log("Server Reconnected");
-    setTimeout(function() {
-      canvasApp.tagPaletteFiles();
-    }, 1200);
+    canvasApp.filesLoaded();
   };
 
   this.addUser = () => {

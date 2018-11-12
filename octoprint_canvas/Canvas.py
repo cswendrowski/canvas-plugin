@@ -4,6 +4,8 @@ import StringIO
 import json
 import websocket
 import requests
+import ssl
+import time
 
 
 try:
@@ -28,6 +30,7 @@ class Canvas():
         self._logger = plugin._logger
         self._plugin_manager = plugin._plugin_manager
         self._identifier = plugin._identifier
+        # SETTINGS PLUGIN
         self._settings = plugin._settings
 
         self.ws_connection = False
@@ -40,7 +43,7 @@ class Canvas():
     ##############
 
     def loadChubData(self):
-        self._logger.info("Loading CHUB data")
+        self._logger.info("Loading HUB data")
         chub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
         chub_file_path = chub_dir_path + "/canvas-hub-data.yml"
 
@@ -70,7 +73,7 @@ class Canvas():
             yaml.dump(chub_yaml, chub_data)
             chub_data.close()
 
-        if "hubToken" in chub_yaml["canvas-hub"]:
+        if "token" in chub_yaml["canvas-hub"]:
             self.chub_registered = True
 
         return chub_yaml
@@ -87,39 +90,28 @@ class Canvas():
                 chub_serial_number = self.chub_yaml["canvas-hub"]["serial-number"]
                 self.registerCHUBAPICall(chub_serial_number)
         else:
-            self._logger.info("CHUB already registered")
+            self._logger.info("C.HUB already registered")
             self.updateUI({"command": "HubRegistered"})
 
     def registerCHUBAPICall(self, chub_identifier):
-        self._logger.info(chub_identifier)
-        self._logger.info(
-            "Making the call to the Canvas API Endpoint to register CHUB devices")
+        self._logger.info("Registering HUB to AMARANTH")
 
-        temp = {
-            "hubId": "asdad39239",
-            "hubName": "Tomato",
-            "hubToken": "7328283239nans"
-        }
+        url = "https://api-dev.canvas3d.co/hubs"
+        data = {"name": chub_identifier}
 
-        self.chub_yaml["canvas-hub"].update(temp)
-        self.chub_registered = True
-        self.updateUI({"command": "HubRegistered"})
+        try:
+            response = requests.put(url, json=data).json()
+            if response.get("status") >= 400:
+                self._logger.info(response)
+            else:
+                self.chub_yaml["canvas-hub"].update(response)
+                self.updateYAMLInfo()
+                self.chub_registered = True
+                self.updateUI({"command": "HubRegistered"})
+        except requests.exceptions.RequestException as e:
+            print e
 
-        # url = "https://api.canvas3d.io/users/login"
-        # data = {"email": email, "password": password}
 
-        # try:
-        #     response = requests.post(url, json=data).json()
-        #     if response.get("status") >= 400:
-        #         self._logger.info("Error: Try making the request again")
-        #     else:
-        #         self._logger.info("API response valid!")
-        #         self.chub_registered = True
-        #         self.chub_yaml["canvas-hub"].update(response)
-
-        #         return response
-        # except requests.exceptions.RequestException as e:
-        #     print e
 
     ##############
     # 2. WEBSOCKET FUNCTIONS
@@ -133,51 +125,72 @@ class Canvas():
             response = json.loads(message)
             print(response["type"])
             # if "TOKEN_VERIFICATION" in response["type"]:
-            #     # token_validation_list = response["tokens"]
-            #     # self.updateTokenValidationInYAML(token_validation_list)
-            #     # self.updateRegisteredUsers()
+            #     print("HANDLING TOKEN_VERIFICATION")
+                # token_validation_list = response["tokens"]
+                # self.updateTokenValidationInYAML(token_validation_list)
+                # self.updateRegisteredUsers()
             if "DOWNLOAD" in response["type"]:
                 self.downloadPrintFiles(response)
+            elif "ERROR/INVALID_TOKEN" in response["type"]:
+                print("HANDLING ERROR/INVALID_TOKEN")
+            elif "CONFIRM_TOKEN" in response["type"]:
+                print("HANDLING CONFIRM_TOKEN")
+            elif "ERROR" in response["type"]:
+                print("HANDLING ERROR")
+
+
+
 
     def ws_on_error(self, ws, error):
         print(error)
+        while self.ws_connection is False:
+            time.sleep(10)
+            self.enableWebsocketConnection()
 
     def ws_on_close(self, ws):
         print("### Closing Websocket ###")
-        self.updateUI({"command": "Websocket", "data": False})
         self.ws_connection = False
+        self.updateUI({"command": "Websocket", "data": False})
+        while self.ws_connection is False:
+            time.sleep(10)
+            self.enableWebsocketConnection()
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
         self.updateUI({"command": "Websocket", "data": True})
-        # list_of_tokens = json.dumps(self.getListOfTokens())
-        self.updateRegisteredUsers()
-        # print("Sending tokens: " + list_of_tokens)
-        # self.verifyTokens(list_of_tokens)
-        print("Sent")
+        print("Sending Hub Token")
+        self.sendInitialHubToken()
+        print("Hub Token Sent")
 
     def ws_on_pong(self, ws, pong):
         print("Received Pong")
 
+    def runWebSocket(self):
+            self.ws.run_forever(ping_interval=30, ping_timeout=15, sslopt={"cert_reqs": ssl.CERT_NONE})
+
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.chub_yaml and self.chub_yaml["canvas-users"]:
-            self.ws = websocket.WebSocketApp("ws://hub-dev.canvas3d.co",
+            self.ws = websocket.WebSocketApp("wss://hub-dev.canvas3d.co:8443",
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
                                              on_close=self.ws_on_close,
                                              on_open=self.ws_on_open,
-                                             on_pong=self.ws_on_pong)
-            # self.ws.on_open = self.on_open
-            thread.start_new_thread(lambda: self.ws.run_forever(
-                ping_interval=30, ping_timeout=10), ())
+                                             on_pong=self.ws_on_pong
+                                             )
+            thread.start_new_thread(self.runWebSocket, ())
             self.ws_connection = True
         else:
             self._logger.info(
                 "There are no registered users. Please register a Canvas account.")
 
-    # def verifyTokens(self, data):
-    #     self.ws.send(data)
+    def sendInitialHubToken(self):
+        data = {
+            "type": "AUTH/TOKEN",
+            "token": self.chub_yaml["canvas-hub"]["token"]
+        }
+        self._logger.info(json.dumps(data))
+        self.ws.send(json.dumps(data))
 
     # def updateTokenValidationInYAML(self, data):
     #     registeredUsers = self.chub_yaml["canvas-users"]
@@ -218,21 +231,21 @@ class Canvas():
         user = self.chub_yaml["canvas-users"][data["userId"]]
 
         # user must have a valid token to enable the download
-        if user["token_valid"]:
-            token = user["token"]
-            authorization = "Bearer " + token
-            headers = {"Authorization": authorization}
-            url = "https://slice.api.canvas3d.io/projects/" + \
-                data["projectId"] + "/download"
+        token = user["token"]
+        authorization = "Bearer " + token
+        headers = {"Authorization": authorization}
+        url = "https://slice.api.canvas3d.io/projects/" + \
+            data["projectId"] + "/download"
 
-            response = requests.get(url, headers=headers)
-            if response.ok:
-                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
-                z = zipfile.ZipFile(StringIO.StringIO(response.content))
-                watched_path = self._settings.global_get_basefolder("watched")
-                z.extractall(watched_path)
-        else:
-            self._logger.info("Token is invalid. Download will not initiate")
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
+            z = zipfile.ZipFile(StringIO.StringIO(response.content))
+            watched_path = self._settings.global_get_basefolder("watched")
+            z.extractall(watched_path)
+
+            self._logger.info("Files downloaded onto OctoPrint. Sending back confirmation to Amaranth.")
+            # ws.send("CONFIRMED")
 
     ##############
     # 4. HELPER FUNCTIONS
@@ -244,17 +257,13 @@ class Canvas():
 
         # if user is not registered in C.HUB YML file yet
         if data.get("id") not in registeredUsers:
-            self._logger.info("Saving New User in C.HUB YML")
-            # save new user to YML file
-            registeredUsers[data.get("id")] = data
-            self.updateYAMLInfo()
+            self._logger.info("USER IS NOT IN YAML FILE YET.")
 
            # if websocket is not already enabled, enable it
             if not self.ws_connection:
                 self.enableWebsocketConnection()
 
             self.registerUserAndCHUB(data)
-            self.updateUI({"command": "UserConnectedToHUB", "data": data})
             # list_of_tokens = json.dumps(self.getListOfTokens())
             # self.verifyTokens(list_of_tokens)
         else:
@@ -281,16 +290,56 @@ class Canvas():
     #         lambda user: user['token'], self.chub_yaml["canvas-users"].values())
     #     return {"type": "TOKENS", "tokens": list_of_tokens}
 
-    def registerUserAndCHUB(self, userToken):
-        chub_token = self.chub_yaml["canvas-hub"]["hubToken"]
-        user_token = userToken
+    def registerUserAndCHUB(self, data):
         self._logger.info("Sending chub_token and user_token to Canvas Server")
-        # url = blablala
-        # response = requests.post(url, json=data).json()
-        # once response is good, update registered users + add dictionary key to confirm validation?
-        self.updateRegisteredUsers()
+        chub_id = self.chub_yaml["canvas-hub"]["hub"]["id"]
+        chub_token = self.chub_yaml["canvas-hub"]["token"]
+        payload = {
+            "userToken": data["token"]
+        }
+
+        url = "https://api-dev.canvas3d.co/hubs/" + chub_id +"/register"
+        authorization = "Bearer " + chub_token
+        headers = {"Authorization": authorization}
+
+        self._logger.info(url)
+        self._logger.info(headers)
+        self._logger.info(json.dumps(payload))
+
+        try:
+            response = requests.post(url, json=payload, headers=headers).json()
+            if response.get("status") >= 400:
+                self._logger.info(response)
+            else:
+                self._logger.info(response)
+
+                self.chub_yaml["canvas-users"][data.get("id")] = data
+                self.updateYAMLInfo()
+                self.updateRegisteredUsers()
+                self.updateUI({"command": "UserConnectedToHUB", "data": data})
+
+        except requests.exceptions.RequestException as e:
+            print e
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
         self._logger.info(data)
         self._plugin_manager.send_plugin_message(self._identifier, data)
+
+
+# api-dev.canvas3d.co/hubs
+# PUT REQUEST
+# {"name:" serialnumber or secret key}
+
+# api-dev.canvas3d.co/hubs/${actual hub id}/register
+# POST REQUEST
+# headers: {
+#     "Authorization:" "Bearer <hubtoken>"
+# }
+# payload: {
+#     "userToken": "<token>"
+# }
+
+
+# LISTENING
+# 4 types

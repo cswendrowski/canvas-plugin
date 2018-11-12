@@ -12,9 +12,9 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.StartupPlugin,
                    octoprint.plugin.SimpleApiPlugin,
                    octoprint.plugin.EventHandlerPlugin,
-                   octoprint.plugin.UiPlugin,
                    octoprint.plugin.ShutdownPlugin,
-                   octoprint.plugin.SettingsPlugin):
+                   octoprint.plugin.SettingsPlugin
+                   ):
 
     # STARTUPPLUGIN
     def on_after_startup(self):
@@ -29,12 +29,13 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         # }
         # self.canvas.downloadPrintFiles(temp)
 
+    # SHUTDOWNPLUGIN
     def on_shutdown(self):
         self._logger.info("Canvas Plugin CLOSED")
         if self.canvas.ws_connection is True:
             self.canvas.ws.close()
-            self.canvas.ws_connection = False
 
+    # TEMPLATEPLUGIN
     def get_template_configs(self):
         return [
             dict(type="navbar", custom_bindings=True),
@@ -100,20 +101,21 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if command == "addUser":
             self.canvas.addUser(data["email"], data["password"])
 
-    # EVENTHANDLERPLUGIN: To be able to go from BE to FE
+    # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
         if "ClientOpened" in event:
             self.canvas.registerCHUB()
+            self.canvas.updateRegisteredUsers()
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()
         if "ClientClosed" in event:
             if self.canvas.ws_connection is True:
                 self.canvas.ws.close()
-                self.canvas.ws_connection = False
 
-            # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
-            # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
-            # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
+
+# If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
+# ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
+# can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "Canvas"
 __plugin_description__ = "A plugin to handle connecting and communicating with CANVAS (Beta)"
 
