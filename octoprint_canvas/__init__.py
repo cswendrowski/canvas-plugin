@@ -12,30 +12,21 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                    octoprint.plugin.StartupPlugin,
                    octoprint.plugin.SimpleApiPlugin,
                    octoprint.plugin.EventHandlerPlugin,
-                   octoprint.plugin.ShutdownPlugin,
                    octoprint.plugin.SettingsPlugin
                    ):
-
-    def __init__(self):
-        self.internet_disconnect = False
 
     # STARTUPPLUGIN
     def on_after_startup(self):
         self._logger.info("Canvas Plugin STARTED")
         self.canvas = Canvas.Canvas(self)
 
-        # temp = {
-        #     "type": "DOWNLOAD",
-        #     "userId": "10f1e816b36de32ae1de1cdc29ba42bc",
-        #     "projectId": "ab6225f37b511d671bd27756af3cb299",
-        #     "filename": "test2"
-        # }
-
-    # SHUTDOWNPLUGIN
-    def on_shutdown(self):
-        self._logger.info("Canvas Plugin CLOSED")
-        if self.canvas.ws_connection is True:
-            self.canvas.ws.close()
+        temp = {
+            "type": "DOWNLOAD",
+            "userId": "e40c87c3a4117655c90ea9864564cbe1",
+            "projectId": "970757341caae0cb3e1189b7f7afff73",
+            "filename": "khoi-hammer"
+        }
+        self.canvas.downloadPrintFiles(temp)
 
     # TEMPLATEPLUGIN
     def get_template_configs(self):
@@ -105,19 +96,28 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
-        if "ClientOpened" in event:
+        self._logger.info("EVENT: " + event)
+        if "Startup" in event:
+            self.internet_disconnect = False
+        elif "ClientOpened" in event:
+            self.canvas.checkWebsocketConnection()
             self.canvas.registerCHUB()
             self.canvas.updateRegisteredUsers()
+            # temp = {
+            #     "type": "DOWNLOAD",
+            #     "userId": "e40c87c3a4117655c90ea9864564cbe1",
+            #     "projectId": "970757341caae0cb3e1189b7f7afff73",
+            #     "filename": "khoi-hammer"
+            # }
+            # self.canvas.downloadPrintFiles(temp)
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()
         elif "ClientClosed" in event:
             if self.canvas.ws_connection is True:
                 self._logger.info("Client closed and connection was on")
-                self.canvas.ws.close()
         elif "ConnectivityChanged" in event:
-            self._logger.info("CONNECT CHANGED")
             self._logger.info(payload)
-            # INTERNET CONNECTION IS WENT FROM OFF TO ON
+            # INTERNET CONNECTION WENT FROM OFF TO ON
             if payload["old"] is False and payload["new"] is True and self.internet_disconnect is True:
                 self._logger.info("ONLINE")
                 self._logger.info(self._connectivity_checker.check_immediately())
@@ -125,10 +125,16 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 while self.canvas.ws_connection is False:
                     time.sleep(10)
                     self.canvas.enableWebsocketConnection()
+            # INTERNET CONNECTION WENT FROM ON TO OFF, WITHOUT CLOSING SERVER
             elif payload["old"] is True and payload["new"] is False:
                 self._logger.info("OFFLINE")
                 self._logger.info(self._connectivity_checker.check_immediately())
                 self.internet_disconnect = True
+        elif "FileAdded" in event:
+            self.canvas.updateUI({"command": "FileAdded", "data": payload["name"]})
+        elif "Shutdown" in event:
+            if self.canvas.ws_connection is True:
+                self.canvas.ws.close()
 
 
 

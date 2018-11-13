@@ -33,7 +33,6 @@ class Canvas():
         # SETTINGS PLUGIN
         self._settings = plugin._settings
 
-
         self.ws_connection = False
         self.chub_registered = False
 
@@ -83,8 +82,7 @@ class Canvas():
         if self.chub_registered is False:
             # if DIY CHUB
             if not "serial-number" in self.chub_yaml["canvas-hub"]:
-                secret_key = yaml.load(self._settings.config_yaml)[
-                    "server"]["secretKey"]
+                secret_key = yaml.load(self._settings.config_yaml)["server"]["secretKey"]
                 self.registerCHUBAPICall(secret_key)
             # if regular CHUB
             else:
@@ -130,7 +128,8 @@ class Canvas():
                 self.sendInitialHubToken()
             elif "CONN/CLOSED" in response["type"]:
                 self.ws.close()
-            elif "DOWNLOAD" in response["type"]:
+            elif "OP/DOWNLOAD" in response["type"]:
+                print("HANDLING DL")
                 self.downloadPrintFiles(response)
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
@@ -149,15 +148,13 @@ class Canvas():
     def ws_on_close(self, ws):
         print("### Closing Websocket ###")
         self.ws_connection = False
-        self.updateUI({"command": "Websocket", "data": False})
-        # while self.ws_connection is False:
-        #     time.sleep(10)
-        #     self.enableWebsocketConnection()
+        self.checkWebsocketConnection()
+
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
-        self.updateUI({"command": "Websocket", "data": True})
         self.ws_connection = True
+        self.checkWebsocketConnection()
 
 
     def ws_on_pong(self, ws, pong):
@@ -180,17 +177,23 @@ class Canvas():
                                              )
             thread.start_new_thread(self.runWebSocket, ())
         else:
-            self._logger.info(
-                "There are no registered users. Please register a Canvas account.")
+            if self.ws_connection is True:
+                self._logger.info("Websocket already enabled.")
+            else:
+                self._logger.info("There are no registered users. Please register a Canvas account.")
+
+    def checkWebsocketConnection(self):
+        if self.ws_connection is True:
+            self.updateUI({"command": "Websocket", "data": True})
+        else:
+            self.updateUI({"command": "Websocket", "data": False})
 
     def sendInitialHubToken(self):
         data = {
             "type": "AUTH/TOKEN",
             "token": self.chub_yaml["canvas-hub"]["token"]
         }
-        self._logger.info(json.dumps(data))
         self.ws.send(json.dumps(data))
-        print("Hub Token Sent")
 
 
     ##############
@@ -216,26 +219,32 @@ class Canvas():
             print e
 
     def downloadPrintFiles(self, data):
+        self._logger.info("DOWNLOADING FUNCTION")
+        self._logger.info(data)
+
+
         user = self.chub_yaml["canvas-users"][data["userId"]]
 
         # user must have a valid token to enable the download
         token = user["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
-        # DEV: url = "https://slice.api-dev.canvas3d.co/projects/" + \
-            # data["projectId"] + "/download"
-        url = "https://slice.api.canvas3d.io/projects/" + \
+        # DEV:
+        url = "https://slice.api-dev.canvas3d.co/projects/" + \
             data["projectId"] + "/download"
+        # url = "https://slice.api.canvas3d.io/projects/" + \
+        #     data["projectId"] + "/download"
 
         response = requests.get(url, headers=headers)
         if response.ok:
+            self._logger.info("GOT INSIDE OKAY")
+
             # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
             z = zipfile.ZipFile(StringIO.StringIO(response.content))
             watched_path = self._settings.global_get_basefolder("watched")
             z.extractall(watched_path)
 
             self._logger.info("Files downloaded onto OctoPrint. Sending back confirmation to Amaranth.")
-            # ws.send("CONFIRMED")
 
     ##############
     # 4. HELPER FUNCTIONS
@@ -293,8 +302,6 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
-                self._logger.info(response)
-
                 self.chub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
                 self.updateRegisteredUsers()
@@ -305,7 +312,6 @@ class Canvas():
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
-        self._logger.info(data)
         self._plugin_manager.send_plugin_message(self._identifier, data)
 
 

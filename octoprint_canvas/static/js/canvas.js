@@ -190,6 +190,7 @@ function CanvasViewModel(parameters) {
 
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
+    console.log(message);
     if (pluginIdent === "canvas") {
       console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
@@ -219,6 +220,8 @@ function CanvasViewModel(parameters) {
           title: "Incorrect Login Information",
           text: "User credentials are incorrect. Please try again."
         });
+      } else if (message.command === "Download") {
+        console.log("Download received");
       }
     }
   };
