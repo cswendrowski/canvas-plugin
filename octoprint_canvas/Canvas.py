@@ -217,9 +217,6 @@ class Canvas():
             print e
 
     def downloadPrintFiles(self, data):
-        self._logger.info("DOWNLOADING FUNCTION")
-        self._logger.info(data)
-
         user = self.chub_yaml["canvas-users"][data["userId"]]
 
         # user must have a valid token to enable the download

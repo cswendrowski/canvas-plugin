@@ -221,6 +221,7 @@ function CanvasViewModel(parameters) {
   this.onEventUpdatedFiles = () => {
     canvasApp.filesLoaded();
     if (this.canvasFileReceived) {
+      canvasApp.tagPaletteFiles();
       this.onDataUpdaterPluginMessage("canvas", { command: "CanvasFileAnalysisDone", data: this.canvasFilename });
       this.canvasFileReceived = false;
       this.canvasFilename = null;
