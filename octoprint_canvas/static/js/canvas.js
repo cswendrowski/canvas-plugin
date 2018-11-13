@@ -202,15 +202,29 @@ function CanvasViewModel(parameters) {
     console.log("CanvasViewModel STARTUP COMPLETED");
     canvasApp.toggleTheme();
     canvasApp.filesLoaded();
+    canvasApp.removePopup();
     $("body")
       .css("position", "relative")
       .append(`<ul class="added-notifications-list"></ul>`);
   };
 
-  this.onEventUpdatedFiles = () => {
-    console.log("File Updated EVENT!");
-    canvasApp.filesLoaded();
+  this.onEventFileAdded = payload => {
+    if (this.canvasFileReceived) {
+      this.canvasFilename = payload.name;
+    }
+  };
+
+  this.onEventMetadataAnalysisFinished = () => {
     canvasApp.applyExtraTagging();
+  };
+
+  this.onEventUpdatedFiles = () => {
+    canvasApp.filesLoaded();
+    if (this.canvasFileReceived) {
+      this.onDataUpdaterPluginMessage("canvas", { command: "CanvasFileAnalysisDone", data: this.canvasFilename });
+      this.canvasFileReceived = false;
+      this.canvasFilename = null;
+    }
   };
 
   this.onDataUpdaterReconnect = () => {
@@ -266,7 +280,8 @@ function CanvasViewModel(parameters) {
           text: "User credentials are incorrect. Please try again."
         });
       } else if (message.command === "FileReceivedFromCanvas") {
-        canvasApp.removePopup();
+        this.canvasFileReceived = true;
+      } else if (message.command === "CanvasFileAnalysisDone") {
         canvasApp.displayFileAddedPopup(message.data);
       }
     }
