@@ -20,14 +20,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("Canvas Plugin STARTED")
         self.canvas = Canvas.Canvas(self)
 
-        temp = {
-            "type": "DOWNLOAD",
-            "userId": "e40c87c3a4117655c90ea9864564cbe1",
-            "projectId": "970757341caae0cb3e1189b7f7afff73",
-            "filename": "khoi-hammer"
-        }
-        self.canvas.downloadPrintFiles(temp)
-
     # TEMPLATEPLUGIN
     def get_template_configs(self):
         return [
@@ -103,13 +95,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.canvas.checkWebsocketConnection()
             self.canvas.registerCHUB()
             self.canvas.updateRegisteredUsers()
-            # temp = {
-            #     "type": "DOWNLOAD",
-            #     "userId": "e40c87c3a4117655c90ea9864564cbe1",
-            #     "projectId": "970757341caae0cb3e1189b7f7afff73",
-            #     "filename": "khoi-hammer"
-            # }
-            # self.canvas.downloadPrintFiles(temp)
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()
         elif "ClientClosed" in event:
@@ -120,7 +105,8 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             # INTERNET CONNECTION WENT FROM OFF TO ON
             if payload["old"] is False and payload["new"] is True and self.internet_disconnect is True:
                 self._logger.info("ONLINE")
-                self._logger.info(self._connectivity_checker.check_immediately())
+                self._logger.info(
+                    self._connectivity_checker.check_immediately())
                 self.internet_disconnect = False
                 while self.canvas.ws_connection is False:
                     time.sleep(10)
@@ -128,17 +114,14 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             # INTERNET CONNECTION WENT FROM ON TO OFF, WITHOUT CLOSING SERVER
             elif payload["old"] is True and payload["new"] is False:
                 self._logger.info("OFFLINE")
-                self._logger.info(self._connectivity_checker.check_immediately())
+                self._logger.info(
+                    self._connectivity_checker.check_immediately())
                 self.internet_disconnect = True
-        elif "FileAdded" in event:
-            self.canvas.updateUI({"command": "FileAdded", "data": payload["name"]})
+        # elif "FileAdded" in event:
+        #     self.canvas.updateUI({"command": "FileAdded", "data": payload["name"]})
         elif "Shutdown" in event:
             if self.canvas.ws_connection is True:
                 self.canvas.ws.close()
-
-
-
-
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py

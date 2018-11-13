@@ -122,7 +122,7 @@ canvasApp.unhideCanvasTabContent = () => {
   $(".canvas-plugin").css("display", "block");
 };
 
-/* 7. FIle LOADING */
+/* 7. FILE LOADING */
 canvasApp.filesLoaded = () => {
   let checkExist = setInterval(function() {
     if ($("#files .gcode_files .scroll-wrapper").find(".entry .action-buttons .toggleAdditionalData").length) {
@@ -146,9 +146,47 @@ canvasApp.filesLoaded = () => {
   }, 100);
 };
 
-// canvasApp.arrowToggle = () => {
-//   $(".accordion-heading").append(`<div><i data-toggle="collapse" class="fa fa-angle-down"></i></div>`);
-// };
+/* 8. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
+canvasApp.displayFileAddedPopup = filename => {
+  let newFile = $(`<li id=file-added${this.counter} class="popup-file-added">
+          <i class="material-icons remove-popup">clear</i>
+          <h6>New File From Canvas</h6>
+          <p>${filename}</p>
+          </li>`).hide();
+  $(".added-notifications-list").append(newFile);
+  newFile.fadeIn(200);
+  let currentId = `#file-added${this.counter}`;
+  this.counter++;
+  setTimeout(function() {
+    $(currentId).fadeOut(500, function() {
+      this.remove();
+    });
+  }, 5000);
+};
+
+/* 9. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
+canvasApp.removePopup = () => {
+  $("body").on("click", ".added-notifications-list .popup-file-added .remove-popup", function() {
+    $(this)
+      .closest("li")
+      .fadeOut(200, function() {
+        $(this).remove();
+      });
+  });
+};
+
+/* 10. APPLY ADDITIONAL TAGGING FOR UPDATED FILES BECAUSE
+DYNAMIC ELEMENTS WERE NOT DONE ON EVENT LISTENING */
+canvasApp.applyExtraTagging = () => {
+  let count = 0;
+  let applyTagging = setInterval(function() {
+    if (count > 150) {
+      clearInterval(applyTagging);
+    }
+    canvasApp.tagPaletteFiles();
+    count++;
+  }, 100);
+};
 
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
@@ -158,21 +196,30 @@ function CanvasViewModel(parameters) {
   // OBSERVABLE VALUES
   this.userEmail = ko.observable();
   this.password = ko.observable();
+  this.counter = 0;
 
   this.onStartupComplete = () => {
     console.log("CanvasViewModel STARTUP COMPLETED");
     canvasApp.toggleTheme();
     canvasApp.filesLoaded();
+    $("body")
+      .css("position", "relative")
+      .append(`<ul class="added-notifications-list"></ul>`);
   };
 
   this.onEventUpdatedFiles = () => {
     console.log("File Updated EVENT!");
     canvasApp.filesLoaded();
+    canvasApp.applyExtraTagging();
   };
 
   this.onDataUpdaterReconnect = () => {
     console.log("Server Reconnected");
     canvasApp.filesLoaded();
+    canvasApp.removePopup();
+    $("body")
+      .css("position", "relative")
+      .append(`<ul class="added-notifications-list"></ul>`);
   };
 
   this.addUser = () => {
@@ -190,9 +237,7 @@ function CanvasViewModel(parameters) {
 
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
-    console.log(message);
     if (pluginIdent === "canvas") {
-      console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
@@ -220,8 +265,9 @@ function CanvasViewModel(parameters) {
           title: "Incorrect Login Information",
           text: "User credentials are incorrect. Please try again."
         });
-      } else if (message.command === "Download") {
-        console.log("Download received");
+      } else if (message.command === "FileReceivedFromCanvas") {
+        canvasApp.removePopup();
+        canvasApp.displayFileAddedPopup(message.data);
       }
     }
   };

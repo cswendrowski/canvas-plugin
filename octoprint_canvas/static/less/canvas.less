@@ -533,4 +533,51 @@
       width: 2.9375em;
     }
   }
+
+  /* DOWNLOAD POPUPS */
+  .added-notifications-list {
+    position: fixed;
+    top: 15%;
+    right: 0;
+    margin: 0;
+  }
+
+  .popup-file-added {
+    position:relative;
+    list-style: none;
+    width: 250px;
+    padding: 0.5rem 1.1rem;
+    margin-bottom: 7px;
+    border: 1px solid rgba(54,54,54,1);
+    border-right: none;
+    z-index: 5;
+    background-color: #f5f5f5;
+    border-top-left-radius: 1px;
+    border-bottom-left-radius: 1px;
+    word-wrap: break-word;
+
+    i {
+      cursor: pointer;
+      position: absolute;
+      top: -7px;
+      left: -7px;
+      border: 1px solid white;
+      background-color: rgba(54,54,54,1);
+      color: white;
+      border-radius: 50%;
+      padding: 1px;
+      font-size: 12px;
+      margin: 0;
+    }
+
+    h6 {
+      margin: 0;
+      margin-bottom: 2px;
+    }
+
+    p {
+      margin:0;
+      font-size: 12px;
+    }
+  }
 }

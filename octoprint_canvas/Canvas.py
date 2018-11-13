@@ -82,7 +82,8 @@ class Canvas():
         if self.chub_registered is False:
             # if DIY CHUB
             if not "serial-number" in self.chub_yaml["canvas-hub"]:
-                secret_key = yaml.load(self._settings.config_yaml)["server"]["secretKey"]
+                secret_key = yaml.load(self._settings.config_yaml)[
+                    "server"]["secretKey"]
                 self.registerCHUBAPICall(secret_key)
             # if regular CHUB
             else:
@@ -109,8 +110,6 @@ class Canvas():
                 self.updateUI({"command": "HubRegistered"})
         except requests.exceptions.RequestException as e:
             print e
-
-
 
     ##############
     # 2. WEBSOCKET FUNCTIONS
@@ -150,18 +149,17 @@ class Canvas():
         self.ws_connection = False
         self.checkWebsocketConnection()
 
-
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
         self.ws_connection = True
         self.checkWebsocketConnection()
 
-
     def ws_on_pong(self, ws, pong):
         print("Received Pong")
 
     def runWebSocket(self):
-            self.ws.run_forever(ping_interval=30, ping_timeout=15, sslopt={"cert_reqs": ssl.CERT_NONE})
+        self.ws.run_forever(ping_interval=30, ping_timeout=15,
+                            sslopt={"cert_reqs": ssl.CERT_NONE})
 
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
@@ -180,7 +178,8 @@ class Canvas():
             if self.ws_connection is True:
                 self._logger.info("Websocket already enabled.")
             else:
-                self._logger.info("There are no registered users. Please register a Canvas account.")
+                self._logger.info(
+                    "There are no registered users. Please register a Canvas account.")
 
     def checkWebsocketConnection(self):
         if self.ws_connection is True:
@@ -194,7 +193,6 @@ class Canvas():
             "token": self.chub_yaml["canvas-hub"]["token"]
         }
         self.ws.send(json.dumps(data))
-
 
     ##############
     # 3. USER FUNCTIONS
@@ -222,7 +220,6 @@ class Canvas():
         self._logger.info("DOWNLOADING FUNCTION")
         self._logger.info(data)
 
-
         user = self.chub_yaml["canvas-users"][data["userId"]]
 
         # user must have a valid token to enable the download
@@ -237,14 +234,13 @@ class Canvas():
 
         response = requests.get(url, headers=headers)
         if response.ok:
-            self._logger.info("GOT INSIDE OKAY")
-
             # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
             z = zipfile.ZipFile(StringIO.StringIO(response.content))
             watched_path = self._settings.global_get_basefolder("watched")
             z.extractall(watched_path)
 
-            self._logger.info("Files downloaded onto OctoPrint. Sending back confirmation to Amaranth.")
+            self.updateUI({"command": "FileReceivedFromCanvas",
+                           "data": data["filename"]})
 
     ##############
     # 4. HELPER FUNCTIONS
@@ -291,8 +287,8 @@ class Canvas():
             "userToken": data["token"]
         }
 
-        url = "https://api-dev.canvas3d.co/hubs/" + chub_id +"/register"
-        #PRODUCTION url = "https://api.canvas3d.io/hubs/" + chub_id +"/register"
+        url = "https://api-dev.canvas3d.co/hubs/" + chub_id + "/register"
+        # PRODUCTION url = "https://api.canvas3d.io/hubs/" + chub_id +"/register"
 
         authorization = "Bearer " + chub_token
         headers = {"Authorization": authorization}
@@ -313,6 +309,3 @@ class Canvas():
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
         self._plugin_manager.send_plugin_message(self._identifier, data)
-
-
-
