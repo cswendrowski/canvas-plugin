@@ -301,6 +301,7 @@ class Canvas():
                 self.chub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
                 self.updateRegisteredUsers()
+                self.enableWebsocketConnection()
                 self.updateUI({"command": "UserConnectedToHUB", "data": data})
 
         except requests.exceptions.RequestException as e:
