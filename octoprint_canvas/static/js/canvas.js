@@ -209,6 +209,7 @@ function CanvasViewModel(parameters) {
   };
 
   this.onEventFileAdded = payload => {
+    canvasApp.applyExtraTagging();
     if (this.canvasFileReceived) {
       this.canvasFilename = payload.name;
     }
@@ -219,6 +220,7 @@ function CanvasViewModel(parameters) {
   };
 
   this.onEventUpdatedFiles = () => {
+    canvasApp.applyExtraTagging();
     canvasApp.filesLoaded();
     if (this.canvasFileReceived) {
       canvasApp.tagPaletteFiles();
