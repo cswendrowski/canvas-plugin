@@ -34,6 +34,7 @@ class Canvas():
         self._settings = plugin._settings
 
         self.ws_connection = False
+        self.ws_disconnect = False
         self.chub_registered = False
 
         self.chub_yaml = self.loadChubData()
@@ -139,18 +140,25 @@ class Canvas():
                 print("HANDLING ERROR")
 
     def ws_on_error(self, ws, error):
+        print("ERROR")
         print(error)
-        while self.ws_connection is False:
-            time.sleep(10)
-            self.enableWebsocketConnection()
+        if "ping/pong timed out" in error:
+            self.ws_disconnect = True
 
     def ws_on_close(self, ws):
         print("### Closing Websocket ###")
         self.ws_connection = False
         self.checkWebsocketConnection()
+        if self.ws_disconnect is True:
+            while self.ws_connection is False:
+                time.sleep(10)
+                print("Trying to reconnect...")
+                self.enableWebsocketConnection()
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
+        if self.ws_disconnect is True:
+            self.ws_disconnect = False
         self.ws_connection = True
         self.checkWebsocketConnection()
 
