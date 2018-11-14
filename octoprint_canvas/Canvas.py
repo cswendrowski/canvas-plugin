@@ -122,7 +122,6 @@ class Canvas():
 
         if is_json(message) is True:
             response = json.loads(message)
-            print(response["type"])
             if "CONN/OPEN" in response["type"]:
                 print("Sending Hub Token")
                 self.sendInitialHubToken()
