@@ -513,31 +513,32 @@
     width: 2.9375em;
   }
 }
-.canvas-theme .added-notifications-list {
+.canvas-theme .side-notifications-list {
   position: fixed;
   top: 15%;
-  right: 0;
+  left: 0;
   margin: 0;
 }
-.canvas-theme .popup-file-added {
+.canvas-theme .popup-notification {
   position: relative;
   list-style: none;
-  width: 250px;
+  text-align: right;
+  width: 200px;
   padding: 0.5rem 1.1rem;
   margin-bottom: 7px;
   border: 1px solid #363636;
-  border-right: none;
+  border-left: none;
   z-index: 5;
   background-color: #f5f5f5;
-  border-top-left-radius: 1px;
-  border-bottom-left-radius: 1px;
+  border-top-right-radius: 1px;
+  border-bottom-right-radius: 1px;
   word-wrap: break-word;
 }
-.canvas-theme .popup-file-added i {
+.canvas-theme .popup-notification i {
   cursor: pointer;
   position: absolute;
   top: -7px;
-  left: -7px;
+  right: -7px;
   border: 1px solid white;
   background-color: #363636;
   color: white;
@@ -546,11 +547,12 @@
   font-size: 12px;
   margin: 0;
 }
-.canvas-theme .popup-file-added h6 {
+.canvas-theme .popup-notification h6 {
   margin: 0;
   margin-bottom: 2px;
 }
-.canvas-theme .popup-file-added p {
+.canvas-theme .popup-notification p {
   margin: 0;
   font-size: 12px;
+  font-style: italic;
 }

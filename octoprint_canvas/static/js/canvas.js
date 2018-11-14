@@ -146,26 +146,46 @@ canvasApp.filesLoaded = () => {
 };
 
 /* 8. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
-canvasApp.displayFileAddedPopup = filename => {
-  let newFile = $(`<li id=file-added${this.counter} class="popup-file-added">
-          <i class="material-icons remove-popup">clear</i>
-          <h6>New File From CANVAS</h6>
-          <p>${filename}</p>
-          </li>`).hide();
-  $(".added-notifications-list").append(newFile);
-  newFile.fadeIn(200);
-  let currentId = `#file-added${this.counter}`;
-  this.counter++;
-  setTimeout(function() {
-    $(currentId).fadeOut(500, function() {
+canvasApp.displayNotification = data => {
+  if (data.status === "incoming") {
+    let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
+            <i class="material-icons remove-popup">clear</i>
+            <h6>Canvas File Incoming...</h6>
+            <p>${data.filename}</p>
+            </li>`).hide();
+    $(".side-notifications-list").append(notification);
+    notification.fadeIn(200);
+    let currentId = `#file-incoming${this.incomingCounter}`;
+    this.incomingCounter++;
+    setTimeout(function() {
+      $(currentId).fadeOut(500, function() {
+        this.remove();
+      });
+    }, 10000);
+  } else if (data.status === "received") {
+    $(`#file-incoming${this.receivedCounter}`).fadeOut(1000, function() {
       this.remove();
     });
-  }, 5000);
+    let notification = $(`<li id="file-added${this.receivedCounter}" class="popup-notification">
+            <i class="material-icons remove-popup">clear</i>
+            <h6>File Received From CANVAS</h6>
+            <p>${data.filename}</p>
+            </li>`).hide();
+    $(".side-notifications-list").append(notification);
+    notification.fadeIn(200);
+    let currentId = `#file-added${this.receivedCounter}`;
+    this.receivedCounter++;
+    setTimeout(function() {
+      $(currentId).fadeOut(500, function() {
+        this.remove();
+      });
+    }, 5000);
+  }
 };
 
 /* 9. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
 canvasApp.removePopup = () => {
-  $("body").on("click", ".added-notifications-list .popup-file-added .remove-popup", function() {
+  $("body").on("click", ".side-notifications-list .remove-popup", function() {
     $(this)
       .closest("li")
       .fadeOut(200, function() {
@@ -187,6 +207,13 @@ canvasApp.applyExtraTagging = () => {
   }, 100);
 };
 
+canvasApp.removeUser = () => {
+  $(".registered-accounts").on("click", ".username", event => {
+    user = event.target.innerText;
+    this.removeUser(user);
+  });
+};
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -195,7 +222,9 @@ function CanvasViewModel(parameters) {
   // OBSERVABLE VALUES
   this.userInput = ko.observable();
   this.password = ko.observable();
-  this.counter = 0;
+  this.users = ko.observableArray();
+  this.incomingCounter = 0;
+  this.receivedCounter = 0;
 
   this.onStartupComplete = () => {
     console.log("CanvasViewModel STARTUP COMPLETED");
@@ -204,7 +233,8 @@ function CanvasViewModel(parameters) {
     canvasApp.removePopup();
     $("body")
       .css("position", "relative")
-      .append(`<ul class="added-notifications-list"></ul>`);
+      .append(`<ul class="side-notifications-list"></ul>`);
+    canvasApp.removeUser();
   };
 
   this.onEventFileAdded = payload => {
@@ -223,7 +253,10 @@ function CanvasViewModel(parameters) {
     canvasApp.filesLoaded();
     if (this.canvasFileReceived) {
       canvasApp.tagPaletteFiles();
-      this.onDataUpdaterPluginMessage("canvas", { command: "CanvasFileAnalysisDone", data: this.canvasFilename });
+      this.onDataUpdaterPluginMessage("canvas", {
+        command: "CanvasFileAnalysisDone",
+        data: { filename: this.canvasFilename, status: "received" }
+      });
       this.canvasFileReceived = false;
       this.canvasFilename = null;
     }
@@ -233,9 +266,11 @@ function CanvasViewModel(parameters) {
     console.log("Server Reconnected");
     canvasApp.filesLoaded();
     canvasApp.removePopup();
-    $("body")
-      .css("position", "relative")
-      .append(`<ul class="added-notifications-list"></ul>`);
+    if (!$("body").find(".side-notifications-list")) {
+      $("body")
+        .css("position", "relative")
+        .append(`<ul class="side-notifications-list"></ul>`);
+    }
   };
 
   this.addUser = () => {
@@ -256,9 +291,24 @@ function CanvasViewModel(parameters) {
     });
   };
 
+  this.removeUser = username => {
+    let payload = { command: "removeUser", data: username };
+
+    $.ajax({
+      url: API_BASEURL + "plugin/canvas",
+      type: "POST",
+      dataType: "json",
+      data: JSON.stringify(payload),
+      contentType: "application/json; charset=UTF-8"
+    }).then(res => {
+      console.log("USER BEING REMOVED");
+    });
+  };
+
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
+      console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
@@ -286,10 +336,12 @@ function CanvasViewModel(parameters) {
           title: "Incorrect Login Information",
           text: "User credentials are incorrect. Please try again."
         });
+      } else if (message.command === "CanvasDownloadStart") {
+        canvasApp.displayNotification(message.data);
       } else if (message.command === "FileReceivedFromCanvas") {
         this.canvasFileReceived = true;
       } else if (message.command === "CanvasFileAnalysisDone") {
-        canvasApp.displayFileAddedPopup(message.data);
+        canvasApp.displayNotification(message.data);
       }
     }
   };

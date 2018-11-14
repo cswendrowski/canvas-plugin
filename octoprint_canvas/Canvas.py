@@ -129,6 +129,8 @@ class Canvas():
                 self.ws.close()
             elif "OP/DOWNLOAD" in response["type"]:
                 print("HANDLING DL")
+                # self.updateUI({"command": "CanvasDownloadStart",
+                #                "data": {"filename": response["filename"], "status": "incoming"}})
                 self.downloadPrintFiles(response)
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
@@ -225,6 +227,29 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             print e
 
+    def removeUser(self, userInfo):
+        username = userInfo["data"]
+        chub_id = self.chub_yaml["canvas-hub"]["hub"]["id"]
+
+        registeredUsers = self.chub_yaml["canvas-users"]
+        for user in registeredUsers.values():
+            if user["username"] == username:
+                user_token = user["token"]
+                user_id = user["id"]
+
+        url = "https://api-dev.canvas3d.co/hubs/" + chub_id + "/unregister"
+        authorization = "Bearer " + user_token
+        headers = {"Authorization": authorization}
+
+        try:
+            response = requests.post(url, headers=headers).json()
+            if response.get("status") >= 400:
+                self._logger.info("ERROR")
+            else:
+                self.removeUserFromYAML(user_id)
+        except requests.exceptions.RequestException as e:
+            print e
+
     def downloadPrintFiles(self, data):
         user = self.chub_yaml["canvas-users"][data["userId"]]
 
@@ -242,15 +267,23 @@ class Canvas():
         if response.ok:
             # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
             z = zipfile.ZipFile(StringIO.StringIO(response.content))
+            filename = z.namelist()[0]
+            self.updateUI({"command": "CanvasDownloadStart",
+                           "data": {"filename": filename, "status": "incoming"}})
             watched_path = self._settings.global_get_basefolder("watched")
             z.extractall(watched_path)
 
             self.updateUI({"command": "FileReceivedFromCanvas",
-                           "data": data["filename"]})
+                           "data": filename})
 
     ##############
     # 4. HELPER FUNCTIONS
     ##############
+
+    def removeUserFromYAML(self, user_id):
+        del self.chub_yaml["canvas-users"][user_id]
+        self.updateYAMLInfo()
+        self.updateRegisteredUsers()
 
     def verifyUserInYAML(self, data):
         # get list of all registered users on the C.HUB YML file
@@ -270,12 +303,15 @@ class Canvas():
             self.updateUI({"command": "UserAlreadyExists", "data": data})
 
     def updateRegisteredUsers(self):
-        # make a list of usernames and their token_valid status
+        # make a list of usernames
         if "canvas-users" in self.chub_yaml:
             list_of_users = map(
                 lambda user: {key: user[key] for key in ["username"]}, self.chub_yaml["canvas-users"].values())
             self.updateUI(
                 {"command": "DisplayRegisteredUsers", "data": list_of_users})
+
+            if not self.chub_yaml["canvas-users"]:
+                self.ws.close()
 
     def updateYAMLInfo(self):
         chub_data_path = os.path.expanduser(
