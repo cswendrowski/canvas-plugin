@@ -134,10 +134,6 @@ class Canvas():
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
                 self.ws.close()
-            elif "CONFIRM_TOKEN" in response["type"]:
-                print("HANDLING CONFIRM_TOKEN")
-            elif "ERROR" in response["type"]:
-                print("HANDLING ERROR")
 
     def ws_on_error(self, ws, error):
         print("ERROR")
