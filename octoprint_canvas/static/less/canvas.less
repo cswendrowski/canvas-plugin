@@ -239,10 +239,24 @@
   }
 
   /* 9. Specific Canvas Tab Styling */
+
+  .add-user {
+    margin-top: 10px;
+  }
+
   .label-spacing {
     display: flex;
     justify-content: space-between;
-    width: 51%;
+    align-items: center;
+    width: 60%;
+
+    input[type="password"] {
+      margin-bottom: 0;
+    }
+  }
+
+  .connect-canvas-button {
+    margin-top: 16px;
   }
 
   /* 10. Settings Modal Styling */
@@ -318,6 +332,7 @@
 
   .canvas-plugin {
     display: none;
+    margin-left: 30px;
   }
 
   #settings_plugin_pluginmanager_repositorydialog a {
@@ -543,12 +558,12 @@
   }
 
   .popup-file-added {
-    position:relative;
+    position: relative;
     list-style: none;
     width: 250px;
     padding: 0.5rem 1.1rem;
     margin-bottom: 7px;
-    border: 1px solid rgba(54,54,54,1);
+    border: 1px solid rgba(54, 54, 54, 1);
     border-right: none;
     z-index: 5;
     background-color: #f5f5f5;
@@ -562,7 +577,7 @@
       top: -7px;
       left: -7px;
       border: 1px solid white;
-      background-color: rgba(54,54,54,1);
+      background-color: rgba(54, 54, 54, 1);
       color: white;
       border-radius: 50%;
       padding: 1px;
@@ -576,7 +591,7 @@
     }
 
     p {
-      margin:0;
+      margin: 0;
       font-size: 12px;
     }
   }

@@ -193,7 +193,7 @@ canvasApp.applyExtraTagging = () => {
 
 function CanvasViewModel(parameters) {
   // OBSERVABLE VALUES
-  this.userEmail = ko.observable();
+  this.userInput = ko.observable();
   this.password = ko.observable();
   this.counter = 0;
 
@@ -239,7 +239,12 @@ function CanvasViewModel(parameters) {
   };
 
   this.addUser = () => {
-    let payload = { command: "addUser", email: this.userEmail(), password: this.password() };
+    let payload = { command: "addUser", data: { username: this.userInput(), password: this.password() } };
+
+    if (this.userInput().includes("@")) {
+      payload = { command: "addUser", data: { email: this.userInput(), password: this.password() } };
+    }
+
     $.ajax({
       url: API_BASEURL + "plugin/canvas",
       type: "POST",

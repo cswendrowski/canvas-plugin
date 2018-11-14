@@ -1,17 +1,15 @@
 <div class="row canvas-plugin">
-	<div class="distance" style="margin-left: 50px">
+	<div class="distance">
 			<div class="row">
 				<h4>CANVAS</h4>
 				<p>Connection Status: <span id="connection-state-msg-canvas" class="text-muted">Not Connected</span></p>
 			</div>
-			<div class="row" style="margin-top: 10px">
+			<div class="row">
 				<form class="add-user" data-bind="submit: addUser">
-					<label class="label-spacing">Email: <input type="email" data-bind="value: userEmail" required autocomplete="on"></label>
+					<label class="label-spacing">Username/Email: <input type="text" data-bind="value: userInput" required autocomplete="on"></label>
 					<label class="label-spacing">Password: <input type="password" data-bind="value: password" required></label>
-					<div style="margin-top: 10px">
-						<button class="btn btn-primary">Connect a CANVAS Account</button>
-						<h5><a class="canvas-register" target="_blank" href="https://canvas3d.io/signup">Don't have an account?</a></h5>
-					</div>
+					<button class="btn btn-primary connect-canvas-button">Connect a CANVAS Account</button>
+					<h5><a class="canvas-register" target="_blank" href="https://canvas3d.io/signup">Don't have an account?</a></h5>
 				</form>
 			</div>
 			<hr>

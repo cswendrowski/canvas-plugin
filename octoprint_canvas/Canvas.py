@@ -198,11 +198,17 @@ class Canvas():
     # 3. USER FUNCTIONS
     ##############
 
-    def addUser(self, email, password):
+    def addUser(self, loginInfo):
         # Make POST request to canvas API to log in user
         url = "https://api-dev.canvas3d.co/users/login"
         # PRODUCTION: url = "https://api.canvas3d.io/users/login"
-        data = {"email": email, "password": password}
+
+        if "username" in loginInfo["data"]:
+            data = {"username": loginInfo["data"]["username"],
+                    "password": loginInfo["data"]["password"]}
+        elif "email" in loginInfo["data"]:
+            data = {"email": loginInfo["data"]["email"],
+                    "password": loginInfo["data"]["password"]}
 
         try:
             response = requests.post(url, json=data).json()

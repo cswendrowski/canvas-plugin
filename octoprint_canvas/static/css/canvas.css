@@ -213,6 +213,9 @@
 .canvas-theme #temperature-graph {
   background-image: none !important;
 }
+.canvas-theme .add-user {
+  margin-top: 10px;
+}
 .canvas-theme .label-spacing {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -220,7 +223,16 @@
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  width: 51%;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 60%;
+}
+.canvas-theme .label-spacing input[type="password"] {
+  margin-bottom: 0;
+}
+.canvas-theme .connect-canvas-button {
+  margin-top: 16px;
 }
 .canvas-theme #settings_dialog a,
 .canvas-theme #plugin_announcements_dialog a {
@@ -287,6 +299,7 @@
 }
 .canvas-theme .canvas-plugin {
   display: none;
+  margin-left: 30px;
 }
 .canvas-theme #settings_plugin_pluginmanager_repositorydialog a {
   color: rgba(54, 54, 54, 0.8);
