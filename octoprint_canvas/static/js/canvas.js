@@ -71,7 +71,6 @@ canvasApp.removeFolderBinding = () => {
 canvasApp.toggleTheme = () => {
   $("html").addClass("canvas-theme");
   canvasApp.toggleBrandName("CANVAS Hub");
-  // canvasApp.arrowToggle();
 
   $(".theme-input").on("change", event => {
     let checked = event.target.checked;
@@ -150,7 +149,7 @@ canvasApp.filesLoaded = () => {
 canvasApp.displayFileAddedPopup = filename => {
   let newFile = $(`<li id=file-added${this.counter} class="popup-file-added">
           <i class="material-icons remove-popup">clear</i>
-          <h6>New File From Canvas</h6>
+          <h6>New File From CANVAS</h6>
           <p>${filename}</p>
           </li>`).hide();
   $(".added-notifications-list").append(newFile);
@@ -265,14 +264,14 @@ function CanvasViewModel(parameters) {
         swal({
           type: "success",
           // animation: false,
-          title: "Canvas user successfully connected",
+          title: "CANVAS user successfully connected",
           text: `${message.data.username} is now registered to this Canvas Hub.`
         });
       } else if (message.command === "UserAlreadyExists") {
         swal({
           type: "info",
           // animation: false,
-          title: "Canvas user already registered",
+          title: "CANVAS user already registered",
           text: `${message.data.username} is already registered to this Canvas Hub.`
         });
       } else if (message.command === "invalidUserCredentials") {
