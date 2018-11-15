@@ -1,3 +1,64 @@
+.canvas-plugin {
+  margin-left: 30px;
+}
+.form-row {
+  margin-top: 10px;
+}
+.label-spacing {
+  display: flex;
+  justify-content: space-between;
+  width: 60%;
+}
+.connect-canvas-button {
+  margin-top: 7px;
+}
+.registered-accounts {
+  list-style: none;
+  margin-left: 0;
+}
+.registered-canvas-user {
+  display: flex;
+  align-items: center;
+
+  i {
+    font-size: 20px;
+  }
+  .username {
+    margin: 0 7px 0 5px;
+  }
+  .remove-user {
+    cursor: pointer;
+    transition: 0.1s all;
+    font-size: 14px;
+    color: rgba(54, 54, 54, 1);
+    background-color: white;
+    border: 1px solid rgba(54, 54, 54, 1);
+    border-radius: 50%;
+  }
+  .hide {
+    display: none;
+  }
+}
+.toggle-remove-users {
+  display: none;
+  cursor: pointer;
+  margin-top: 0;
+  font-weight: 400;
+  align-items: center;
+
+  i {
+    font-size: 12px;
+  }
+
+  span:hover {
+    text-shadow: 0.25px 0px 0px rgba(54, 54, 54, 1);
+  }
+
+  span {
+    text-decoration: underline;
+  }
+}
+
 .canvas-theme {
   /* 1. Switch Octoprint Logo for Canvas Logo */
   .brand span {
@@ -337,7 +398,6 @@
     font-weight: 500;
     color: white;
     background-color: rgba(54, 54, 54, 1);
-    display: inline-block;
     margin: 7.5px 10px 7.5px 0;
     padding: 5px 15px 5px 10px;
     font-weight: 500;
