@@ -290,6 +290,10 @@
     color: rgba(54, 54, 54, 1);
   }
 
+  a.canvas-register:hover {
+    text-shadow: 0.25px 0px 0px rgba(54, 54, 54, 1);
+  }
+
   #settings_dialog .pull-right .btn:hover i {
     color: rgba(54, 54, 54, 1);
   }
@@ -304,6 +308,30 @@
     margin-left: 0;
   }
 
+  .hide {
+    display: none;
+  }
+
+  .toggle-remove-users {
+    display: none;
+    cursor: pointer;
+    margin-top: 0;
+    font-weight: 400;
+    align-items: center;
+
+    i {
+      font-size: 12px;
+    }
+
+    span:hover {
+      text-shadow: 0.25px 0px 0px rgba(54, 54, 54, 1);
+    }
+
+    span {
+      text-decoration: underline;
+    }
+  }
+
   .registered-canvas-user {
     list-style: none;
     font-weight: 500;
@@ -315,6 +343,26 @@
     font-weight: 500;
     display: inline-flex;
     justify-content: center;
+    position: relative;
+    transition: 0.15s all;
+
+    .remove-user {
+      cursor: pointer;
+      transition: 0.1s all;
+      position: absolute;
+      top: -9px;
+      right: -9px;
+      margin: 0;
+      font-size: 16px;
+      color: white;
+      background-color: crimson;
+      border: 1px solid white;
+      border-radius: 50%;
+
+      &:hover {
+        filter: brightness(115%);
+      }
+    }
   }
 
   .username {

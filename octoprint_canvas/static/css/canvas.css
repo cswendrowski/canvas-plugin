@@ -260,6 +260,9 @@
   opacity: 1;
   color: #363636;
 }
+.canvas-theme a.canvas-register:hover {
+  text-shadow: 0.25px 0px 0px #363636;
+}
 .canvas-theme #settings_dialog .pull-right .btn:hover i {
   color: #363636;
 }
@@ -268,6 +271,27 @@
 }
 .canvas-theme .registered-accounts {
   margin-left: 0;
+}
+.canvas-theme .hide {
+  display: none;
+}
+.canvas-theme .toggle-remove-users {
+  display: none;
+  cursor: pointer;
+  margin-top: 0;
+  font-weight: 400;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+.canvas-theme .toggle-remove-users i {
+  font-size: 12px;
+}
+.canvas-theme .toggle-remove-users span:hover {
+  text-shadow: 0.25px 0px 0px #363636;
+}
+.canvas-theme .toggle-remove-users span {
+  text-decoration: underline;
 }
 .canvas-theme .registered-canvas-user {
   list-style: none;
@@ -283,6 +307,29 @@
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
+  position: relative;
+  -webkit-transition: 0.15s all;
+  -o-transition: 0.15s all;
+  transition: 0.15s all;
+}
+.canvas-theme .registered-canvas-user .remove-user {
+  cursor: pointer;
+  -webkit-transition: 0.1s all;
+  -o-transition: 0.1s all;
+  transition: 0.1s all;
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  margin: 0;
+  font-size: 16px;
+  color: white;
+  background-color: crimson;
+  border: 1px solid white;
+  border-radius: 50%;
+}
+.canvas-theme .registered-canvas-user .remove-user:hover {
+  -webkit-filter: brightness(115%);
+  filter: brightness(115%);
 }
 .canvas-theme .username {
   display: -webkit-box;

@@ -94,13 +94,24 @@ canvasApp.toggleTheme = () => {
 /* 4. Display all connected Canvas Accounts */
 canvasApp.handleUserDisplay = data => {
   $(".registered-accounts").html("");
-  data.data.forEach(user => {
-    $(".registered-accounts").append(
-      `<li class="registered-canvas-user"><i class="material-icons md-18">person</i><span class="username">${
-        user.username
-      }</span></li>`
-    );
-  });
+  console.log(data.data.length);
+  if (data.data.length > 0) {
+    data.data.forEach(user => {
+      $(".registered-accounts").append(`<li class="registered-canvas-user">
+        <i class="material-icons md-18">person</i>
+        <span class="username">${user.username}</span>
+        <i class="hide material-icons remove-user">remove</i>
+        </li>`);
+    });
+    $(".toggle-remove-users").css("display", "flex");
+    if ($(".toggle-remove-users span").text() === "Stop Editing") {
+      $(".remove-user").toggleClass("hide");
+    }
+  } else {
+    $(".toggle-remove-users").css("display", "none");
+    $(".toggle-remove-users span").text("Edit");
+    $(".toggle-remove-users i").text("edit");
+  }
 };
 
 /* 5. Display that Websockets are enabled between C.Hub and Canvas */
@@ -207,10 +218,27 @@ canvasApp.applyExtraTagging = () => {
   }, 100);
 };
 
+/* 11. Remove Canvas user event listener */
 canvasApp.removeUser = () => {
-  $(".registered-accounts").on("click", ".username", event => {
-    user = event.target.innerText;
+  $(".registered-accounts").on("click", ".remove-user", event => {
+    user = event.target.previousElementSibling.innerText;
     this.removeUser(user);
+  });
+};
+
+/* 12. Toggle edit users */
+canvasApp.toggleEditUser = () => {
+  $(".toggle-remove-users span").on("click", () => {
+    $(".remove-user").toggleClass("hide");
+    if ($(".toggle-remove-users span").text() === "Edit") {
+      $(".toggle-remove-users span").text("Stop Editing");
+      $(".toggle-remove-users i")
+        .text("clear")
+        .css("font-size", "15px");
+    } else {
+      $(".toggle-remove-users span").text("Edit");
+      $(".toggle-remove-users i").text("edit");
+    }
   });
 };
 
@@ -235,6 +263,7 @@ function CanvasViewModel(parameters) {
       .css("position", "relative")
       .append(`<ul class="side-notifications-list"></ul>`);
     canvasApp.removeUser();
+    canvasApp.toggleEditUser();
   };
 
   this.onEventFileAdded = payload => {
@@ -271,6 +300,7 @@ function CanvasViewModel(parameters) {
         .css("position", "relative")
         .append(`<ul class="side-notifications-list"></ul>`);
     }
+    canvasApp.toggleEditUser();
   };
 
   this.addUser = () => {
