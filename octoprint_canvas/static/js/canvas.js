@@ -162,7 +162,7 @@ canvasApp.displayNotification = data => {
     let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
             <i class="material-icons remove-popup">clear</i>
             <h6>Canvas File Incoming...</h6>
-            <p>${data.filename}</p>
+            <p class="file-incoming-name">${data.filename}</p>
             </li>`).hide();
     $(".side-notifications-list").append(notification);
     notification.fadeIn(200);

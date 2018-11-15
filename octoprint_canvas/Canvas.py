@@ -310,8 +310,7 @@ class Canvas():
                 lambda user: {key: user[key] for key in ["username"]}, self.chub_yaml["canvas-users"].values())
             self.updateUI(
                 {"command": "DisplayRegisteredUsers", "data": list_of_users})
-
-            if not self.chub_yaml["canvas-users"]:
+            if not self.chub_yaml["canvas-users"] and self.ws_connection is True:
                 self.ws.close()
 
     def updateYAMLInfo(self):
