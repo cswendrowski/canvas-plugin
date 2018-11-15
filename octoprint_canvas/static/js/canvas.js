@@ -174,9 +174,9 @@ canvasApp.displayNotification = data => {
       });
     }, 10000);
   } else if (data.status === "received") {
-    $(`#file-incoming${this.receivedCounter}`).fadeOut(1000, function() {
-      this.remove();
-    });
+    // $(`#file-incoming${this.receivedCounter}`).fadeOut(1000, function() {
+    //   this.remove();
+    // });
     let notification = $(`<li id="file-added${this.receivedCounter}" class="popup-notification">
             <i class="material-icons remove-popup">clear</i>
             <h6>File Received From CANVAS</h6>
