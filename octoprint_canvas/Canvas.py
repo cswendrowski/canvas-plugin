@@ -246,7 +246,7 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info("ERROR")
             else:
-                self.removeUserFromYAML(user_id)
+                self.removeUserFromYAML(user_id, username)
         except requests.exceptions.RequestException as e:
             print e
 
@@ -280,10 +280,11 @@ class Canvas():
     # 4. HELPER FUNCTIONS
     ##############
 
-    def removeUserFromYAML(self, user_id):
+    def removeUserFromYAML(self, user_id, username):
         del self.chub_yaml["canvas-users"][user_id]
         self.updateYAMLInfo()
         self.updateRegisteredUsers()
+        self.updateUI({"command": "UserDeleted", "data": username})
 
     def verifyUserInYAML(self, data):
         # get list of all registered users on the C.HUB YML file

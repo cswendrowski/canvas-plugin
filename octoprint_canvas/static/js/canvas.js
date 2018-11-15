@@ -366,6 +366,13 @@ function CanvasViewModel(parameters) {
           title: "Incorrect Login Information",
           text: "User credentials are incorrect. Please try again."
         });
+      } else if (message.command === "UserDeleted") {
+        swal({
+          type: "success",
+          // animation: false,
+          title: "CANVAS user successfully removed",
+          text: `${message.data} is now removed from this Canvas Hub.`
+        });
       } else if (message.command === "CanvasDownloadStart") {
         canvasApp.displayNotification(message.data);
       } else if (message.command === "FileReceivedFromCanvas") {
