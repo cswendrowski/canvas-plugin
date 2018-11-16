@@ -163,6 +163,7 @@
   cursor: default;
 }
 .canvas-theme .btn-primary[disabled],
+.canvas-theme .btn[disabled],
 .canvas-theme .btn.disabled {
   border: 1px solid #868686 !important;
   color: #868686 !important;
