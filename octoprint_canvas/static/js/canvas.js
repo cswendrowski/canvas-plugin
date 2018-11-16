@@ -69,9 +69,6 @@ canvasApp.removeFolderBinding = () => {
 
 /* 3. Toggle on/off the Canvas Theme */
 canvasApp.toggleTheme = () => {
-  // $("html").addClass("canvas-theme");
-  // canvasApp.toggleBrandName("CANVAS Hub");
-
   $(".theme-input").on("change", event => {
     let checked = event.target.checked;
 
