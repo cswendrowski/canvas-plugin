@@ -456,6 +456,40 @@
     margin-left: -20px;
   }
 
+  .loading-overlay-container {
+    z-index: 999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .loader {
+    width: 4em;
+    height: 4em;
+    border: 8px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: rotate360 1.5s linear infinite;
+  }
+
+  @keyframes rotate360 {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   /* SWEET ALERT STYLING */
   .swal2-popup {
     border-radius: 1px;

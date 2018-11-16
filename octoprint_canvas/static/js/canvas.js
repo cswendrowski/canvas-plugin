@@ -69,8 +69,8 @@ canvasApp.removeFolderBinding = () => {
 
 /* 3. Toggle on/off the Canvas Theme */
 canvasApp.toggleTheme = () => {
-  $("html").addClass("canvas-theme");
-  canvasApp.toggleBrandName("CANVAS Hub");
+  // $("html").addClass("canvas-theme");
+  // canvasApp.toggleBrandName("CANVAS Hub");
 
   $(".theme-input").on("change", event => {
     let checked = event.target.checked;
@@ -242,6 +242,17 @@ canvasApp.toggleEditUser = () => {
   });
 };
 
+/* 13. LOADER */
+canvasApp.loadingOverlay = condition => {
+  if (condition) {
+    $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
+  } else {
+    $("body")
+      .find(".loading-overlay-container")
+      .remove();
+  }
+};
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -304,6 +315,7 @@ function CanvasViewModel(parameters) {
   };
 
   this.addUser = () => {
+    canvasApp.loadingOverlay(true);
     let payload = { command: "addUser", data: { username: this.userInput(), password: this.password() } };
 
     if (this.userInput().includes("@")) {
@@ -318,10 +330,12 @@ function CanvasViewModel(parameters) {
       contentType: "application/json; charset=UTF-8"
     }).then(res => {
       $(".add-user input").val("");
+      canvasApp.loadingOverlay(false);
     });
   };
 
   this.removeUser = username => {
+    canvasApp.loadingOverlay(true);
     let payload = { command: "removeUser", data: username };
 
     $.ajax({
@@ -332,6 +346,7 @@ function CanvasViewModel(parameters) {
       contentType: "application/json; charset=UTF-8"
     }).then(res => {
       console.log("USER BEING REMOVED");
+      canvasApp.loadingOverlay(false);
     });
   };
 
@@ -379,6 +394,18 @@ function CanvasViewModel(parameters) {
         this.canvasFileReceived = true;
       } else if (message.command === "CanvasFileAnalysisDone") {
         canvasApp.displayNotification(message.data);
+      } else if (message.command === "toggleTheme") {
+        if (message.data) {
+          $(".theme-input")
+            .attr("checked", true)
+            .text("Turn Off");
+          $("html").addClass("canvas-theme");
+          canvasApp.toggleBrandName("CANVAS Hub");
+        } else {
+          $(".theme-input")
+            .attr("checked", false)
+            .text("Turn On");
+        }
       }
     }
   };
@@ -394,7 +421,7 @@ $(function() {
     // This is the constructor to call for instantiating the plugin
     construct: CanvasViewModel,
     // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
-    // dependencies: ["filesViewModel"],
+    dependencies: ["settingsViewModel"],
     // Finally, this is the list of selectors for all elements we want this view model to be bound to.
     elements: ["#tab_plugin_canvas"]
   });

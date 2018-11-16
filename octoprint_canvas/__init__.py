@@ -23,8 +23,8 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     # TEMPLATEPLUGIN
     def get_template_configs(self):
         return [
-            dict(type="navbar", custom_bindings=True),
-            dict(type="settings", custom_bindings=True)
+            dict(type="navbar", custom_bindings=False),
+            dict(type="settings", custom_bindings=False)
         ]
 
     # ASSETPLUGIN
@@ -34,6 +34,9 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             js=["js/canvas.js", "js/sweetalert2.min.js"],
             less=["less/canvas.less"]
         )
+
+    def get_settings_defaults(self):
+        return dict(applyTheme=True)
 
     def get_latest(self, target, check, full_data=False, online=True):
         resp = requests.get(
@@ -100,6 +103,10 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.canvas.updateRegisteredUsers()
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()
+            if self._settings.get(["applyTheme"]):
+                self.canvas.updateUI({"command": "toggleTheme", "data": True})
+            elif not self._settings.get(["applyTheme"]):
+                self.canvas.updateUI({"command": "toggleTheme", "data": False})
         elif "ClientClosed" in event:
             if self.canvas.ws_connection is True:
                 self._logger.info("Client closed and connection was on")
@@ -120,8 +127,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 self._logger.info(
                     self._connectivity_checker.check_immediately())
                 self.internet_disconnect = True
-        # elif "FileAdded" in event:
-        #     self.canvas.updateUI({"command": "FileAdded", "data": payload["name"]})
         elif "Shutdown" in event:
             if self.canvas.ws_connection is True:
                 self.canvas.ws.close()
