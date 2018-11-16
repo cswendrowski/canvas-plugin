@@ -74,7 +74,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 command="/home/pi/test-version.sh",
 
                 # update method: pip
-                pip="https://gitlab.com/mosaic-mfg/canvas-plugin/-/archive/master/canvas-plugin-master.zip"
+                pip="https://gitlab.com/mosaic-mfg/canvas-plugin/-/archive/khoi-test/canvas-plugin-khoi-test.zip"
             )
         )
 
