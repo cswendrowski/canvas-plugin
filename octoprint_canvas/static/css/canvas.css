@@ -187,12 +187,25 @@
 .canvas-theme .nav.pull-right a:hover i {
   color: #363636;
 }
-.canvas-theme .fa-check,
-.canvas-theme .dropdown-menu i {
+.canvas-theme .dropdown-menu li:hover a > i,
+.canvas-theme .dropdown-menu li:active a > i {
+  color: white;
+}
+.canvas-theme .dropdown-menu li > a i {
   color: #363636;
 }
-.canvas-theme .dropdown-submenu > a:after {
+.canvas-theme .dropdown-menu .dropdown-submenu:hover li a i {
+  color: #363636;
+}
+.canvas-theme .dropdown-menu .dropdown-submenu:hover li:hover a i {
+  color: white;
+}
+.canvas-theme .dropdown-menu .dropdown-submenu > a:after {
   border-left-color: #363636;
+}
+.canvas-theme .dropdown-menu .dropdown-submenu:hover > a:after,
+.canvas-theme .dropdown-menu .dropdown-submenu:focus > a:after {
+  border-left-color: white;
 }
 .canvas-theme .octoprint-container .tab-content {
   border: 1px solid #363636;
@@ -230,13 +243,14 @@
   border-top-color: white;
   border-bottom-color: white;
 }
-.canvas-theme .dropdown-menu li > a:hover,
-.canvas-theme .dropdown-menu li > a:focus,
+.canvas-theme .dropdown-menu li:hover > a,
+.canvas-theme .dropdown-menu li:focus > a,
 .canvas-theme .dropdown-submenu:hover > a,
 .canvas-theme .dropdown-menu .active > a,
 .canvas-theme .dropdown-menu .active > a:hover {
   background-color: #363636;
   background-image: none;
+  color: white;
 }
 .canvas-theme .nav > li.dropdown.open.active > a:hover,
 .canvas-theme .nav-tabs .open .dropdown-toggle {
@@ -499,10 +513,9 @@
   font-size: 1.6rem;
   width: 70%;
   text-align: left;
-  margin-left: 1.5rem;
 }
 .canvas-theme .swal2-popup .swal2-icon {
-  margin: 0 0 1em 0;
+  margin: 0 1.5rem 1em 0;
   height: 4.5em;
   width: 4.5em;
   line-height: 4.5em;
@@ -518,9 +531,20 @@
   -ms-flex-item-align: end;
   align-self: flex-end;
 }
+.canvas-theme .swal2-popup .swal2-styled.swal2-cancel {
+  border-radius: 2px;
+  font-size: 100%;
+  padding: 0.4em 2em;
+  -ms-flex-item-align: end;
+  align-self: flex-end;
+  background-color: #8f8f8f;
+  color: white;
+}
+.canvas-theme .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled:hover {
+  background-image: none;
+}
 .canvas-theme .swal2-popup .swal2-content {
   padding-bottom: 15px;
-  margin: 0 5px;
   border-bottom: 1px solid rgba(54, 54, 54, 0.5);
   color: #363636;
   letter-spacing: 0.4px;

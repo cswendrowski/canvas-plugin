@@ -98,6 +98,8 @@ class Canvas():
         self._logger.info("Registering HUB to AMARANTH")
 
         url = "https://api-dev.canvas3d.co/hubs"
+        # url = "https://api.canvas3d.io/hubs"
+
         data = {"name": chub_identifier}
 
         try:
@@ -206,7 +208,7 @@ class Canvas():
     def addUser(self, loginInfo):
         # Make POST request to canvas API to log in user
         url = "https://api-dev.canvas3d.co/users/login"
-        # PRODUCTION: url = "https://api.canvas3d.io/users/login"
+        # url = "https://api.canvas3d.io/users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
@@ -238,6 +240,8 @@ class Canvas():
                 user_id = user["id"]
 
         url = "https://api-dev.canvas3d.co/hubs/" + chub_id + "/unregister"
+        # url = "https://api.canvas3d.io/hubs/" + chub_id + "/unregister"
+
         authorization = "Bearer " + user_token
         headers = {"Authorization": authorization}
 
@@ -330,7 +334,7 @@ class Canvas():
         }
 
         url = "https://api-dev.canvas3d.co/hubs/" + chub_id + "/register"
-        # PRODUCTION url = "https://api.canvas3d.io/hubs/" + chub_id +"/register"
+        # url = "https://api.canvas3d.io/hubs/" + chub_id + "/register"
 
         authorization = "Bearer " + chub_token
         headers = {"Authorization": authorization}

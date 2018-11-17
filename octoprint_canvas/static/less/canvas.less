@@ -157,13 +157,35 @@
     color: rgba(54, 54, 54, 1);
   }
 
-  .fa-check,
-  .dropdown-menu i {
-    color: rgba(54, 54, 54, 1);
+  // .fa-check,
+  .dropdown-menu li {
+    &:hover a > i,
+    &:active a > i {
+      color: white;
+    }
+    > a i {
+      color: rgba(54, 54, 54, 1);
+    }
   }
 
-  .dropdown-submenu > a:after {
+  .dropdown-menu .dropdown-submenu {
+    &:hover {
+      li a i {
+        color: rgba(54, 54, 54, 1);
+      }
+      li:hover a i {
+        color: white;
+      }
+    }
+  }
+
+  .dropdown-menu .dropdown-submenu > a:after {
     border-left-color: rgba(54, 54, 54, 1);
+  }
+
+  .dropdown-menu .dropdown-submenu:hover > a:after,
+  .dropdown-menu .dropdown-submenu:focus > a:after {
+    border-left-color: white;
   }
 
   /* 4. Tabs + Tab Content Styling */
@@ -211,13 +233,14 @@
     border-bottom-color: white;
   }
 
-  .dropdown-menu li > a:hover,
-  .dropdown-menu li > a:focus,
+  .dropdown-menu li:hover > a,
+  .dropdown-menu li:focus > a,
   .dropdown-submenu:hover > a,
   .dropdown-menu .active > a,
   .dropdown-menu .active > a:hover {
     background-color: rgba(54, 54, 54, 1);
     background-image: none;
+    color: white;
   }
 
   .nav > li.dropdown.open.active > a:hover,
@@ -508,10 +531,9 @@
     font-size: 1.6rem;
     width: 70%;
     text-align: left;
-    margin-left: 1.5rem;
   }
   .swal2-popup .swal2-icon {
-    margin: 0 0 1em 0;
+    margin: 0 1.5rem 1em 0;
     height: 4.5em;
     width: 4.5em;
     line-height: 4.5em;
@@ -527,9 +549,20 @@
     padding: 0.4em 2em;
     align-self: flex-end;
   }
+  .swal2-popup .swal2-styled.swal2-cancel {
+    border-radius: 2px;
+    font-size: 100%;
+    padding: 0.4em 2em;
+    align-self: flex-end;
+    background-color: rgb(143, 143, 143);
+    color: white;
+  }
+
+  .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled:hover {
+    background-image: none;
+  }
   .swal2-popup .swal2-content {
     padding-bottom: 15px;
-    margin: 0 5px;
     border-bottom: 1px solid rgba(54, 54, 54, 0.5);
     color: rgba(54, 54, 54, 1);
     letter-spacing: 0.4px;
