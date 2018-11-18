@@ -95,11 +95,8 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
         self._logger.info("EVENT: " + event)
-        if "Startup" in event:
-            self.internet_disconnect = False
-        elif "ClientOpened" in event:
+        if "ClientOpened" in event:
             self.canvas.checkWebsocketConnection()
-            # self.canvas.registerCHUB()
             self.canvas.updateRegisteredUsers()
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()
@@ -107,26 +104,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 self.canvas.updateUI({"command": "toggleTheme", "data": True})
             elif not self._settings.get(["applyTheme"]):
                 self.canvas.updateUI({"command": "toggleTheme", "data": False})
-        elif "ClientClosed" in event:
-            if self.canvas.ws_connection is True:
-                self._logger.info("Client closed and connection was on")
-        elif "ConnectivityChanged" in event:
-            self._logger.info(payload)
-            # INTERNET CONNECTION WENT FROM OFF TO ON
-            if payload["old"] is False and payload["new"] is True and self.internet_disconnect is True:
-                self._logger.info("ONLINE")
-                self._logger.info(
-                    self._connectivity_checker.check_immediately())
-                self.internet_disconnect = False
-                while self.canvas.ws_connection is False:
-                    time.sleep(10)
-                    self.canvas.enableWebsocketConnection()
-            # INTERNET CONNECTION WENT FROM ON TO OFF, WITHOUT CLOSING SERVER
-            elif payload["old"] is True and payload["new"] is False:
-                self._logger.info("OFFLINE")
-                self._logger.info(
-                    self._connectivity_checker.check_immediately())
-                self.internet_disconnect = True
         elif "Shutdown" in event:
             if self.canvas.ws_connection is True:
                 self.canvas.ws.close()

@@ -140,8 +140,7 @@ class Canvas():
                 self.ws.close()
 
     def ws_on_error(self, ws, error):
-        print("ERROR")
-        print(error)
+        print("WS ERROR: " + str(error))
         if "ping/pong timed out" in error:
             self.ws_disconnect = True
 
@@ -149,11 +148,6 @@ class Canvas():
         print("### Closing Websocket ###")
         self.ws_connection = False
         self.checkWebsocketConnection()
-        if self.ws_disconnect is True:
-            while self.ws_connection is False:
-                time.sleep(10)
-                print("Trying to reconnect...")
-                self.enableWebsocketConnection()
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
@@ -166,8 +160,13 @@ class Canvas():
         print("Received Pong")
 
     def runWebSocket(self):
-        self.ws.run_forever(ping_interval=30, ping_timeout=15,
+        self.ws.run_forever(ping_interval=30, ping_timeout=5,
                             sslopt={"cert_reqs": ssl.CERT_NONE})
+        # if we get to this line of code, it means the websocket connection was closed
+        if self.ws_disconnect is True:
+            time.sleep(10)
+            print("Trying to reconnect...")
+            self.enableWebsocketConnection()
 
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
