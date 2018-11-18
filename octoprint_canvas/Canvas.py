@@ -38,6 +38,7 @@ class Canvas():
         self.chub_registered = False
 
         self.chub_yaml = self.loadChubData()
+        self.registerCHUB()
 
     ##############
     # 1. INITIAL FUNCTIONS
@@ -92,7 +93,7 @@ class Canvas():
                 self.registerCHUBAPICall(chub_serial_number)
         else:
             self._logger.info("C.HUB already registered")
-            self.updateUI({"command": "HubRegistered"})
+            # self.updateUI({"command": "HubRegistered"})
 
     def registerCHUBAPICall(self, chub_identifier):
         self._logger.info("Registering HUB to AMARANTH")

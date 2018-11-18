@@ -138,9 +138,9 @@ canvasApp.handleWebsocketConnection = data => {
 };
 
 /* 6. Show Canvas Plugin Tab Content */
-canvasApp.unhideCanvasTabContent = () => {
-  $(".canvas-plugin").css("display", "block");
-};
+// canvasApp.unhideCanvasTabContent = () => {
+//   $(".canvas-plugin").css("display", "block");
+// };
 
 /* 7. FILE LOADING */
 canvasApp.filesLoaded = () => {
@@ -368,9 +368,11 @@ function CanvasViewModel(parameters) {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
         canvasApp.handleWebsocketConnection(message);
-      } else if (message.command === "HubRegistered") {
-        canvasApp.unhideCanvasTabContent();
-      } else if (message.command === "UserConnectedToHUB") {
+      }
+      // else if (message.command === "HubRegistered") {
+      //   canvasApp.unhideCanvasTabContent();
+      // }
+      else if (message.command === "UserConnectedToHUB") {
         swal({
           type: "success",
           // animation: false,

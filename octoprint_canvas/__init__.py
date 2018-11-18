@@ -99,7 +99,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.internet_disconnect = False
         elif "ClientOpened" in event:
             self.canvas.checkWebsocketConnection()
-            self.canvas.registerCHUB()
+            # self.canvas.registerCHUB()
             self.canvas.updateRegisteredUsers()
             if self.canvas.ws_connection is False:
                 self.canvas.enableWebsocketConnection()

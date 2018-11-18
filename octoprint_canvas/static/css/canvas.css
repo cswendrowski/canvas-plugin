@@ -478,7 +478,7 @@
   font-size: 22px;
 }
 .canvas-theme .canvas-plugin {
-  display: none;
+  display: block;
   margin-left: 30px;
 }
 .canvas-theme #settings_plugin_pluginmanager_repositorydialog a {
