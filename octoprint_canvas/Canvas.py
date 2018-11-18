@@ -51,7 +51,7 @@ class Canvas():
 
         # if /.mosaicdata doesn't exist yet, make the directory
         if not os.path.exists(chub_dir_path):
-            os.mkdir(chub_path)
+            os.mkdir(chub_dir_path)
 
         # if the YML file doesn't exist, make the file
         if not os.path.isfile(chub_file_path):
