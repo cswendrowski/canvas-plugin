@@ -137,12 +137,7 @@ canvasApp.handleWebsocketConnection = data => {
   }
 };
 
-/* 6. Show Canvas Plugin Tab Content */
-// canvasApp.unhideCanvasTabContent = () => {
-//   $(".canvas-plugin").css("display", "block");
-// };
-
-/* 7. FILE LOADING */
+/* 6. FILE LOADING */
 canvasApp.filesLoaded = () => {
   let checkExist = setInterval(function() {
     if ($("#files .gcode_files .scroll-wrapper").find(".entry .action-buttons .toggleAdditionalData").length) {
@@ -166,7 +161,7 @@ canvasApp.filesLoaded = () => {
   }, 100);
 };
 
-/* 8. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
+/* 7. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
 canvasApp.displayNotification = data => {
   if (data.status === "incoming") {
     let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
@@ -204,7 +199,7 @@ canvasApp.displayNotification = data => {
   }
 };
 
-/* 9. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
+/* 8. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
 canvasApp.removePopup = () => {
   $("body").on("click", ".side-notifications-list .remove-popup", function() {
     $(this)
@@ -215,7 +210,7 @@ canvasApp.removePopup = () => {
   });
 };
 
-/* 10. APPLY ADDITIONAL TAGGING FOR UPDATED FILES BECAUSE
+/* 9. APPLY ADDITIONAL TAGGING FOR UPDATED FILES BECAUSE
 DYNAMIC ELEMENTS WERE NOT DONE ON EVENT LISTENING */
 canvasApp.applyExtraTagging = () => {
   let count = 0;
@@ -228,7 +223,7 @@ canvasApp.applyExtraTagging = () => {
   }, 100);
 };
 
-/* 11. Remove Canvas user event listener */
+/* 10. Remove Canvas user event listener */
 canvasApp.removeUser = () => {
   $(".registered-accounts").on("click", ".remove-user", event => {
     user = event.target.previousElementSibling.innerText;
@@ -236,7 +231,7 @@ canvasApp.removeUser = () => {
   });
 };
 
-/* 12. Toggle edit users */
+/* 11. Toggle edit users */
 canvasApp.toggleEditUser = () => {
   $(".toggle-remove-users span").on("click", () => {
     $(".remove-user").toggleClass("hide");
@@ -252,7 +247,7 @@ canvasApp.toggleEditUser = () => {
   });
 };
 
-/* 13. LOADER */
+/* 12. LOADER */
 canvasApp.loadingOverlay = condition => {
   if (condition) {
     $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
@@ -368,11 +363,7 @@ function CanvasViewModel(parameters) {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
         canvasApp.handleWebsocketConnection(message);
-      }
-      // else if (message.command === "HubRegistered") {
-      //   canvasApp.unhideCanvasTabContent();
-      // }
-      else if (message.command === "UserConnectedToHUB") {
+      } else if (message.command === "UserConnectedToHUB") {
         swal({
           type: "success",
           // animation: false,

@@ -35,82 +35,81 @@ class Canvas():
 
         self.ws_connection = False
         self.ws_disconnect = False
-        self.chub_registered = False
+        self.hub_registered = False
 
-        self.chub_yaml = self.loadChubData()
-        self.registerCHUB()
+        self.hub_yaml = self.loadHubData()
+        self.registerHub()
 
     ##############
     # 1. INITIAL FUNCTIONS
     ##############
 
-    def loadChubData(self):
+    def loadHubData(self):
         self._logger.info("Loading HUB data")
-        chub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
-        chub_file_path = chub_dir_path + "/canvas-hub-data.yml"
+        hub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
+        hub_file_path = hub_dir_path + "/canvas-hub-data.yml"
 
         # if /.mosaicdata doesn't exist yet, make the directory
-        if not os.path.exists(chub_dir_path):
-            os.mkdir(chub_dir_path)
+        if not os.path.exists(hub_dir_path):
+            os.mkdir(hub_dir_path)
 
         # if the YML file doesn't exist, make the file
-        if not os.path.isfile(chub_file_path):
-            f = open(chub_file_path, "w")
-            chub_template = ({'versions': {'turquoise': '1.0.0', 'global': '0.1.0', 'canvas-plugin': '0.1.0',
-                                           'palette-plugin': '0.2.0', 'data-version': '0.0.1'},
-                              'canvas-hub': {},
-                              'canvas-users': {}})
-            yaml.dump(chub_template, f)
+        if not os.path.isfile(hub_file_path):
+            f = open(hub_file_path, "w")
+            hub_template = ({'versions': {'turquoise': '1.0.0', 'global': '0.1.0', 'canvas-plugin': '0.1.0',
+                                          'palette-plugin': '0.2.0', 'data-version': '0.0.1'},
+                             'canvas-hub': {},
+                             'canvas-users': {}})
+            yaml.dump(hub_template, f)
             f.close()
 
         # access yaml file with all the info
-        chub_data = open(chub_file_path, "r")
-        chub_yaml = yaml.load(chub_data)
-        chub_data.close()
+        hub_data = open(hub_file_path, "r")
+        hub_yaml = yaml.load(hub_data)
+        hub_data.close()
 
         # if the yaml file exists already but doesn't have a "canvas-users" key and value yet
-        if not "canvas-users" in chub_yaml:
-            chub_yaml["canvas-users"] = {}
-            chub_data = open(chub_file_path, "w")
-            yaml.dump(chub_yaml, chub_data)
-            chub_data.close()
+        if not "canvas-users" in hub_yaml:
+            hub_yaml["canvas-users"] = {}
+            hub_data = open(hub_file_path, "w")
+            yaml.dump(hub_yaml, hub_data)
+            hub_data.close()
 
-        if "token" in chub_yaml["canvas-hub"]:
-            self.chub_registered = True
+        if "token" in hub_yaml["canvas-hub"]:
+            self.hub_registered = True
 
-        return chub_yaml
+        return hub_yaml
 
-    def registerCHUB(self):
-        if self.chub_registered is False:
-            # if DIY CHUB
-            if not "serial-number" in self.chub_yaml["canvas-hub"]:
+    def registerHub(self):
+        if self.hub_registered is False:
+            # if DIY Hub
+            if not "serial-number" in self.hub_yaml["canvas-hub"]:
                 secret_key = yaml.load(self._settings.config_yaml)[
                     "server"]["secretKey"]
-                self.registerCHUBAPICall(secret_key)
-            # if regular CHUB
+                self.registerHubAPICall(secret_key)
+            # if regular Hub
             else:
-                chub_serial_number = self.chub_yaml["canvas-hub"]["serial-number"]
-                self.registerCHUBAPICall(chub_serial_number)
+                hub_serial_number = self.hub_yaml["canvas-hub"]["serial-number"]
+                self.registerHubAPICall(hub_serial_number)
         else:
             self._logger.info("C.HUB already registered")
-            # self.updateUI({"command": "HubRegistered"})
 
-    def registerCHUBAPICall(self, chub_identifier):
+    def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
         url = "https://api-dev.canvas3d.co/hubs"
         # url = "https://api.canvas3d.io/hubs"
 
-        data = {"name": chub_identifier}
+        data = {"name": hub_identifier}
 
         try:
             response = requests.put(url, json=data).json()
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
-                self.chub_yaml["canvas-hub"].update(response)
+                self.hub_yaml["canvas-hub"].update(response)
                 self.updateYAMLInfo()
-                self.chub_registered = True
+                self.hub_registered = True
                 self.updateUI({"command": "HubRegistered"})
         except requests.exceptions.RequestException as e:
             print e
@@ -162,7 +161,7 @@ class Canvas():
     def runWebSocket(self):
         self.ws.run_forever(ping_interval=30, ping_timeout=5,
                             sslopt={"cert_reqs": ssl.CERT_NONE})
-        # if we get to this line of code, it means the websocket connection was closed
+        # if websocket connection was disconnected, try to reconnect again
         if self.ws_disconnect is True:
             time.sleep(10)
             print("Trying to reconnect...")
@@ -170,7 +169,7 @@ class Canvas():
 
     def enableWebsocketConnection(self):
         # if C.HUB already has registered Canvas Users, enable websocket client
-        if "canvas-users" in self.chub_yaml and self.chub_yaml["canvas-users"] and self.ws_connection is False:
+        if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
             # prod: wss://hub-dev.canvas3d.co:8443
             # dev: ws://hub-dev.canvas3d.co:8443
             self.ws = websocket.WebSocketApp("ws://hub-dev.canvas3d.co:8443",
@@ -186,7 +185,7 @@ class Canvas():
                 self._logger.info("Websocket already enabled.")
             else:
                 self._logger.info(
-                    "There are no registered users. Please register a Canvas account.")
+                    "There are no registered Canvas accounts yet. Connection not established.")
 
     def checkWebsocketConnection(self):
         if self.ws_connection is True:
@@ -197,7 +196,7 @@ class Canvas():
     def sendInitialHubToken(self):
         data = {
             "type": "AUTH/TOKEN",
-            "token": self.chub_yaml["canvas-hub"]["token"]
+            "token": self.hub_yaml["canvas-hub"]["token"]
         }
         self.ws.send(json.dumps(data))
 
@@ -231,16 +230,16 @@ class Canvas():
 
     def removeUser(self, userInfo):
         username = userInfo["data"]
-        chub_id = self.chub_yaml["canvas-hub"]["hub"]["id"]
+        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
 
-        registeredUsers = self.chub_yaml["canvas-users"]
+        registeredUsers = self.hub_yaml["canvas-users"]
         for user in registeredUsers.values():
             if user["username"] == username:
                 user_token = user["token"]
                 user_id = user["id"]
 
-        url = "https://api-dev.canvas3d.co/hubs/" + chub_id + "/unregister"
-        # url = "https://api.canvas3d.io/hubs/" + chub_id + "/unregister"
+        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/unregister"
+        # url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
 
         authorization = "Bearer " + user_token
         headers = {"Authorization": authorization}
@@ -255,7 +254,7 @@ class Canvas():
             print e
 
     def downloadPrintFiles(self, data):
-        user = self.chub_yaml["canvas-users"][data["userId"]]
+        user = self.hub_yaml["canvas-users"][data["userId"]]
 
         # user must have a valid token to enable the download
         token = user["token"]
@@ -276,7 +275,6 @@ class Canvas():
                            "data": {"filename": filename, "status": "incoming"}})
             watched_path = self._settings.global_get_basefolder("watched")
             z.extractall(watched_path)
-
             self.updateUI({"command": "FileReceivedFromCanvas",
                            "data": filename})
 
@@ -285,58 +283,58 @@ class Canvas():
     ##############
 
     def removeUserFromYAML(self, user_id, username):
-        del self.chub_yaml["canvas-users"][user_id]
+        del self.hub_yaml["canvas-users"][user_id]
         self.updateYAMLInfo()
         self.updateRegisteredUsers()
         self.updateUI({"command": "UserDeleted", "data": username})
 
     def verifyUserInYAML(self, data):
         # get list of all registered users on the C.HUB YML file
-        registeredUsers = self.chub_yaml["canvas-users"]
+        registeredUsers = self.hub_yaml["canvas-users"]
 
         # if user is not registered in C.HUB YML file yet
         if data.get("id") not in registeredUsers:
-            self._logger.info("USER IS NOT IN YAML FILE YET.")
+            self._logger.info("User does is not registered to Hub yet.")
 
            # if websocket is not already enabled, enable it
             if not self.ws_connection:
                 self.enableWebsocketConnection()
 
-            self.registerUserAndCHUB(data)
+            self.registerUserAndHub(data)
         else:
-            self._logger.info("User already registered! You are good.")
+            self._logger.info("User already registered to Hub.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
 
     def updateRegisteredUsers(self):
         # make a list of usernames
-        if "canvas-users" in self.chub_yaml:
+        if "canvas-users" in self.hub_yaml:
             list_of_users = map(
-                lambda user: {key: user[key] for key in ["username"]}, self.chub_yaml["canvas-users"].values())
+                lambda user: {key: user[key] for key in ["username"]}, self.hub_yaml["canvas-users"].values())
             self.updateUI(
                 {"command": "DisplayRegisteredUsers", "data": list_of_users})
-            if not self.chub_yaml["canvas-users"] and self.ws_connection is True:
+            if not self.hub_yaml["canvas-users"] and self.ws_connection is True:
                 self.ws.close()
 
     def updateYAMLInfo(self):
-        chub_data_path = os.path.expanduser(
+        hub_data_path = os.path.expanduser(
             '~') + "/.mosaicdata/canvas-hub-data.yml"
-        chub_data = open(chub_data_path, "w")
-        yaml.dump(self.chub_yaml, chub_data)
-        chub_data.close()
+        hub_data = open(hub_data_path, "w")
+        yaml.dump(self.hub_yaml, hub_data)
+        hub_data.close()
 
-    def registerUserAndCHUB(self, data):
+    def registerUserAndHub(self, data):
 
-        self._logger.info("Sending chub_token and user_token to Canvas Server")
-        chub_id = self.chub_yaml["canvas-hub"]["hub"]["id"]
-        chub_token = self.chub_yaml["canvas-hub"]["token"]
+        self._logger.info("Sending hub_token and user_token to Canvas Server")
+        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        hub_token = self.hub_yaml["canvas-hub"]["token"]
         payload = {
             "userToken": data["token"]
         }
 
-        url = "https://api-dev.canvas3d.co/hubs/" + chub_id + "/register"
-        # url = "https://api.canvas3d.io/hubs/" + chub_id + "/register"
+        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/register"
+        # url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
 
-        authorization = "Bearer " + chub_token
+        authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
 
         try:
@@ -344,7 +342,7 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
-                self.chub_yaml["canvas-users"][data.get("id")] = data
+                self.hub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
                 self.updateRegisteredUsers()
                 self.enableWebsocketConnection()
