@@ -35,7 +35,9 @@ canvasApp.toggleBrandName = name => {
       .find("span")
       .text(name);
 
-    $("head title").text(name);
+    $("head title")
+      .removeAttr("data-bind")
+      .text(name);
     $("head")
       .find('link[rel="shortcut icon"]')
       .attr("href", "/plugin/canvas/static/img/Mosaic_Icon_Square.png");
@@ -44,7 +46,9 @@ canvasApp.toggleBrandName = name => {
       .find("span")
       .text(name);
 
-    $("head title").text(name);
+    $("head title")
+      .removeAttr("data-bind")
+      .text(name);
     $("head")
       .find('link[rel="shortcut icon"]')
       .attr("href", "/static/img/tentacle-20x20@2x.png");
