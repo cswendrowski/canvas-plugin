@@ -366,7 +366,7 @@
   margin-bottom: 0;
 }
 .canvas-theme .connect-canvas-button {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 .canvas-theme #settings_dialog a,
 .canvas-theme #plugin_announcements_dialog a {
@@ -552,6 +552,11 @@
   font-weight: 400;
   text-align: left;
   line-height: 140%;
+}
+.canvas-theme .swal2-popup .swal2-checkbox {
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
 }
 .canvas-theme .swal2-popup #swal2-content {
   text-align: left;
