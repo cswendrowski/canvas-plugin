@@ -92,15 +92,15 @@ canvasApp.toggleTheme = () => {
     if (checked) {
       $("html").addClass("canvas-theme");
       canvasApp.toggleBrandName("CANVAS Hub");
-      $(".theme-input-label")
-        .find("span")
-        .text("Turn Off");
+      // $(".theme-input-label")
+      //   .find("span")
+      //   .text("Turn Off");
     } else {
       $("html").removeClass("canvas-theme");
       canvasApp.toggleBrandName("OctoPrint");
-      $(".theme-input-label")
-        .find("span")
-        .text("Turn On");
+      // $(".theme-input-label")
+      //   .find("span")
+      //   .text("Turn On");
     }
   });
 };
@@ -403,15 +403,11 @@ function CanvasViewModel(parameters) {
         canvasApp.displayNotification(message.data);
       } else if (message.command === "toggleTheme") {
         if (message.data) {
-          $(".theme-input")
-            .attr("checked", true)
-            .text("Turn Off");
+          $(".theme-input").attr("checked", true);
           $("html").addClass("canvas-theme");
           canvasApp.toggleBrandName("CANVAS Hub");
         } else {
-          $(".theme-input")
-            .attr("checked", false)
-            .text("Turn On");
+          $(".theme-input").attr("checked", false);
         }
       }
     }
