@@ -170,7 +170,7 @@ canvasApp.displayNotification = data => {
   if (data.status === "incoming") {
     let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
             <i class="material-icons remove-popup">clear</i>
-            <h6>Canvas File Incoming...</h6>
+            <h6>CANVAS File Incoming...</h6>
             <p class="file-incoming-name">${data.filename}</p>
             </li>`).hide();
     $(".side-notifications-list").append(notification);
@@ -372,14 +372,14 @@ function CanvasViewModel(parameters) {
           type: "success",
           // animation: false,
           title: "CANVAS user successfully connected",
-          text: `${message.data.username} is now registered to this Canvas Hub.`
+          text: `${message.data.username} is now registered to this CANVAS Hub.`
         });
       } else if (message.command === "UserAlreadyExists") {
         swal({
           type: "info",
           // animation: false,
           title: "CANVAS user already registered",
-          text: `${message.data.username} is already registered to this Canvas Hub.`
+          text: `${message.data.username} is already registered to this CANVAS Hub.`
         });
       } else if (message.command === "invalidUserCredentials") {
         swal({
@@ -393,7 +393,7 @@ function CanvasViewModel(parameters) {
           type: "success",
           // animation: false,
           title: "CANVAS user successfully removed",
-          text: `${message.data} is now removed from this Canvas Hub.`
+          text: `${message.data} is now removed from this CANVAS Hub.`
         });
       } else if (message.command === "CanvasDownloadStart") {
         canvasApp.displayNotification(message.data);
