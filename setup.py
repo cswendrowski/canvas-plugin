@@ -14,17 +14,17 @@ plugin_package = "octoprint_%s" % plugin_identifier
 plugin_name = "Canvas"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "0.2.0"
+plugin_version = "0.8.0"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
 plugin_description = "TODO"
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
-plugin_author = "Bobby Wood"
+plugin_author = "Bobby Wood & Khoi Pham"
 
 # The plugin's author's mail address.
-plugin_author_email = "bobby@mosaicmfg.com"
+plugin_author_email = "info@mosaicmfg.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
 plugin_url = "https://gitlab.com/mosaic-mfg/canvas-plugin"
