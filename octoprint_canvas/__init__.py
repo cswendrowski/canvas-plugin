@@ -98,8 +98,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if "ClientOpened" in event:
             self.canvas.checkWebsocketConnection()
             self.canvas.updateRegisteredUsers()
-            if self.canvas.ws_connection is False:
-                self.canvas.enableWebsocketConnection()
             if self._settings.get(["applyTheme"]):
                 self.canvas.updateUI({"command": "toggleTheme", "data": True})
             elif not self._settings.get(["applyTheme"]):

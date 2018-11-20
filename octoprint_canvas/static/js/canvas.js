@@ -177,11 +177,11 @@ canvasApp.displayNotification = data => {
     notification.fadeIn(200);
     let currentId = `#file-incoming${this.incomingCounter}`;
     this.incomingCounter++;
-    setTimeout(function() {
-      $(currentId).fadeOut(500, function() {
-        this.remove();
-      });
-    }, 10000);
+    // setTimeout(function() {
+    //   $(currentId).fadeOut(500, function() {
+    //     this.remove();
+    //   });
+    // }, 120000);
   } else if (data.status === "received") {
     // $(`#file-incoming${this.receivedCounter}`).fadeOut(1000, function() {
     //   this.remove();
@@ -195,11 +195,11 @@ canvasApp.displayNotification = data => {
     notification.fadeIn(200);
     let currentId = `#file-added${this.receivedCounter}`;
     this.receivedCounter++;
-    setTimeout(function() {
-      $(currentId).fadeOut(500, function() {
-        this.remove();
-      });
-    }, 5000);
+    // setTimeout(function() {
+    //   $(currentId).fadeOut(500, function() {
+    //     this.remove();
+    //   });
+    // }, 120000);
   }
 };
 
