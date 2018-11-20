@@ -57,12 +57,8 @@ canvasApp.toggleBrandName = name => {
 
 /* 2. Add Palette Tag to .mcf.gcode files */
 canvasApp.tagPaletteFiles = () => {
-  let allPrintFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .title");
-  allPrintFiles.each((index, printFile) => {
-    if (printFile.innerHTML.includes(".mcf.gcode")) {
-      $(printFile).addClass("palette-tag");
-    }
-  });
+  canvasApp.handleGCODEFolders();
+  canvasApp.applyExtraTagging();
 };
 
 /* 2.1 Event listener for clicking back and forth between GCODE folders.
@@ -70,7 +66,7 @@ Use this function to keep Palette files tagged */
 canvasApp.handleGCODEFolders = () => {
   canvasApp.removeFolderBinding();
   $("#files .gcode_files .entry.back.clickable").on("click", () => {
-    canvasApp.filesLoaded();
+    canvasApp.applyExtraTagging();
   });
 };
 
@@ -80,7 +76,7 @@ canvasApp.removeFolderBinding = () => {
     .find(".folder .title")
     .removeAttr("data-bind")
     .on("click", event => {
-      canvasApp.tagPaletteFiles();
+      canvasApp.applyExtraTagging();
     });
 };
 
@@ -92,15 +88,9 @@ canvasApp.toggleTheme = () => {
     if (checked) {
       $("html").addClass("canvas-theme");
       canvasApp.toggleBrandName("CANVAS Hub");
-      // $(".theme-input-label")
-      //   .find("span")
-      //   .text("Turn Off");
     } else {
       $("html").removeClass("canvas-theme");
       canvasApp.toggleBrandName("OctoPrint");
-      // $(".theme-input-label")
-      //   .find("span")
-      //   .text("Turn On");
     }
   });
 };
@@ -141,31 +131,7 @@ canvasApp.handleWebsocketConnection = data => {
   }
 };
 
-/* 6. FILE LOADING */
-canvasApp.filesLoaded = () => {
-  let checkExist = setInterval(function() {
-    if ($("#files .gcode_files .scroll-wrapper").find(".entry .action-buttons .toggleAdditionalData").length) {
-      canvasApp.tagPaletteFiles();
-      let dynamicFilesFullyLoaded = true;
-      let allFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .action-buttons .toggleAdditionalData");
-      allFiles.each((i, file) => {
-        // if any of the files have a class of disabled on them,
-        // it means that all the files have not finished dynamically being added to the DOM
-        if (file.classList.value.includes("disabled")) {
-          dynamicFilesFullyLoaded = false;
-        }
-      });
-      if (dynamicFilesFullyLoaded) {
-        canvasApp.removeFolderBinding();
-        canvasApp.tagPaletteFiles();
-        canvasApp.handleGCODEFolders();
-        clearInterval(checkExist);
-      }
-    }
-  }, 100);
-};
-
-/* 7. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
+/* 6. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
 canvasApp.displayNotification = data => {
   if (data.status === "incoming") {
     let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
@@ -177,11 +143,11 @@ canvasApp.displayNotification = data => {
     notification.fadeIn(200);
     let currentId = `#file-incoming${this.incomingCounter}`;
     this.incomingCounter++;
-    // setTimeout(function() {
-    //   $(currentId).fadeOut(500, function() {
-    //     this.remove();
-    //   });
-    // }, 120000);
+    setTimeout(function() {
+      $(currentId).fadeOut(500, function() {
+        this.remove();
+      });
+    }, 300000);
   } else if (data.status === "received") {
     // $(`#file-incoming${this.receivedCounter}`).fadeOut(1000, function() {
     //   this.remove();
@@ -195,15 +161,15 @@ canvasApp.displayNotification = data => {
     notification.fadeIn(200);
     let currentId = `#file-added${this.receivedCounter}`;
     this.receivedCounter++;
-    // setTimeout(function() {
-    //   $(currentId).fadeOut(500, function() {
-    //     this.remove();
-    //   });
-    // }, 120000);
+    setTimeout(function() {
+      $(currentId).fadeOut(500, function() {
+        this.remove();
+      });
+    }, 300000);
   }
 };
 
-/* 8. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
+/* 7. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
 canvasApp.removePopup = () => {
   $("body").on("click", ".side-notifications-list .remove-popup", function() {
     $(this)
@@ -214,20 +180,25 @@ canvasApp.removePopup = () => {
   });
 };
 
-/* 9. APPLY ADDITIONAL TAGGING FOR UPDATED FILES BECAUSE
+/* 8. APPLY ADDITIONAL TAGGING FOR UPDATED FILES BECAUSE
 DYNAMIC ELEMENTS WERE NOT DONE ON EVENT LISTENING */
 canvasApp.applyExtraTagging = () => {
   let count = 0;
   let applyTagging = setInterval(function() {
-    if (count > 150) {
+    if (count > 50) {
       clearInterval(applyTagging);
     }
-    canvasApp.tagPaletteFiles();
+    let allPrintFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .title");
+    allPrintFiles.each((index, printFile) => {
+      if (printFile.innerHTML.includes(".mcf.gcode")) {
+        $(printFile).addClass("palette-tag");
+      }
+    });
     count++;
   }, 100);
 };
 
-/* 10. Remove Canvas user event listener */
+/* 9. Remove Canvas user event listener */
 canvasApp.removeUser = () => {
   $(".registered-accounts").on("click", ".remove-user", event => {
     user = event.target.previousElementSibling.innerText;
@@ -235,7 +206,7 @@ canvasApp.removeUser = () => {
   });
 };
 
-/* 11. Toggle edit users */
+/* 10. Toggle edit users */
 canvasApp.toggleEditUser = () => {
   $(".toggle-remove-users span").on("click", () => {
     $(".remove-user").toggleClass("hide");
@@ -251,7 +222,7 @@ canvasApp.toggleEditUser = () => {
   });
 };
 
-/* 12. LOADER */
+/* 11. LOADER */
 canvasApp.loadingOverlay = condition => {
   if (condition) {
     $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
@@ -277,7 +248,7 @@ function CanvasViewModel(parameters) {
   this.onStartupComplete = () => {
     console.log("CanvasViewModel STARTUP COMPLETED");
     canvasApp.toggleTheme();
-    canvasApp.filesLoaded();
+    canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     $("body")
       .css("position", "relative")
@@ -287,19 +258,18 @@ function CanvasViewModel(parameters) {
   };
 
   this.onEventFileAdded = payload => {
-    canvasApp.applyExtraTagging();
+    canvasApp.tagPaletteFiles();
     if (this.canvasFileReceived) {
       this.canvasFilename = payload.name;
     }
   };
 
   this.onEventMetadataAnalysisFinished = () => {
-    canvasApp.applyExtraTagging();
+    canvasApp.tagPaletteFiles();
   };
 
   this.onEventUpdatedFiles = () => {
-    canvasApp.applyExtraTagging();
-    canvasApp.filesLoaded();
+    canvasApp.tagPaletteFiles();
     if (this.canvasFileReceived) {
       canvasApp.tagPaletteFiles();
       this.onDataUpdaterPluginMessage("canvas", {
@@ -313,7 +283,7 @@ function CanvasViewModel(parameters) {
 
   this.onDataUpdaterReconnect = () => {
     console.log("Server Reconnected");
-    canvasApp.filesLoaded();
+    canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     if (!$("body").find(".side-notifications-list")) {
       $("body")
@@ -377,21 +347,18 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "UserAlreadyExists") {
         swal({
           type: "info",
-          // animation: false,
           title: "CANVAS user already registered",
           text: `${message.data.username} is already registered to this CANVAS Hub.`
         });
       } else if (message.command === "invalidUserCredentials") {
         swal({
           type: "error",
-          // animation: false,
           title: "Incorrect Login Information",
           text: "User credentials are incorrect. Please try again."
         });
       } else if (message.command === "UserDeleted") {
         swal({
           type: "success",
-          // animation: false,
           title: "CANVAS user successfully removed",
           text: `${message.data} is now removed from this CANVAS Hub.`
         });
