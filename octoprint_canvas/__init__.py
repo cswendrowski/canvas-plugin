@@ -40,7 +40,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     def get_latest(self, target, check, full_data=False, online=True):
         resp = requests.get(
-            "http://emerald.mosaicmanufacturing.com/canvas-hub-canvas-test/latest")
+            "http://emerald.mosaicmanufacturing.com/canvas-hub-canvas/latest")
         version_data = resp.json()
         version = version_data["versions"][0]["version"]
         current_version = check.get("current")
