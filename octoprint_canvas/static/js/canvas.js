@@ -57,6 +57,7 @@ canvasApp.toggleBrandName = name => {
 
 /* 2. Add Palette Tag to .mcf.gcode files */
 canvasApp.tagPaletteFiles = () => {
+  canvasApp.removeFolderBinding();
   canvasApp.handleGCODEFolders();
   canvasApp.applyExtraTagging();
 };
@@ -185,7 +186,7 @@ DYNAMIC ELEMENTS WERE NOT DONE ON EVENT LISTENING */
 canvasApp.applyExtraTagging = () => {
   let count = 0;
   let applyTagging = setInterval(function() {
-    if (count > 50) {
+    if (count > 10) {
       clearInterval(applyTagging);
     }
     let allPrintFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .title");
@@ -264,6 +265,10 @@ function CanvasViewModel(parameters) {
     }
   };
 
+  this.onEventFileRemoved = () => {
+    canvasApp.tagPaletteFiles();
+  };
+
   this.onEventMetadataAnalysisFinished = () => {
     canvasApp.tagPaletteFiles();
   };
@@ -279,6 +284,14 @@ function CanvasViewModel(parameters) {
       this.canvasFileReceived = false;
       this.canvasFilename = null;
     }
+  };
+
+  this.onEventFileSelected = () => {
+    canvasApp.tagPaletteFiles();
+  };
+
+  this.onEventFileDeselected = () => {
+    canvasApp.tagPaletteFiles();
   };
 
   this.onDataUpdaterReconnect = () => {
@@ -340,7 +353,6 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "UserConnectedToHUB") {
         swal({
           type: "success",
-          // animation: false,
           title: "CANVAS user successfully connected",
           text: `${message.data.username} is now registered to this CANVAS Hub.`
         });
