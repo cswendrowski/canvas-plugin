@@ -99,7 +99,6 @@ canvasApp.toggleTheme = () => {
 /* 4. Display all connected Canvas Accounts */
 canvasApp.handleUserDisplay = data => {
   $(".registered-accounts").html("");
-  console.log(data.data.length);
   if (data.data.length > 0) {
     data.data.forEach(user => {
       $(".registered-accounts").append(`<li class="registered-canvas-user">
@@ -186,7 +185,7 @@ DYNAMIC ELEMENTS WERE NOT DONE ON EVENT LISTENING */
 canvasApp.applyExtraTagging = () => {
   let count = 0;
   let applyTagging = setInterval(function() {
-    if (count > 10) {
+    if (count > 20) {
       clearInterval(applyTagging);
     }
     let allPrintFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .title");
@@ -247,7 +246,6 @@ function CanvasViewModel(parameters) {
   this.receivedCounter = 0;
 
   this.onStartupComplete = () => {
-    console.log("CanvasViewModel STARTUP COMPLETED");
     canvasApp.toggleTheme();
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
@@ -295,7 +293,6 @@ function CanvasViewModel(parameters) {
   };
 
   this.onDataUpdaterReconnect = () => {
-    console.log("Server Reconnected");
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     if (!$("body").find(".side-notifications-list")) {
@@ -337,7 +334,6 @@ function CanvasViewModel(parameters) {
       data: JSON.stringify(payload),
       contentType: "application/json; charset=UTF-8"
     }).then(res => {
-      console.log("USER BEING REMOVED");
       canvasApp.loadingOverlay(false);
     });
   };
@@ -345,7 +341,6 @@ function CanvasViewModel(parameters) {
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
-      console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
         canvasApp.handleUserDisplay(message);
       } else if (message.command === "Websocket") {
