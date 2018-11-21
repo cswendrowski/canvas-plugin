@@ -127,6 +127,7 @@
   /* 8. OTHER STYLING */
   /* 9. Specific Canvas Tab Styling */
   /* 10. Settings Modal Styling */
+  /* ALERT */
   /* EXTRA */
   /* SWEET ALERT STYLING */
   /* DOWNLOAD POPUPS */
@@ -399,6 +400,19 @@
 }
 .canvas-theme #settings_dialog .pull-right .btn:hover i {
   color: #363636;
+}
+.canvas-theme .ui-pnotify .alert {
+  color: #363636;
+  background-color: white;
+  border: 1px solid #363636;
+}
+.canvas-theme .ui-pnotify .alert h4,
+.canvas-theme .ui-pnotify .alert a {
+  color: #363636;
+}
+.canvas-theme .ui-pnotify-icon span {
+  margin-top: 3px;
+  margin-left: 1px;
 }
 .canvas-theme #connection-state-msg-canvas {
   color: red;
