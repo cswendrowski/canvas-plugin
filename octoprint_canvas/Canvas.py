@@ -26,11 +26,9 @@ def is_json(myjson):
 
 class Canvas():
     def __init__(self, plugin):
-        plugin._logger.info("Hello from Canvas.py!")
         self._logger = plugin._logger
         self._plugin_manager = plugin._plugin_manager
         self._identifier = plugin._identifier
-        # SETTINGS PLUGIN
         self._settings = plugin._settings
 
         self.ws_connection = False
@@ -94,14 +92,12 @@ class Canvas():
                 hub_serial_number = self.hub_yaml["canvas-hub"]["serial-number"]
                 self.registerHubAPICall(hub_serial_number)
         else:
-            self._logger.info("C.HUB already registered")
+            self._logger.info("HUB already registered")
 
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        # url = "https://api-dev.canvas3d.co/hubs"
         url = "https://api.canvas3d.io/hubs"
-
         data = {"name": hub_identifier}
 
         try:
@@ -127,14 +123,11 @@ class Canvas():
         if is_json(message) is True:
             response = json.loads(message)
             if "CONN/OPEN" in response["type"]:
-                print("Sending Hub Token")
                 self.sendInitialHubToken()
             elif "CONN/CLOSED" in response["type"]:
                 self.ws.close()
             elif "OP/DOWNLOAD" in response["type"]:
                 print("HANDLING DL")
-                # self.updateUI({"command": "CanvasDownloadStart",
-                #                "data": {"filename": response["filename"], "status": "incoming"}})
                 self.downloadPrintFiles(response)
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
@@ -158,7 +151,7 @@ class Canvas():
         self.checkWebsocketConnection()
 
     def ws_on_pong(self, ws, pong):
-        print("Received Pong")
+        print("Received WS Pong")
 
     def runWebSocket(self):
         self.ws.run_forever(ping_interval=30, ping_timeout=5,
@@ -170,7 +163,7 @@ class Canvas():
             self.enableWebsocketConnection()
 
     def enableWebsocketConnection(self):
-        # if C.HUB already has registered Canvas Users, enable websocket client
+        # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
             # prod: wss: // hub.canvas3d.io: 8443
             # dev: ws://hub-dev.canvas3d.co:8443
@@ -207,8 +200,6 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        # Make POST request to canvas API to log in user
-        # url = "https://api-dev.canvas3d.co/users/login"
         url = "https://api.canvas3d.io/users/login"
 
         if "username" in loginInfo["data"]:
@@ -221,11 +212,9 @@ class Canvas():
         try:
             response = requests.post(url, json=data).json()
             if response.get("status") >= 400:
-                self._logger.info("Error: Try Logging In Again")
                 self._logger.info(response)
                 self.updateUI({"command": "invalidUserCredentials"})
             else:
-                self._logger.info("API response valid!")
                 self.verifyUserInYAML(response)
         except requests.exceptions.RequestException as e:
             print e
@@ -240,7 +229,6 @@ class Canvas():
                 user_token = user["token"]
                 user_id = user["id"]
 
-        # url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/unregister"
         url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
 
         authorization = "Bearer " + user_token
@@ -258,13 +246,9 @@ class Canvas():
     def downloadPrintFiles(self, data):
         user = self.hub_yaml["canvas-users"][data["userId"]]
 
-        # user must have a valid token to enable the download
         token = user["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
-        # DEV:
-        # url = "https://slice.api-dev.canvas3d.co/projects/" + \
-        #     data["projectId"] + "/download"
         url = "https://slice.api.canvas3d.io/projects/" + \
             data["projectId"] + "/download"
 
@@ -291,12 +275,12 @@ class Canvas():
         self.updateUI({"command": "UserDeleted", "data": username})
 
     def verifyUserInYAML(self, data):
-        # get list of all registered users on the C.HUB YML file
+        # get list of all registered users on the HUB YML file
         registeredUsers = self.hub_yaml["canvas-users"]
 
-        # if user is not registered in C.HUB YML file yet
+        # if user is not registered in HUB YML file yet
         if data.get("id") not in registeredUsers:
-            self._logger.info("User does is not registered to Hub yet.")
+            self._logger.info("User is not registered to HUB yet.")
 
            # if websocket is not already enabled, enable it
             if not self.ws_connection:
@@ -304,7 +288,7 @@ class Canvas():
 
             self.registerUserAndHub(data)
         else:
-            self._logger.info("User already registered to Hub.")
+            self._logger.info("User already registered to HUB.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
 
     def updateRegisteredUsers(self):
@@ -325,17 +309,13 @@ class Canvas():
         hub_data.close()
 
     def registerUserAndHub(self, data):
-
-        self._logger.info("Sending hub_token and user_token to Canvas Server")
         hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
         payload = {
             "userToken": data["token"]
         }
 
-        # url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/register"
         url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
-
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
 
