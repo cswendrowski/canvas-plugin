@@ -92,7 +92,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if command == "removeUser":
             self.canvas.removeUser(data)
 
-            # EVENTHANDLERPLUGIN
+    # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
         self._logger.info("EVENT: " + event)
         if "ClientOpened" in event:
