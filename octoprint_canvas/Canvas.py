@@ -97,7 +97,7 @@ class Canvas():
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        url = "https://api.canvas3d.io/hubs"
+        url = "https://api-dev.canvas3d.co/hubs"
         data = {"name": hub_identifier}
 
         try:
@@ -167,7 +167,7 @@ class Canvas():
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
             # prod: wss: // hub.canvas3d.io: 8443
             # dev: ws://hub-dev.canvas3d.co:8443
-            self.ws = websocket.WebSocketApp("ws://hub.canvas3d.io:8443",
+            self.ws = websocket.WebSocketApp("ws://hub-dev.canvas3d.co:8443",
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
                                              on_close=self.ws_on_close,
@@ -200,7 +200,7 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        url = "https://api.canvas3d.io/users/login"
+        url = "https://api-dev.canvas3d.co/users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
@@ -229,7 +229,7 @@ class Canvas():
                 user_token = user["token"]
                 user_id = user["id"]
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
+        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/unregister"
 
         authorization = "Bearer " + user_token
         headers = {"Authorization": authorization}
@@ -249,7 +249,7 @@ class Canvas():
         token = user["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
-        url = "https://slice.api.canvas3d.io/projects/" + \
+        url = "https://slice.api-dev.canvas3d.co/projects/" + \
             data["projectId"] + "/download"
 
         response = requests.get(url, headers=headers)
@@ -315,7 +315,7 @@ class Canvas():
             "userToken": data["token"]
         }
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
+        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/register"
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
 
