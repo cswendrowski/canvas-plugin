@@ -165,8 +165,6 @@ class Canvas():
     def enableWebsocketConnection(self):
         # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            # prod: wss: // hub.canvas3d.io: 8443
-            # dev: ws://hub-dev.canvas3d.co:8443
             self.ws = websocket.WebSocketApp("ws://hub.canvas3d.io:8443",
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
