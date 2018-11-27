@@ -82,7 +82,8 @@ canvasApp.removeFolderBinding = () => {
 };
 
 /* 3. Toggle on/off the Canvas Theme */
-canvasApp.toggleTheme = () => {
+canvasApp.toggleTheme = condition => {
+  // FE event listener
   $(".theme-input").on("change", event => {
     let checked = event.target.checked;
 
@@ -94,6 +95,12 @@ canvasApp.toggleTheme = () => {
       canvasApp.toggleBrandName("OctoPrint");
     }
   });
+
+  // When receiving initial settings from BE
+  if (condition) {
+    $("html").addClass("canvas-theme");
+    canvasApp.toggleBrandName("CANVAS Hub");
+  }
 };
 
 /* 4. Display all connected Canvas Accounts */
@@ -118,7 +125,7 @@ canvasApp.handleUserDisplay = data => {
   }
 };
 
-/* 5. Display that Websockets are enabled between C.Hub and Canvas */
+/* 5. Display that Websockets are enabled between Hub and Canvas */
 canvasApp.handleWebsocketConnection = data => {
   if (data.data === true) {
     $("#connection-state-msg-canvas")
@@ -131,9 +138,10 @@ canvasApp.handleWebsocketConnection = data => {
   }
 };
 
-/* 6. DISPLAY POPUP WHEN FILES RECEIVED FROM CANVAS */
+/* 6. Display popup notifications for files incoming and received from Canvas */
 canvasApp.displayNotification = data => {
   if (data.status === "incoming") {
+    // Display notification of incoming file
     let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
             <i class="material-icons remove-popup">clear</i>
             <h6>CANVAS File Incoming...</h6>
@@ -149,9 +157,14 @@ canvasApp.displayNotification = data => {
       });
     }, 300000);
   } else if (data.status === "received") {
-    // $(`#file-incoming${this.receivedCounter}`).fadeOut(1000, function() {
-    //   this.remove();
-    // });
+    // Remove all previous "incoming" notifications with the same name as the received file
+    $(`.popup-notification .file-incoming-name:contains("${data.filename}")`)
+      .closest("li")
+      .fadeOut(1000, function() {
+        this.remove();
+      });
+
+    // Display notification of received file
     let notification = $(`<li id="file-added${this.receivedCounter}" class="popup-notification">
             <i class="material-icons remove-popup">clear</i>
             <h6>File Received From CANVAS</h6>
@@ -169,7 +182,7 @@ canvasApp.displayNotification = data => {
   }
 };
 
-/* 7. REMOVE POPUP WHEN RECEIVING FILES FROM CANVAS */
+/* 7. Remove popup notifications */
 canvasApp.removePopup = () => {
   $("body").on("click", ".side-notifications-list .remove-popup", function() {
     $(this)
@@ -180,8 +193,7 @@ canvasApp.removePopup = () => {
   });
 };
 
-/* 8. APPLY ADDITIONAL TAGGING FOR UPDATED FILES BECAUSE
-DYNAMIC ELEMENTS WERE NOT DONE ON EVENT LISTENING */
+/* 8. Apply additional tagging function for slower DOM-binding scenarios*/
 canvasApp.applyExtraTagging = () => {
   let count = 0;
   let applyTagging = setInterval(function() {
@@ -222,7 +234,7 @@ canvasApp.toggleEditUser = () => {
   });
 };
 
-/* 11. LOADER */
+/* 11. Loader */
 canvasApp.loadingOverlay = condition => {
   if (condition) {
     $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
@@ -233,15 +245,56 @@ canvasApp.loadingOverlay = condition => {
   }
 };
 
+/* 12. Add Notification List To DOM */
+canvasApp.addNotificationList = () => {
+  if ($("body").find(".side-notifications-list").length === 0) {
+    $("body")
+      .css("position", "relative")
+      .append(`<ul class="side-notifications-list"></ul>`);
+  }
+};
+
+/* 13. Alert Texts */
+
+canvasApp.userAddedSuccess = username => {
+  return swal({
+    type: "success",
+    title: "CANVAS user successfully connected",
+    text: `${username} is now registered to this CANVAS Hub.`
+  });
+};
+
+canvasApp.userExistsAlready = username => {
+  return swal({
+    type: "info",
+    title: "CANVAS user already registered",
+    text: `${username} is already registered to this CANVAS Hub.`
+  });
+};
+
+canvasApp.userInvalidCredentials = () => {
+  return swal({
+    type: "error",
+    title: "Incorrect Login Information",
+    text: "User credentials are incorrect. Please try again."
+  });
+};
+
+canvasApp.userDeletedSuccess = username => {
+  return swal({
+    type: "success",
+    title: "CANVAS user successfully removed",
+    text: `${username} is now removed from this CANVAS Hub.`
+  });
+};
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
 
 function CanvasViewModel(parameters) {
-  // OBSERVABLE VALUES
   this.userInput = ko.observable();
   this.password = ko.observable();
-  this.users = ko.observableArray();
   this.incomingCounter = 0;
   this.receivedCounter = 0;
 
@@ -249,9 +302,7 @@ function CanvasViewModel(parameters) {
     canvasApp.toggleTheme();
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
-    $("body")
-      .css("position", "relative")
-      .append(`<ul class="side-notifications-list"></ul>`);
+    canvasApp.addNotificationList();
     canvasApp.removeUser();
     canvasApp.toggleEditUser();
   };
@@ -295,11 +346,7 @@ function CanvasViewModel(parameters) {
   this.onDataUpdaterReconnect = () => {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
-    if (!$("body").find(".side-notifications-list")) {
-      $("body")
-        .css("position", "relative")
-        .append(`<ul class="side-notifications-list"></ul>`);
-    }
+    canvasApp.addNotificationList();
     canvasApp.toggleEditUser();
   };
 
@@ -346,29 +393,13 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "Websocket") {
         canvasApp.handleWebsocketConnection(message);
       } else if (message.command === "UserConnectedToHUB") {
-        swal({
-          type: "success",
-          title: "CANVAS user successfully connected",
-          text: `${message.data.username} is now registered to this CANVAS Hub.`
-        });
+        canvasApp.userAddedSuccess(message.data.username);
       } else if (message.command === "UserAlreadyExists") {
-        swal({
-          type: "info",
-          title: "CANVAS user already registered",
-          text: `${message.data.username} is already registered to this CANVAS Hub.`
-        });
+        canvasApp.userExistsAlready(message.data.username);
       } else if (message.command === "invalidUserCredentials") {
-        swal({
-          type: "error",
-          title: "Incorrect Login Information",
-          text: "User credentials are incorrect. Please try again."
-        });
+        canvasApp.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
-        swal({
-          type: "success",
-          title: "CANVAS user successfully removed",
-          text: `${message.data} is now removed from this CANVAS Hub.`
-        });
+        canvasApp.userDeletedSuccess(message.data);
       } else if (message.command === "CanvasDownloadStart") {
         canvasApp.displayNotification(message.data);
       } else if (message.command === "FileReceivedFromCanvas") {
@@ -378,8 +409,7 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "toggleTheme") {
         if (message.data) {
           $(".theme-input").attr("checked", true);
-          $("html").addClass("canvas-theme");
-          canvasApp.toggleBrandName("CANVAS Hub");
+          canvasApp.toggleTheme(true);
         } else {
           $(".theme-input").attr("checked", false);
         }
