@@ -250,17 +250,20 @@ class Canvas():
         url = "https://slice.api.canvas3d.io/projects/" + \
             data["projectId"] + "/download"
 
-        response = requests.get(url, headers=headers)
-        if response.ok:
-            # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
-            z = zipfile.ZipFile(StringIO.StringIO(response.content))
-            filename = z.namelist()[0]
-            self.updateUI({"command": "CanvasDownloadStart",
-                           "data": {"filename": filename, "status": "incoming"}})
-            watched_path = self._settings.global_get_basefolder("watched")
-            z.extractall(watched_path)
-            self.updateUI({"command": "FileReceivedFromCanvas",
-                           "data": filename})
+        try:
+            response = requests.get(url, headers=headers)
+            if response.ok:
+                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
+                z = zipfile.ZipFile(StringIO.StringIO(response.content))
+                filename = z.namelist()[0]
+                self.updateUI({"command": "CanvasDownloadStart",
+                               "data": {"filename": filename, "status": "incoming"}})
+                watched_path = self._settings.global_get_basefolder("watched")
+                z.extractall(watched_path)
+                self.updateUI({"command": "FileReceivedFromCanvas",
+                               "data": filename})
+        except requests.exceptions.RequestException as e:
+            print e
 
     ##############
     # 4. HELPER FUNCTIONS
