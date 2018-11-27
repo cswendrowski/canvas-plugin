@@ -337,3 +337,9 @@ class Canvas():
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
         self._plugin_manager.send_plugin_message(self._identifier, data)
+
+    def checkUserThemeSetting(self):
+        if self._settings.get(["applyTheme"]):
+            self.updateUI({"command": "toggleTheme", "data": True})
+        elif not self._settings.get(["applyTheme"]):
+            self.updateUI({"command": "toggleTheme", "data": False})

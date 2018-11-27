@@ -98,10 +98,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if "ClientOpened" in event:
             self.canvas.checkWebsocketConnection()
             self.canvas.updateRegisteredUsers()
-            if self._settings.get(["applyTheme"]):
-                self.canvas.updateUI({"command": "toggleTheme", "data": True})
-            elif not self._settings.get(["applyTheme"]):
-                self.canvas.updateUI({"command": "toggleTheme", "data": False})
+            self.canvas.checkUserThemeSetting()
         elif "Shutdown" in event:
             if self.canvas.ws_connection is True:
                 self.canvas.ws.close()
@@ -111,7 +108,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "CANVAS"
-__plugin_description__ = "A plugin to handle connecting and communicating with CANVAS (Beta)"
+__plugin_description__ = "A plugin to handle communication with CANVAS"
 
 
 def __plugin_load__():
