@@ -21,7 +21,7 @@ plugin_version = "1.0.0"
 plugin_description = "TODO"
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
-plugin_author = "Bobby Wood & Khoi Pham"
+plugin_author = "Mosaic Manufacturing Ltd."
 
 # The plugin's author's mail address.
 plugin_author_email = "info@mosaicmfg.com"
