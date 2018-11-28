@@ -1,57 +1,31 @@
-OctoPrint Plugin Skeleton
-=========================
+#CANVAS PLUGIN
 
-This is a basic plugin skeleton that you can use as a basis for your own OctoPrint plugin.
+This OctoPrint plugin enables connection and communication between OctoPrint and [CANVAS](https://canvas3d.io/).
 
-You can copy the files to a folder of your choice, or just clone this repository, renaming it in the process. Then 
-modify ``setup.py`` to fit your plugin, rename ``octoprint_skeleton`` accordingly and finally implement your plugin 
-under ``octoprint_<plugin identifier>``.
+##Installing
 
-Example Usage
--------------
+On your OctoPrint server, manually install this plugin via the Plugin Manager using the following URL:
 
-Clone your repository into a new development directory and rename ``octoprint_skeleton``:
+`https://gitlab.com/mosaic-mfg/canvas-plugin/-/archive/master/canvas-plugin-master.zip`
 
-    git clone https://github.com/OctoPrint/OctoPrint-PluginSkeleton OctoPrint-MyNewPlugin
-    cd OctoPrint-MyNewPlugin
-    mv octoprint_skeleton octoprint_mynewplugin
+##Functionalities
 
-Modify `setup.py`'s `plugin_<xyz>` settings so that they match your plugin, e.g.:
+###1. Connect CANVAS accounts to OctoPrint
 
-``` python
-plugin_identifier = "mynewplugin"
-plugin_name = "OctoPrint-MyNewPlugin"
-plugin_version = "1.0"
-plugin_description = "Awesome plugin that does something"
-plugin_author = "You"
-plugin_author_email = "you@somewhere.net"
-plugin_url = "https://github.com/you/OctoPrint-MyNewPlugin"
-```
+![CANVAS USER ADDED](./extras/CANVAS_HUB_USER_ADDED.png)
 
-Then implement your plugin under ``octoprint_mynewplugin`` (don't forget to adjust ``__init__.py``!), e.g.:
+###2. Send files from CANVAS...
 
-``` python
-# coding=utf-8
-from __future__ import absolute_import
+![CANVAS SCREENSHOT](./extras/CANVAS_SCREENSHOT.png)
 
-import octoprint.plugin
+###3. To OctoPrint
 
-class HelloWorldPlugin(octoprint.plugin.StartupPlugin):
-    def on_after_startup(self):
-        self._logger.info("Hello World!")
-        
-__plugin_name__ = "Hello World"
-__plugin_implementation__ = HelloWorldPlugin()
-```
+![CANVAS FILE RECEIVED](./extras/CANVAS_HUB_FILE_RECEIVED_SCREENSHOT.png)
 
-Test it (e.g. via ``python setup.py develop``). If everything works, write a nice ``README.md``, replacing the existing one.
-Commit your code, then push it to your plugin's repository (this assumes you already created it on Github as
-``you/OctoPrint-MyNewPlugin``), e.g.:
+##Authors
 
-    git commit -a -m "Initial commit of MyNewPlugin"
-    git remote set-url origin git@github.com:you/OctoPrint-MyNewPlugin.git
-    git push -u origin master
+[Mosaic Manufacturing Ltd.](https://www.mosaicmfg.com/)
 
-Congratulations, you are now the proud maintainer of a new OctoPrint plugin! :) Don't forget to add an entry to the
-[wiki](https://github.com/foosel/OctoPrint/wiki#plugins) once it's suitable for general consumption, so that others
-may find it!
+##License
+
+This project is licensed under Creative Commons Public Licenses - see the [LICENSE](https://gitlab.com/mosaic-mfg/canvas-plugin/blob/master/LICENSE) file for more details.
