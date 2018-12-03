@@ -248,13 +248,15 @@ class Canvas():
         token = user["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
+        project_id = data["projectId"]
         url = "https://slice.api.canvas3d.io/projects/" + \
-            data["projectId"] + "/download"
+            project_id + "/download"
 
         try:
             response = requests.get(url, headers=headers, stream=True)
-            downloaded_file = self.streamFileProgress(response, filename)
-            self.extractZipfile(downloaded_file)
+            downloaded_file = self.streamFileProgress(
+                response, filename, project_id)
+            self.extractZipfile(downloaded_file, project_id)
         except requests.exceptions.RequestException as e:
             print e
 
@@ -337,10 +339,10 @@ class Canvas():
         elif not self._settings.get(["applyTheme"]):
             self.updateUI({"command": "toggleTheme", "data": False})
 
-    def streamFileProgress(self, response, filename):
+    def streamFileProgress(self, response, filename, project_id):
         total_length = response.headers.get('content-length')
         self.updateUI({"command": "CANVASDownload",
-                       "data": filename, "status": "starting"})
+                       "data": {"filename": filename, "projectId": project_id}, "status": "starting"})
 
         actual_file = ""
         current_downloaded = 0.00
@@ -350,18 +352,16 @@ class Canvas():
         for data in response.iter_content(chunk_size=stream_size):
             actual_file += data
             current_downloaded += len(data)
-
             percentage_completion = int(math.floor(
                 (current_downloaded/total_length)*100))
             self.updateUI({"command": "CANVASDownload",
-                           "data": percentage_completion, "status": "downloading"})
-
+                           "data": {"current": percentage_completion, "projectId": project_id}, "status": "downloading"})
         return actual_file
 
-    def extractZipfile(self, file):
+    def extractZipfile(self, file, project_id):
         z = zipfile.ZipFile(StringIO.StringIO(file))
         filename = z.namelist()[0]
         watched_path = self._settings.global_get_basefolder("watched")
         z.extractall(watched_path)
         self.updateUI({"command": "CANVASDownload",
-                       "data": filename, "status": "received"})
+                       "data": {"filename": filename, "projectId": project_id}, "status": "received"})

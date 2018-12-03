@@ -139,12 +139,22 @@ canvasApp.handleWebsocketConnection = data => {
 };
 
 /* 6. Display popup notifications for files incoming and received from Canvas */
-canvasApp.displayNotification = filename => {
-  console.log(this.incomingCounter);
-  let notification = $(`<li id="file-download${this.incomingCounter}" class="progress-bar popup-notification">
+canvasApp.displayNotification = data => {
+  // if a prior popup with the same file is currently on the page, remove it
+  if ($("body").find(`#${data.projectId}`).length > 0) {
+    $("body")
+      .find(`#${data.projectId}`)
+      .fadeOut(1000, function() {
+        this.remove();
+      });
+  }
+  let notification = $(`<li id="${data.projectId}" class="progress-bar popup-notification">
             <i class="material-icons remove-popup">clear</i>
-            <h6 class="popup-title">CANVAS File Incoming...</h6>
-            <p class="file-download-name">${filename}</p>
+            <div class="popup-heading">
+              <h6 class="popup-title">CANVAS File Incoming...</h6>
+              <div class="small-loader"></div>
+            </div>
+            <p class="file-download-name">${data.filename}</p>
             <div class="total-bar">
               <div class="current-bar">
                 <div class="progression-tool-tip"></div>
@@ -154,8 +164,7 @@ canvasApp.displayNotification = filename => {
             </li>`).hide();
   $(".side-notifications-list").append(notification);
   notification.fadeIn(200);
-  let currentId = `#file-download${this.incomingCounter}`;
-  this.incomingCounter++;
+  let currentId = `#${data.projectId}`;
   setTimeout(function() {
     $(currentId).fadeOut(500, function() {
       this.remove();
@@ -164,70 +173,85 @@ canvasApp.displayNotification = filename => {
 };
 
 /* 6.1 Update the download progress (%) on UI */
-canvasApp.updateDownloadProgress = currentProgress => {
-  if (currentProgress === 0) {
+canvasApp.updateDownloadProgress = data => {
+  if (data.current === 0) {
     $("body")
-      .find(".progress-bar .total-bar")
+      .find(`#${data.projectId} .total-bar`)
       .css("position", "static");
     $("body")
-      .find(".progress-bar .current-bar")
+      .find(`#${data.projectId} .current-bar`)
       .css("position", "relative");
     $("body")
-      .find(".progress-bar .progression-tool-tip")
+      .find(`#${data.projectId} .progression-tool-tip`)
       .css({ left: "0%", right: "auto", visibility: "visible" })
       .removeClass("tool-tip-arrow");
-  } else if (currentProgress === 10) {
+  } else if (data.current === 10) {
     $("body")
-      .find(".progress-bar .progression-tool-tip")
+      .find(`#${data.projectId} .progression-tool-tip`)
       .css({ left: "auto", right: "-13.5px" })
       .addClass("tool-tip-arrow");
-  } else if (currentProgress === 96) {
+  } else if (data.current === 96) {
     $("body")
-      .find(".progress-bar .total-bar")
+      .find(`#${data.projectId} .total-bar`)
       .css("position", "relative");
     $("body")
-      .find(".progress-bar .current-bar")
+      .find(`#${data.projectId} .current-bar`)
       .css("position", "static");
     $("body")
-      .find(".progress-bar .progression-tool-tip")
+      .find(`#${data.projectId} .progression-tool-tip`)
       .css({ left: "auto", right: "0%" })
       .removeClass("tool-tip-arrow");
   }
   $("body")
-    .find(".progress-bar .current-bar")
-    .css("width", currentProgress + "%");
+    .find(`#${data.projectId} .current-bar`)
+    .css("width", data.current + "%");
   $("body")
-    .find(".progress-bar .progression-tool-tip")
-    .text(currentProgress + "%");
+    .find(`#${data.projectId} .progression-tool-tip`)
+    .text(data.current + "%");
 };
 
 /* 6.2 Update download progress when file is received and extracted */
-canvasApp.updateFileReceived = filename => {
+canvasApp.updateFileReceived = data => {
   $("body")
-    .find(".progress-bar .popup-title")
+    .find(`#${data.projectId} .popup-title`)
     .text("File Received. Analyzing File...")
     .hide()
     .fadeIn(200);
   $("body")
-    .find(".progress-bar .file-download-name")
-    .text(filename)
+    .find(`#${data.projectId} .small-loader`)
+    .css("visibility", "visible")
+    .hide()
+    .fadeIn(200);
+  $("body")
+    .find(`#${data.projectId} .total-bar`)
+    .fadeOut(200);
+  $("body")
+    .find(`#${data.projectId} .file-download-name`)
+    .text(data.filename)
     .hide()
     .fadeIn(200);
 };
 
 /* 6.3 Update download progress when file analysis is done */
-canvasApp.updateFileReady = () => {
+canvasApp.updateFileReady = filename => {
   $("body")
-    .find(".progress-bar .total-bar")
-    .fadeOut(200);
-  $("body")
-    .find(".progress-bar .popup-title")
+    .find(`.progress-bar .file-download-name:contains("${filename}")`)
+    .siblings(".popup-heading")
+    .children(".popup-title")
     .text("CANVAS File Ready")
     .hide()
     .fadeIn(200);
+  $("body")
+    .find(`.progress-bar .file-download-name:contains("${filename}")`)
+    .siblings(".popup-heading")
+    .children(".small-loader")
+    .fadeOut(200, function() {
+      $(this).css("visibility", "hidden");
+    });
   setTimeout(function() {
     $("body")
-      .find(".progress-bar")
+      .find(`.progress-bar .file-download-name:contains("${filename}")`)
+      .closest("li")
       .addClass("highlight-glow-received");
   }, 400);
 };
@@ -338,6 +362,11 @@ canvasApp.userDeletedSuccess = username => {
   });
 };
 
+/* 14. Smaller loader */
+canvasApp.smallLoader = () => {
+  return;
+};
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -345,8 +374,6 @@ canvasApp.userDeletedSuccess = username => {
 function CanvasViewModel(parameters) {
   this.userInput = ko.observable();
   this.password = ko.observable();
-  this.incomingCounter = 0;
-  this.receivedCounter = 0;
 
   this.onStartupComplete = () => {
     canvasApp.toggleTheme();
@@ -357,29 +384,21 @@ function CanvasViewModel(parameters) {
     canvasApp.toggleEditUser();
   };
 
-  this.onEventFileAdded = payload => {
+  this.onEventFileAdded = () => {
     canvasApp.tagPaletteFiles();
-    if (this.canvasFileReceived) {
-      this.canvasFilename = payload.name;
-    }
   };
 
   this.onEventFileRemoved = () => {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onEventMetadataAnalysisFinished = () => {
+  this.onEventMetadataAnalysisFinished = payload => {
     canvasApp.tagPaletteFiles();
+    canvasApp.updateFileReady(payload.name);
   };
 
   this.onEventUpdatedFiles = () => {
     canvasApp.tagPaletteFiles();
-    if (this.canvasFileReceived) {
-      canvasApp.tagPaletteFiles();
-      canvasApp.updateFileReady();
-      this.canvasFileReceived = false;
-      this.canvasFilename = null;
-    }
   };
 
   this.onEventFileSelected = () => {
@@ -460,7 +479,6 @@ function CanvasViewModel(parameters) {
         } else if (message.status === "downloading") {
           canvasApp.updateDownloadProgress(message.data);
         } else if (message.status === "received") {
-          this.canvasFileReceived = true;
           canvasApp.updateFileReceived(message.data);
         }
       }

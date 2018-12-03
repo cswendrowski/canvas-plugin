@@ -793,6 +793,9 @@
       margin: 0;
       font-size: 12px;
       font-style: italic;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -850,5 +853,24 @@
     100% {
       background: #f5f5f5;
     }
+  }
+
+  .popup-heading {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  .small-loader {
+    visibility: hidden;
+    overflow: hidden;
+    margin-top: 2px;
+    margin-left: 5px;
+    width: 11.9px;
+    height: 11.9px;
+    border: 2px solid rgba(54, 54, 54, 0.2);
+    border-top-color: rgba(54, 54, 54, 1);
+    border-radius: 50%;
+    animation: rotate360 1.5s linear infinite;
   }
 }
