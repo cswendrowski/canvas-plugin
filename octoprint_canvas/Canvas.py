@@ -6,6 +6,7 @@ import websocket
 import requests
 import ssl
 import time
+import math
 
 
 try:
@@ -128,7 +129,7 @@ class Canvas():
                 self.ws.close()
             elif "OP/DOWNLOAD" in response["type"]:
                 print("HANDLING DL")
-                self.downloadPrintFiles(response)
+                self.downloadPrintFiles(response, response["filename"])
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
                 self.ws.close()
@@ -235,13 +236,13 @@ class Canvas():
         try:
             response = requests.post(url, headers=headers).json()
             if response.get("status") >= 400:
-                self._logger.info("ERROR")
+                self._logger.info(response.get("status"))
             else:
                 self.removeUserFromYAML(user_id, username)
         except requests.exceptions.RequestException as e:
             print e
 
-    def downloadPrintFiles(self, data):
+    def downloadPrintFiles(self, data, filename):
         user = self.hub_yaml["canvas-users"][data["userId"]]
 
         token = user["token"]
@@ -251,17 +252,9 @@ class Canvas():
             data["projectId"] + "/download"
 
         try:
-            response = requests.get(url, headers=headers)
-            if response.ok:
-                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
-                z = zipfile.ZipFile(StringIO.StringIO(response.content))
-                filename = z.namelist()[0]
-                self.updateUI({"command": "CanvasDownloadStart",
-                               "data": {"filename": filename, "status": "incoming"}})
-                watched_path = self._settings.global_get_basefolder("watched")
-                z.extractall(watched_path)
-                self.updateUI({"command": "FileReceivedFromCanvas",
-                               "data": filename})
+            response = requests.get(url, headers=headers, stream=True)
+            downloaded_file = self.streamFileProgress(response, filename)
+            self.extractZipfile(downloaded_file)
         except requests.exceptions.RequestException as e:
             print e
 
@@ -343,3 +336,39 @@ class Canvas():
             self.updateUI({"command": "toggleTheme", "data": True})
         elif not self._settings.get(["applyTheme"]):
             self.updateUI({"command": "toggleTheme", "data": False})
+
+    def streamFileProgress(self, response, filename):
+        total_length = response.headers.get('content-length')
+        # self.updateUI({"command": "CanvasDownloadStart",
+        #                "data": {"filename": filename, "status": "incoming"}})
+        self.updateUI({"command": "CANVASDownload",
+                       "data": filename, "status": "starting"})
+
+        actual_file = ""
+        current_downloaded = 0.00
+        total_length = int(total_length)
+        stream_size = total_length/100
+
+        for data in response.iter_content(chunk_size=stream_size):
+            actual_file += data
+            current_downloaded += len(data)
+
+            percentage_completion = int(math.floor(
+                (current_downloaded/total_length)*100))
+            # self.updateUI({"command": "DownloadProgress",
+            #                "data": percentage_completion, "status": "downloading"})
+            self.updateUI({"command": "CANVASDownload",
+                           "data": percentage_completion, "status": "downloading"})
+            time.sleep(0.05)
+
+        return actual_file
+
+    def extractZipfile(self, file):
+        z = zipfile.ZipFile(StringIO.StringIO(file))
+        filename = z.namelist()[0]
+        watched_path = self._settings.global_get_basefolder("watched")
+        z.extractall(watched_path)
+        # self.updateUI({"command": "FileReceivedFromCanvas",
+        #                "data": filename})
+        self.updateUI({"command": "CANVASDownload",
+                       "data": filename, "status": "received"})

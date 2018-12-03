@@ -139,47 +139,97 @@ canvasApp.handleWebsocketConnection = data => {
 };
 
 /* 6. Display popup notifications for files incoming and received from Canvas */
-canvasApp.displayNotification = data => {
-  if (data.status === "incoming") {
-    // Display notification of incoming file
-    let notification = $(`<li id="file-incoming${this.incomingCounter}" class="popup-notification">
+canvasApp.displayNotification = filename => {
+  console.log(this.incomingCounter);
+  let notification = $(`<li id="file-download${this.incomingCounter}" class="progress-bar popup-notification">
             <i class="material-icons remove-popup">clear</i>
-            <h6>CANVAS File Incoming...</h6>
-            <p class="file-incoming-name">${data.filename}</p>
+            <h6 class="popup-title">CANVAS File Incoming...</h6>
+            <p class="file-download-name">${filename}</p>
+            <div class="total-bar">
+              <div class="current-bar">
+                <div class="progression-tool-tip"></div>
+                <span>&nbsp;</span>
+              </div>
+            </div>
             </li>`).hide();
-    $(".side-notifications-list").append(notification);
-    notification.fadeIn(200);
-    let currentId = `#file-incoming${this.incomingCounter}`;
-    this.incomingCounter++;
-    setTimeout(function() {
-      $(currentId).fadeOut(500, function() {
-        this.remove();
-      });
-    }, 300000);
-  } else if (data.status === "received") {
-    // Remove all previous "incoming" notifications with the same name as the received file
-    $(`.popup-notification .file-incoming-name:contains("${data.filename}")`)
-      .closest("li")
-      .fadeOut(1000, function() {
-        this.remove();
-      });
+  $(".side-notifications-list").append(notification);
+  notification.fadeIn(200);
+  let currentId = `#file-download${this.incomingCounter}`;
+  this.incomingCounter++;
+  setTimeout(function() {
+    $(currentId).fadeOut(500, function() {
+      this.remove();
+    });
+  }, 300000);
+};
 
-    // Display notification of received file
-    let notification = $(`<li id="file-added${this.receivedCounter}" class="popup-notification">
-            <i class="material-icons remove-popup">clear</i>
-            <h6>File Received From CANVAS</h6>
-            <p>${data.filename}</p>
-            </li>`).hide();
-    $(".side-notifications-list").append(notification);
-    notification.fadeIn(200);
-    let currentId = `#file-added${this.receivedCounter}`;
-    this.receivedCounter++;
-    setTimeout(function() {
-      $(currentId).fadeOut(500, function() {
-        this.remove();
-      });
-    }, 300000);
+/* 6.1 Update the download progress (%) on UI */
+canvasApp.updateDownloadProgress = currentProgress => {
+  if (currentProgress === 0) {
+    $("body")
+      .find(".progress-bar .total-bar")
+      .css("position", "static");
+    $("body")
+      .find(".progress-bar .current-bar")
+      .css("position", "relative");
+    $("body")
+      .find(".progress-bar .progression-tool-tip")
+      .css({ left: "0%", right: "auto", visibility: "visible" })
+      .removeClass("tool-tip-arrow");
+  } else if (currentProgress === 10) {
+    $("body")
+      .find(".progress-bar .progression-tool-tip")
+      .css({ left: "auto", right: "-13.5px" })
+      .addClass("tool-tip-arrow");
+  } else if (currentProgress === 96) {
+    $("body")
+      .find(".progress-bar .total-bar")
+      .css("position", "relative");
+    $("body")
+      .find(".progress-bar .current-bar")
+      .css("position", "static");
+    $("body")
+      .find(".progress-bar .progression-tool-tip")
+      .css({ left: "auto", right: "0%" })
+      .removeClass("tool-tip-arrow");
   }
+  $("body")
+    .find(".progress-bar .current-bar")
+    .css("width", currentProgress + "%");
+  $("body")
+    .find(".progress-bar .progression-tool-tip")
+    .text(currentProgress + "%");
+};
+
+/* 6.2 Update download progress when file is received and extracted */
+canvasApp.updateFileReceived = filename => {
+  $("body")
+    .find(".progress-bar .popup-title")
+    .text("File Received. Analyzing File...")
+    .hide()
+    .fadeIn(200);
+  $("body")
+    .find(".progress-bar .file-download-name")
+    .text(filename)
+    .hide()
+    .fadeIn(200);
+};
+
+/* 6.3 Update download progress when file analysis is done */
+canvasApp.updateFileReady = () => {
+  $("body")
+    .find(".progress-bar .total-bar")
+    .fadeOut(200);
+  $("body")
+    .find(".progress-bar .popup-title")
+    .text("CANVAS File Ready")
+    .hide()
+    .fadeIn(200);
+  setTimeout(function() {
+    $("body")
+      .find(".progress-bar")
+      .addClass("highlight-glow-received");
+  }, 400);
 };
 
 /* 7. Remove popup notifications */
@@ -326,10 +376,7 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
     if (this.canvasFileReceived) {
       canvasApp.tagPaletteFiles();
-      this.onDataUpdaterPluginMessage("canvas", {
-        command: "CanvasFileAnalysisDone",
-        data: { filename: this.canvasFilename, status: "received" }
-      });
+      canvasApp.updateFileReady();
       this.canvasFileReceived = false;
       this.canvasFilename = null;
     }
@@ -400,18 +447,21 @@ function CanvasViewModel(parameters) {
         canvasApp.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
         canvasApp.userDeletedSuccess(message.data);
-      } else if (message.command === "CanvasDownloadStart") {
-        canvasApp.displayNotification(message.data);
-      } else if (message.command === "FileReceivedFromCanvas") {
-        this.canvasFileReceived = true;
-      } else if (message.command === "CanvasFileAnalysisDone") {
-        canvasApp.displayNotification(message.data);
       } else if (message.command === "toggleTheme") {
         if (message.data) {
           $(".theme-input").attr("checked", true);
           canvasApp.toggleTheme(true);
         } else {
           $(".theme-input").attr("checked", false);
+        }
+      } else if (message.command === "CANVASDownload") {
+        if (message.status === "starting") {
+          canvasApp.displayNotification(message.data);
+        } else if (message.status === "downloading") {
+          canvasApp.updateDownloadProgress(message.data);
+        } else if (message.status === "received") {
+          this.canvasFileReceived = true;
+          canvasApp.updateFileReceived(message.data);
         }
       }
     }
