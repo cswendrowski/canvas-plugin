@@ -362,11 +362,6 @@ canvasApp.userDeletedSuccess = username => {
   });
 };
 
-/* 14. Smaller loader */
-canvasApp.smallLoader = () => {
-  return;
-};
-
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
