@@ -339,8 +339,6 @@ class Canvas():
 
     def streamFileProgress(self, response, filename):
         total_length = response.headers.get('content-length')
-        # self.updateUI({"command": "CanvasDownloadStart",
-        #                "data": {"filename": filename, "status": "incoming"}})
         self.updateUI({"command": "CANVASDownload",
                        "data": filename, "status": "starting"})
 
@@ -355,11 +353,8 @@ class Canvas():
 
             percentage_completion = int(math.floor(
                 (current_downloaded/total_length)*100))
-            # self.updateUI({"command": "DownloadProgress",
-            #                "data": percentage_completion, "status": "downloading"})
             self.updateUI({"command": "CANVASDownload",
                            "data": percentage_completion, "status": "downloading"})
-            time.sleep(0.05)
 
         return actual_file
 
@@ -368,7 +363,5 @@ class Canvas():
         filename = z.namelist()[0]
         watched_path = self._settings.global_get_basefolder("watched")
         z.extractall(watched_path)
-        # self.updateUI({"command": "FileReceivedFromCanvas",
-        #                "data": filename})
         self.updateUI({"command": "CANVASDownload",
                        "data": filename, "status": "received"})
