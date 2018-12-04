@@ -82,22 +82,20 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def get_api_commands(self):
         return dict(
             addUser=["data"]
-            # removeUser=["data"]
         )
 
     # SIMPLEAPIPLUGIN POST, to handle commands listed in get_api_commands
     def on_api_command(self, command, data):
         if command == "addUser":
             self.canvas.addUser(data)
-        # if command == "removeUser":
-        #     self.canvas.removeUser(data)
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
         self._logger.info("EVENT: " + event)
         if "ClientOpened" in event:
+            self.canvas.getRegisteredUsers()
+            self.canvas.enableWebsocketConnection()
             self.canvas.checkWebsocketConnection()
-            self.canvas.updateRegisteredUsers()
             self.canvas.checkUserThemeSetting()
         elif "Shutdown" in event:
             if self.canvas.ws_connection is True:

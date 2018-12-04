@@ -113,16 +113,7 @@ canvasApp.handleUserDisplay = data => {
         <span class="username">${user.username}</span>
         </li>`);
     });
-    // $(".toggle-remove-users").css("display", "flex");
-    // if ($(".toggle-remove-users span").text() === "Stop Editing") {
-    //   $(".remove-user").toggleClass("hide");
-    // }
   }
-  // else {
-  //   $(".toggle-remove-users").css("display", "none");
-  //   $(".toggle-remove-users span").text("Edit");
-  //   $(".toggle-remove-users i").text("edit");
-  // }
 };
 
 /* 5. Display that Websockets are enabled between Hub and Canvas */
@@ -274,31 +265,7 @@ canvasApp.applyExtraTagging = () => {
   }, 100);
 };
 
-/* 9. Remove Canvas user event listener */
-// canvasApp.removeUser = () => {
-//   $(".registered-accounts").on("click", ".remove-user", event => {
-//     user = event.target.previousElementSibling.innerText;
-//     this.removeUser(user);
-//   });
-// };
-
-/* 10. Toggle edit users */
-// canvasApp.toggleEditUser = () => {
-//   $(".toggle-remove-users span").on("click", () => {
-//     $(".remove-user").toggleClass("hide");
-//     if ($(".toggle-remove-users span").text() === "Edit") {
-//       $(".toggle-remove-users span").text("Stop Editing");
-//       $(".toggle-remove-users i")
-//         .text("clear")
-//         .css("font-size", "15px");
-//     } else {
-//       $(".toggle-remove-users span").text("Edit");
-//       $(".toggle-remove-users i").text("edit");
-//     }
-//   });
-// };
-
-/* 11. Loader */
+/* 9. Loader */
 canvasApp.loadingOverlay = condition => {
   if (condition) {
     $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
@@ -309,7 +276,7 @@ canvasApp.loadingOverlay = condition => {
   }
 };
 
-/* 12. Add Notification List To DOM */
+/* 10. Add Notification List To DOM */
 canvasApp.addNotificationList = () => {
   if ($("body").find(".side-notifications-list").length === 0) {
     $("body")
@@ -318,7 +285,7 @@ canvasApp.addNotificationList = () => {
   }
 };
 
-/* 13. Alert Texts */
+/* 11. Alert Texts */
 
 canvasApp.userAddedSuccess = username => {
   return swal({
@@ -365,12 +332,9 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
-    // canvasApp.removeUser();
-    // canvasApp.toggleEditUser();
   };
 
   this.onEventFileAdded = payload => {
-    console.log("File added");
     canvasApp.tagPaletteFiles();
     if ($("body").find(`.progress-bar .file-download-name:contains("${payload.name}")`)) {
       canvasApp.updateFileReady(payload.name);
@@ -381,18 +345,11 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onEventMetadataAnalysisStarted = () => {
-    console.log("Metadata Started");
-  };
-
   this.onEventMetadataAnalysisFinished = payload => {
-    console.log("Metadata Finished");
     canvasApp.tagPaletteFiles();
-    // canvasApp.updateFileReady(payload.name);
   };
 
   this.onEventUpdatedFiles = () => {
-    console.log("Updated Files");
     canvasApp.tagPaletteFiles();
   };
 
@@ -408,7 +365,6 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
-    // canvasApp.toggleEditUser();
   };
 
   this.addUser = () => {
@@ -430,21 +386,6 @@ function CanvasViewModel(parameters) {
       canvasApp.loadingOverlay(false);
     });
   };
-
-  // this.removeUser = username => {
-  //   canvasApp.loadingOverlay(true);
-  //   let payload = { command: "removeUser", data: username };
-
-  //   $.ajax({
-  //     url: API_BASEURL + "plugin/canvas",
-  //     type: "POST",
-  //     dataType: "json",
-  //     data: JSON.stringify(payload),
-  //     contentType: "application/json; charset=UTF-8"
-  //   }).then(res => {
-  //     canvasApp.loadingOverlay(false);
-  //   });
-  // };
 
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = (pluginIdent, message) => {

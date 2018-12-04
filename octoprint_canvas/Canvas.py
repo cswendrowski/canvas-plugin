@@ -98,7 +98,8 @@ class Canvas():
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        url = "https://api.canvas3d.io/hubs"
+        # url = "https://api.canvas3d.io/hubs"
+        url = "https://api-dev.canvas3d.co/hubs"
         data = {"name": hub_identifier}
 
         try:
@@ -139,8 +140,6 @@ class Canvas():
 
     def ws_on_error(self, ws, error):
         print("WS ERROR: " + str(error))
-        if "ping/pong timed out" in error:
-            self.ws_disconnect = True
 
     def ws_on_close(self, ws):
         print("### Closing Websocket ###")
@@ -149,8 +148,6 @@ class Canvas():
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
-        if self.ws_disconnect is True:
-            self.ws_disconnect = False
         self.ws_connection = True
         self.checkWebsocketConnection()
 
@@ -161,7 +158,7 @@ class Canvas():
         self.ws.run_forever(ping_interval=30, ping_timeout=5,
                             sslopt={"cert_reqs": ssl.CERT_NONE})
         # if websocket connection was disconnected, try to reconnect again
-        if self.ws_disconnect is True:
+        if self.hub_yaml["canvas-users"]:
             time.sleep(10)
             print("Trying to reconnect...")
             self.enableWebsocketConnection()
@@ -169,7 +166,9 @@ class Canvas():
     def enableWebsocketConnection(self):
         # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            self.ws = websocket.WebSocketApp("ws://hub.canvas3d.io:8443",
+            # url = "ws://hub.canvas3d.io:8443"
+            url = "ws://hub-dev.canvas3d.co:8443"
+            self.ws = websocket.WebSocketApp(url,
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
                                              on_close=self.ws_on_close,
@@ -202,7 +201,8 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        url = "https://api.canvas3d.io/users/login"
+        # url = "https://api.canvas3d.io/users/login"
+        url = "https://api-dev.canvas3d.co/users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
@@ -221,39 +221,14 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             print e
 
-    # def removeUser(self, userInfo):
-    #     username = userInfo["data"]
-    #     hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
-
-    #     registeredUsers = self.hub_yaml["canvas-users"]
-    #     for user in registeredUsers.values():
-    #         if user["username"] == username:
-    #             user_token = user["token"]
-    #             user_id = user["id"]
-
-    #     url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
-
-    #     authorization = "Bearer " + user_token
-    #     headers = {"Authorization": authorization}
-
-    #     try:
-    #         response = requests.post(url, headers=headers).json()
-    #         if response.get("status") >= 400:
-    #             self._logger.info(response.get("status"))
-    #         else:
-    #             self.removeUserFromYAML(user_id, username)
-    #     except requests.exceptions.RequestException as e:
-    #         print e
-
     def downloadPrintFiles(self, data, filename):
-        # user = self.hub_yaml["canvas-users"][data["userId"]]
-        # token = user["token"]
-
         token = self.hub_yaml["canvas-hub"]["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
-        url = "https://slice.api.canvas3d.io/projects/" + \
+        # url = "https://slice.api.canvas3d.io/projects/" + \
+        #     project_id + "/download"
+        url = "https://slice.api-dev.canvas3d.co/projects/" + \
             project_id + "/download"
 
         try:
@@ -293,18 +268,25 @@ class Canvas():
             self.updateUI({"command": "UserAlreadyExists", "data": data})
 
     def getRegisteredUsers(self):
-        self._logger.info("HELLO")
         hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
+        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/users"
+        # url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
 
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
 
         try:
             response = requests.get(url, headers=headers).json()
-            self._logger.info(response)
+            users = response["users"]
+            updated_users = {}
+            for user in users:
+                updated_users[user["id"]] = user
+            self.hub_yaml["canvas-users"] = updated_users
+            self.updateYAMLInfo()
+            self.updateRegisteredUsers()
+
         except requests.exceptions.RequestException as e:
             print e
 
@@ -332,7 +314,9 @@ class Canvas():
             "userToken": data["token"]
         }
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
+        # url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
+        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/register"
+
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
 
