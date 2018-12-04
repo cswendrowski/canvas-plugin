@@ -286,6 +286,7 @@ class Canvas():
             self.hub_yaml["canvas-users"] = updated_users
             self.updateYAMLInfo()
             self.updateRegisteredUsers()
+            self.enableWebsocketConnection()
 
         except requests.exceptions.RequestException as e:
             print e

@@ -94,7 +94,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("EVENT: " + event)
         if "ClientOpened" in event:
             self.canvas.getRegisteredUsers()
-            self.canvas.enableWebsocketConnection()
             self.canvas.checkWebsocketConnection()
             self.canvas.checkUserThemeSetting()
         elif "Shutdown" in event:
