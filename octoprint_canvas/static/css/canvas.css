@@ -756,7 +756,8 @@
   font-size: 12px;
   margin: 0;
 }
-.canvas-theme .popup-notification .popup-title {
+.canvas-theme .popup-notification .popup-title,
+.canvas-theme .popup-notification h6 {
   margin: 0;
   margin-bottom: 2px;
 }
@@ -846,7 +847,7 @@
   align-items: flex-start;
 }
 .canvas-theme .small-loader {
-  visibility: hidden;
+  display: none;
   overflow: hidden;
   margin-top: 2px;
   margin-left: 5px;

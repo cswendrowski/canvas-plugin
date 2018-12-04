@@ -164,12 +164,6 @@ canvasApp.displayNotification = data => {
             </li>`).hide();
   $(".side-notifications-list").append(notification);
   notification.fadeIn(200);
-  let currentId = `#${data.projectId}`;
-  setTimeout(function() {
-    $(currentId).fadeOut(500, function() {
-      this.remove();
-    });
-  }, 300000);
 };
 
 /* 6.1 Update the download progress (%) on UI */
@@ -214,13 +208,11 @@ canvasApp.updateDownloadProgress = data => {
 canvasApp.updateFileReceived = data => {
   $("body")
     .find(`#${data.projectId} .popup-title`)
-    .text("File Received. Analyzing File...")
+    .text("File Received. Please wait...")
     .hide()
     .fadeIn(200);
   $("body")
     .find(`#${data.projectId} .small-loader`)
-    .css("visibility", "visible")
-    .hide()
     .fadeIn(200);
   $("body")
     .find(`#${data.projectId} .total-bar`)
@@ -379,20 +371,30 @@ function CanvasViewModel(parameters) {
     canvasApp.toggleEditUser();
   };
 
-  this.onEventFileAdded = () => {
+  this.onEventFileAdded = payload => {
+    console.log("File added");
     canvasApp.tagPaletteFiles();
+    if ($("body").find(`.progress-bar .file-download-name:contains("${payload.name}")`)) {
+      canvasApp.updateFileReady(payload.name);
+    }
   };
 
   this.onEventFileRemoved = () => {
     canvasApp.tagPaletteFiles();
   };
 
+  this.onEventMetadataAnalysisStarted = () => {
+    console.log("Metadata Started");
+  };
+
   this.onEventMetadataAnalysisFinished = payload => {
+    console.log("Metadata Finished");
     canvasApp.tagPaletteFiles();
-    canvasApp.updateFileReady(payload.name);
+    // canvasApp.updateFileReady(payload.name);
   };
 
   this.onEventUpdatedFiles = () => {
+    console.log("Updated Files");
     canvasApp.tagPaletteFiles();
   };
 
