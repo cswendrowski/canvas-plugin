@@ -81,16 +81,16 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     # SIMPLEAPIPLUGIN POST, runs first before on_api_commands, responds to commands from palette,js, any strings inside array = mandatory
     def get_api_commands(self):
         return dict(
-            addUser=["data"],
-            removeUser=["data"]
+            addUser=["data"]
+            # removeUser=["data"]
         )
 
     # SIMPLEAPIPLUGIN POST, to handle commands listed in get_api_commands
     def on_api_command(self, command, data):
         if command == "addUser":
             self.canvas.addUser(data)
-        if command == "removeUser":
-            self.canvas.removeUser(data)
+        # if command == "removeUser":
+        #     self.canvas.removeUser(data)
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):

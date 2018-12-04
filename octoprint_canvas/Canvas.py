@@ -133,6 +133,9 @@ class Canvas():
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
                 self.ws.close()
+            elif "AUTH/UNREGISTER_USER" in response["type"]:
+                print("REMOVING USER")
+                self.removeUserFromYAML(response["userId"])
 
     def ws_on_error(self, ws, error):
         print("WS ERROR: " + str(error))
@@ -218,34 +221,35 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             print e
 
-    def removeUser(self, userInfo):
-        username = userInfo["data"]
-        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+    # def removeUser(self, userInfo):
+    #     username = userInfo["data"]
+    #     hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
 
-        registeredUsers = self.hub_yaml["canvas-users"]
-        for user in registeredUsers.values():
-            if user["username"] == username:
-                user_token = user["token"]
-                user_id = user["id"]
+    #     registeredUsers = self.hub_yaml["canvas-users"]
+    #     for user in registeredUsers.values():
+    #         if user["username"] == username:
+    #             user_token = user["token"]
+    #             user_id = user["id"]
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
+    #     url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
 
-        authorization = "Bearer " + user_token
-        headers = {"Authorization": authorization}
+    #     authorization = "Bearer " + user_token
+    #     headers = {"Authorization": authorization}
 
-        try:
-            response = requests.post(url, headers=headers).json()
-            if response.get("status") >= 400:
-                self._logger.info(response.get("status"))
-            else:
-                self.removeUserFromYAML(user_id, username)
-        except requests.exceptions.RequestException as e:
-            print e
+    #     try:
+    #         response = requests.post(url, headers=headers).json()
+    #         if response.get("status") >= 400:
+    #             self._logger.info(response.get("status"))
+    #         else:
+    #             self.removeUserFromYAML(user_id, username)
+    #     except requests.exceptions.RequestException as e:
+    #         print e
 
     def downloadPrintFiles(self, data, filename):
-        user = self.hub_yaml["canvas-users"][data["userId"]]
+        # user = self.hub_yaml["canvas-users"][data["userId"]]
+        # token = user["token"]
 
-        token = user["token"]
+        token = self.hub_yaml["canvas-hub"]["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
@@ -264,7 +268,8 @@ class Canvas():
     # 4. HELPER FUNCTIONS
     ##############
 
-    def removeUserFromYAML(self, user_id, username):
+    def removeUserFromYAML(self, user_id):
+        username = self.hub_yaml["canvas-users"][user_id]["username"]
         del self.hub_yaml["canvas-users"][user_id]
         self.updateYAMLInfo()
         self.updateRegisteredUsers()
@@ -286,6 +291,22 @@ class Canvas():
         else:
             self._logger.info("User already registered to HUB.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
+
+    def getRegisteredUsers(self):
+        self._logger.info("HELLO")
+        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        hub_token = self.hub_yaml["canvas-hub"]["token"]
+
+        url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
+
+        authorization = "Bearer " + hub_token
+        headers = {"Authorization": authorization}
+
+        try:
+            response = requests.get(url, headers=headers).json()
+            self._logger.info(response)
+        except requests.exceptions.RequestException as e:
+            print e
 
     def updateRegisteredUsers(self):
         # make a list of usernames
@@ -320,6 +341,8 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
+                if "token" in data:
+                    del data["token"]
                 self.hub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
                 self.updateRegisteredUsers()

@@ -111,18 +111,18 @@ canvasApp.handleUserDisplay = data => {
       $(".registered-accounts").append(`<li class="registered-canvas-user">
         <i class="material-icons md-18">person</i>
         <span class="username">${user.username}</span>
-        <i class="hide material-icons remove-user">remove</i>
         </li>`);
     });
-    $(".toggle-remove-users").css("display", "flex");
-    if ($(".toggle-remove-users span").text() === "Stop Editing") {
-      $(".remove-user").toggleClass("hide");
-    }
-  } else {
-    $(".toggle-remove-users").css("display", "none");
-    $(".toggle-remove-users span").text("Edit");
-    $(".toggle-remove-users i").text("edit");
+    // $(".toggle-remove-users").css("display", "flex");
+    // if ($(".toggle-remove-users span").text() === "Stop Editing") {
+    //   $(".remove-user").toggleClass("hide");
+    // }
   }
+  // else {
+  //   $(".toggle-remove-users").css("display", "none");
+  //   $(".toggle-remove-users span").text("Edit");
+  //   $(".toggle-remove-users i").text("edit");
+  // }
 };
 
 /* 5. Display that Websockets are enabled between Hub and Canvas */
@@ -208,7 +208,7 @@ canvasApp.updateDownloadProgress = data => {
 canvasApp.updateFileReceived = data => {
   $("body")
     .find(`#${data.projectId} .popup-title`)
-    .text("File Received. Please wait...")
+    .text("File Received. Please Wait...")
     .hide()
     .fadeIn(200);
   $("body")
@@ -237,9 +237,7 @@ canvasApp.updateFileReady = filename => {
     .find(`.progress-bar .file-download-name:contains("${filename}")`)
     .siblings(".popup-heading")
     .children(".small-loader")
-    .fadeOut(200, function() {
-      $(this).css("visibility", "hidden");
-    });
+    .remove();
   setTimeout(function() {
     $("body")
       .find(`.progress-bar .file-download-name:contains("${filename}")`)
@@ -277,28 +275,28 @@ canvasApp.applyExtraTagging = () => {
 };
 
 /* 9. Remove Canvas user event listener */
-canvasApp.removeUser = () => {
-  $(".registered-accounts").on("click", ".remove-user", event => {
-    user = event.target.previousElementSibling.innerText;
-    this.removeUser(user);
-  });
-};
+// canvasApp.removeUser = () => {
+//   $(".registered-accounts").on("click", ".remove-user", event => {
+//     user = event.target.previousElementSibling.innerText;
+//     this.removeUser(user);
+//   });
+// };
 
 /* 10. Toggle edit users */
-canvasApp.toggleEditUser = () => {
-  $(".toggle-remove-users span").on("click", () => {
-    $(".remove-user").toggleClass("hide");
-    if ($(".toggle-remove-users span").text() === "Edit") {
-      $(".toggle-remove-users span").text("Stop Editing");
-      $(".toggle-remove-users i")
-        .text("clear")
-        .css("font-size", "15px");
-    } else {
-      $(".toggle-remove-users span").text("Edit");
-      $(".toggle-remove-users i").text("edit");
-    }
-  });
-};
+// canvasApp.toggleEditUser = () => {
+//   $(".toggle-remove-users span").on("click", () => {
+//     $(".remove-user").toggleClass("hide");
+//     if ($(".toggle-remove-users span").text() === "Edit") {
+//       $(".toggle-remove-users span").text("Stop Editing");
+//       $(".toggle-remove-users i")
+//         .text("clear")
+//         .css("font-size", "15px");
+//     } else {
+//       $(".toggle-remove-users span").text("Edit");
+//       $(".toggle-remove-users i").text("edit");
+//     }
+//   });
+// };
 
 /* 11. Loader */
 canvasApp.loadingOverlay = condition => {
@@ -367,8 +365,8 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
-    canvasApp.removeUser();
-    canvasApp.toggleEditUser();
+    // canvasApp.removeUser();
+    // canvasApp.toggleEditUser();
   };
 
   this.onEventFileAdded = payload => {
@@ -410,7 +408,7 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
-    canvasApp.toggleEditUser();
+    // canvasApp.toggleEditUser();
   };
 
   this.addUser = () => {
@@ -433,20 +431,20 @@ function CanvasViewModel(parameters) {
     });
   };
 
-  this.removeUser = username => {
-    canvasApp.loadingOverlay(true);
-    let payload = { command: "removeUser", data: username };
+  // this.removeUser = username => {
+  //   canvasApp.loadingOverlay(true);
+  //   let payload = { command: "removeUser", data: username };
 
-    $.ajax({
-      url: API_BASEURL + "plugin/canvas",
-      type: "POST",
-      dataType: "json",
-      data: JSON.stringify(payload),
-      contentType: "application/json; charset=UTF-8"
-    }).then(res => {
-      canvasApp.loadingOverlay(false);
-    });
-  };
+  //   $.ajax({
+  //     url: API_BASEURL + "plugin/canvas",
+  //     type: "POST",
+  //     dataType: "json",
+  //     data: JSON.stringify(payload),
+  //     contentType: "application/json; charset=UTF-8"
+  //   }).then(res => {
+  //     canvasApp.loadingOverlay(false);
+  //   });
+  // };
 
   // Receive messages from the OctoPrint server
   this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
