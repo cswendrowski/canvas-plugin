@@ -42,7 +42,7 @@ class Canvas():
             self.enableWebsocketConnection()
 
     ##############
-    # 1. INITIAL FUNCTIONS
+    # 1. SERVER STARTUP FUNCTIONS
     ##############
 
     def loadHubData(self):
@@ -98,8 +98,7 @@ class Canvas():
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        # url = "https://api.canvas3d.io/hubs"
-        url = "https://api-dev.canvas3d.co/hubs"
+        url = "https://api.canvas3d.io/hubs"
         data = {"name": hub_identifier}
 
         try:
@@ -115,7 +114,40 @@ class Canvas():
             print e
 
     ##############
-    # 2. WEBSOCKET FUNCTIONS
+    # 2. CLIENT UI STARTUP FUNCTIONS
+    ##############
+
+    def getRegisteredUsers(self):
+        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        hub_token = self.hub_yaml["canvas-hub"]["token"]
+
+        url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
+
+        authorization = "Bearer " + hub_token
+        headers = {"Authorization": authorization}
+
+        try:
+            response = requests.get(url, headers=headers).json()
+            users = response["users"]
+            updated_users = {}
+            for user in users:
+                updated_users[user["id"]] = user
+            self.hub_yaml["canvas-users"] = updated_users
+            self.updateYAMLInfo()
+            self.updateRegisteredUsers()
+            self.enableWebsocketConnection()
+
+        except requests.exceptions.RequestException as e:
+            print e
+
+    def checkUserThemeSetting(self):
+        if self._settings.get(["applyTheme"]):
+            self.updateUI({"command": "toggleTheme", "data": True})
+        elif not self._settings.get(["applyTheme"]):
+            self.updateUI({"command": "toggleTheme", "data": False})
+
+    ##############
+    # 3. WEBSOCKET FUNCTIONS
     ##############
 
     def ws_on_message(self, ws, message):
@@ -166,8 +198,7 @@ class Canvas():
     def enableWebsocketConnection(self):
         # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            # url = "ws://hub.canvas3d.io:8443"
-            url = "ws://hub-dev.canvas3d.co:8443"
+            url = "ws://hub.canvas3d.io:8443"
             self.ws = websocket.WebSocketApp(url,
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
@@ -197,12 +228,11 @@ class Canvas():
         self.ws.send(json.dumps(data))
 
     ##############
-    # 3. USER FUNCTIONS
+    # 4. USER FUNCTIONS
     ##############
 
     def addUser(self, loginInfo):
-        # url = "https://api.canvas3d.io/users/login"
-        url = "https://api-dev.canvas3d.co/users/login"
+        url = "https://api.canvas3d.io/users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
@@ -226,9 +256,7 @@ class Canvas():
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
-        # url = "https://slice.api.canvas3d.io/projects/" + \
-        #     project_id + "/download"
-        url = "https://slice.api-dev.canvas3d.co/projects/" + \
+        url = "https://slice.api.canvas3d.io/projects/" + \
             project_id + "/download"
 
         try:
@@ -240,7 +268,7 @@ class Canvas():
             print e
 
     ##############
-    # 4. HELPER FUNCTIONS
+    # 5. HELPER FUNCTIONS
     ##############
 
     def removeUserFromYAML(self, user_id):
@@ -267,30 +295,6 @@ class Canvas():
             self._logger.info("User already registered to HUB.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
 
-    def getRegisteredUsers(self):
-        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
-        hub_token = self.hub_yaml["canvas-hub"]["token"]
-
-        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/users"
-        # url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
-
-        authorization = "Bearer " + hub_token
-        headers = {"Authorization": authorization}
-
-        try:
-            response = requests.get(url, headers=headers).json()
-            users = response["users"]
-            updated_users = {}
-            for user in users:
-                updated_users[user["id"]] = user
-            self.hub_yaml["canvas-users"] = updated_users
-            self.updateYAMLInfo()
-            self.updateRegisteredUsers()
-            self.enableWebsocketConnection()
-
-        except requests.exceptions.RequestException as e:
-            print e
-
     def updateRegisteredUsers(self):
         # make a list of usernames
         if "canvas-users" in self.hub_yaml:
@@ -315,8 +319,7 @@ class Canvas():
             "userToken": data["token"]
         }
 
-        # url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
-        url = "https://api-dev.canvas3d.co/hubs/" + hub_id + "/register"
+        url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
 
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
@@ -340,12 +343,6 @@ class Canvas():
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
         self._plugin_manager.send_plugin_message(self._identifier, data)
-
-    def checkUserThemeSetting(self):
-        if self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": True})
-        elif not self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": False})
 
     def streamFileProgress(self, response, filename, project_id):
         total_length = response.headers.get('content-length')
