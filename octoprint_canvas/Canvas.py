@@ -128,12 +128,16 @@ class Canvas():
 
         try:
             response = requests.get(url, headers=headers).json()
-            users = response["users"]
-            updated_users = {}
-            for user in users:
-                updated_users[user["id"]] = user
-            self.hub_yaml["canvas-users"] = updated_users
-            self.updateYAMLInfo()
+            if "users" in response:
+                users = response["users"]
+                updated_users = {}
+                for user in users:
+                    updated_users[user["id"]] = user
+                self.hub_yaml["canvas-users"] = updated_users
+                self.updateYAMLInfo()
+            else:
+                self._logger.info(
+                    "Could not get updated list of registered users.")
             self.updateRegisteredUsers()
             self.enableWebsocketConnection()
 

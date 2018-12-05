@@ -221,7 +221,7 @@ canvasApp.updateFileReady = filename => {
     .find(`.progress-bar .file-download-name:contains("${filename}")`)
     .siblings(".popup-heading")
     .children(".popup-title")
-    .text("CANVAS File Ready")
+    .text("CANVAS File Added")
     .hide()
     .fadeIn(200);
   $("body")
