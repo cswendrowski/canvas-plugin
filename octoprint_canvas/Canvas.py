@@ -6,6 +6,7 @@ import websocket
 import requests
 import ssl
 import time
+import math
 
 
 try:
@@ -41,7 +42,7 @@ class Canvas():
             self.enableWebsocketConnection()
 
     ##############
-    # 1. INITIAL FUNCTIONS
+    # 1. SERVER STARTUP FUNCTIONS
     ##############
 
     def loadHubData(self):
@@ -113,7 +114,44 @@ class Canvas():
             print e
 
     ##############
-    # 2. WEBSOCKET FUNCTIONS
+    # 2. CLIENT UI STARTUP FUNCTIONS
+    ##############
+
+    def getRegisteredUsers(self):
+        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        hub_token = self.hub_yaml["canvas-hub"]["token"]
+
+        url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
+
+        authorization = "Bearer " + hub_token
+        headers = {"Authorization": authorization}
+
+        try:
+            response = requests.get(url, headers=headers).json()
+            if "users" in response:
+                users = response["users"]
+                updated_users = {}
+                for user in users:
+                    updated_users[user["id"]] = user
+                self.hub_yaml["canvas-users"] = updated_users
+                self.updateYAMLInfo()
+            else:
+                self._logger.info(
+                    "Could not get updated list of registered users.")
+            self.updateRegisteredUsers()
+            self.enableWebsocketConnection()
+
+        except requests.exceptions.RequestException as e:
+            print e
+
+    def checkUserThemeSetting(self):
+        if self._settings.get(["applyTheme"]):
+            self.updateUI({"command": "toggleTheme", "data": True})
+        elif not self._settings.get(["applyTheme"]):
+            self.updateUI({"command": "toggleTheme", "data": False})
+
+    ##############
+    # 3. WEBSOCKET FUNCTIONS
     ##############
 
     def ws_on_message(self, ws, message):
@@ -128,15 +166,16 @@ class Canvas():
                 self.ws.close()
             elif "OP/DOWNLOAD" in response["type"]:
                 print("HANDLING DL")
-                self.downloadPrintFiles(response)
+                self.downloadPrintFiles(response, response["filename"])
             elif "ERROR/INVALID_TOKEN" in response["type"]:
                 print("HANDLING ERROR/INVALID_TOKEN")
                 self.ws.close()
+            elif "AUTH/UNREGISTER_USER" in response["type"]:
+                print("REMOVING USER")
+                self.removeUserFromYAML(response["userId"])
 
     def ws_on_error(self, ws, error):
         print("WS ERROR: " + str(error))
-        if "ping/pong timed out" in error:
-            self.ws_disconnect = True
 
     def ws_on_close(self, ws):
         print("### Closing Websocket ###")
@@ -145,8 +184,6 @@ class Canvas():
 
     def ws_on_open(self, ws):
         print("### Opening Websocket ###")
-        if self.ws_disconnect is True:
-            self.ws_disconnect = False
         self.ws_connection = True
         self.checkWebsocketConnection()
 
@@ -157,7 +194,7 @@ class Canvas():
         self.ws.run_forever(ping_interval=30, ping_timeout=5,
                             sslopt={"cert_reqs": ssl.CERT_NONE})
         # if websocket connection was disconnected, try to reconnect again
-        if self.ws_disconnect is True:
+        if self.hub_yaml["canvas-users"]:
             time.sleep(10)
             print("Trying to reconnect...")
             self.enableWebsocketConnection()
@@ -165,7 +202,8 @@ class Canvas():
     def enableWebsocketConnection(self):
         # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            self.ws = websocket.WebSocketApp("ws://hub.canvas3d.io:8443",
+            url = "ws://hub.canvas3d.io:8443"
+            self.ws = websocket.WebSocketApp(url,
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
                                              on_close=self.ws_on_close,
@@ -194,7 +232,7 @@ class Canvas():
         self.ws.send(json.dumps(data))
 
     ##############
-    # 3. USER FUNCTIONS
+    # 4. USER FUNCTIONS
     ##############
 
     def addUser(self, loginInfo):
@@ -217,59 +255,28 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             print e
 
-    def removeUser(self, userInfo):
-        username = userInfo["data"]
-        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
-
-        registeredUsers = self.hub_yaml["canvas-users"]
-        for user in registeredUsers.values():
-            if user["username"] == username:
-                user_token = user["token"]
-                user_id = user["id"]
-
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/unregister"
-
-        authorization = "Bearer " + user_token
-        headers = {"Authorization": authorization}
-
-        try:
-            response = requests.post(url, headers=headers).json()
-            if response.get("status") >= 400:
-                self._logger.info("ERROR")
-            else:
-                self.removeUserFromYAML(user_id, username)
-        except requests.exceptions.RequestException as e:
-            print e
-
-    def downloadPrintFiles(self, data):
-        user = self.hub_yaml["canvas-users"][data["userId"]]
-
-        token = user["token"]
+    def downloadPrintFiles(self, data, filename):
+        token = self.hub_yaml["canvas-hub"]["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
+        project_id = data["projectId"]
         url = "https://slice.api.canvas3d.io/projects/" + \
-            data["projectId"] + "/download"
+            project_id + "/download"
 
         try:
-            response = requests.get(url, headers=headers)
-            if response.ok:
-                # unzip content and save it in the "watched" folder for Octoprint to automatically analyze and add to uploads folder
-                z = zipfile.ZipFile(StringIO.StringIO(response.content))
-                filename = z.namelist()[0]
-                self.updateUI({"command": "CanvasDownloadStart",
-                               "data": {"filename": filename, "status": "incoming"}})
-                watched_path = self._settings.global_get_basefolder("watched")
-                z.extractall(watched_path)
-                self.updateUI({"command": "FileReceivedFromCanvas",
-                               "data": filename})
+            response = requests.get(url, headers=headers, stream=True)
+            downloaded_file = self.streamFileProgress(
+                response, filename, project_id)
+            self.extractZipfile(downloaded_file, project_id)
         except requests.exceptions.RequestException as e:
             print e
 
     ##############
-    # 4. HELPER FUNCTIONS
+    # 5. HELPER FUNCTIONS
     ##############
 
-    def removeUserFromYAML(self, user_id, username):
+    def removeUserFromYAML(self, user_id):
+        username = self.hub_yaml["canvas-users"][user_id]["username"]
         del self.hub_yaml["canvas-users"][user_id]
         self.updateYAMLInfo()
         self.updateRegisteredUsers()
@@ -317,6 +324,7 @@ class Canvas():
         }
 
         url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
+
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
 
@@ -325,6 +333,8 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
+                if "token" in data:
+                    del data["token"]
                 self.hub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
                 self.updateRegisteredUsers()
@@ -338,8 +348,29 @@ class Canvas():
         self._logger.info("Sending UIUpdate from Canvas")
         self._plugin_manager.send_plugin_message(self._identifier, data)
 
-    def checkUserThemeSetting(self):
-        if self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": True})
-        elif not self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": False})
+    def streamFileProgress(self, response, filename, project_id):
+        total_length = response.headers.get('content-length')
+        self.updateUI({"command": "CANVASDownload",
+                       "data": {"filename": filename, "projectId": project_id}, "status": "starting"})
+
+        actual_file = ""
+        current_downloaded = 0.00
+        total_length = int(total_length)
+        stream_size = total_length/100
+
+        for data in response.iter_content(chunk_size=stream_size):
+            actual_file += data
+            current_downloaded += len(data)
+            percentage_completion = int(math.floor(
+                (current_downloaded/total_length)*100))
+            self.updateUI({"command": "CANVASDownload",
+                           "data": {"current": percentage_completion, "projectId": project_id}, "status": "downloading"})
+        return actual_file
+
+    def extractZipfile(self, file, project_id):
+        z = zipfile.ZipFile(StringIO.StringIO(file))
+        filename = z.namelist()[0]
+        watched_path = self._settings.global_get_basefolder("watched")
+        z.extractall(watched_path)
+        self.updateUI({"command": "CANVASDownload",
+                       "data": {"filename": filename, "projectId": project_id}, "status": "received"})
