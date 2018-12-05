@@ -20,7 +20,7 @@ On your OctoPrint server, manually install this plugin via the Plugin Manager us
 
 ### 3. To OctoPrint
 
-![CANVAS FILE RECEIVED](./extras/CANVAS_HUB_FILE_RECEIVED_SCREENSHOT.png)
+![CANVAS FILE RECEIVED](./extras/CANVAS_HUB_FILE_ADDED.png)
 
 ## Authors
 
