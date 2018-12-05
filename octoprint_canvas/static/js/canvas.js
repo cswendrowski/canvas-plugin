@@ -290,16 +290,16 @@ canvasApp.addNotificationList = () => {
 canvasApp.userAddedSuccess = username => {
   return swal({
     type: "success",
-    title: "CANVAS user successfully connected",
-    text: `${username} is now registered to this CANVAS Hub.`
+    title: "CANVAS user successfully added",
+    text: `${username} is now linked to this CANVAS Hub.`
   });
 };
 
 canvasApp.userExistsAlready = username => {
   return swal({
     type: "info",
-    title: "CANVAS user already registered",
-    text: `${username} is already registered to this CANVAS Hub.`
+    title: "CANVAS user already linked",
+    text: `${username} is already linked to this CANVAS Hub.`
   });
 };
 
