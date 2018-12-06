@@ -98,7 +98,7 @@ class Canvas():
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        url = "https://api-dev.canvas3d.co/hubs"
+        url = "https://api.canvas3d.io/hubs"
         data = {"name": hub_identifier}
 
         try:
@@ -236,7 +236,7 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        url = "https://api-dev.canvas3d.co/users/login"
+        url = "https://api.canvas3d.io/users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
