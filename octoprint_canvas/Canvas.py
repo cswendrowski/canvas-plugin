@@ -19,6 +19,7 @@ yaml = YAML(typ="safe")
 
 from dotenv import load_dotenv
 env_path = os.path.abspath(".") + "/.env"
+print(env_path)
 load_dotenv(env_path)
 BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
 BASE_URL_WS = os.getenv("DEV_BASE_URL_WS", "hub.canvas3d.io:")
