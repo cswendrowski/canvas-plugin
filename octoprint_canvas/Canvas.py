@@ -13,8 +13,15 @@ try:
     import thread
 except ImportError:
     import _thread as thread
+
 from ruamel.yaml import YAML
 yaml = YAML(typ="safe")
+
+from dotenv import load_dotenv
+env_path = os.path.abspath(".") + "/.env"
+load_dotenv(env_path)
+BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
+BASE_URL_WS = os.getenv("DEV_BASE_URL_WS", "hub.canvas3d.io:")
 
 
 def is_json(myjson):
@@ -98,7 +105,7 @@ class Canvas():
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        url = "https://api.canvas3d.io/hubs"
+        url = "https://" + BASE_URL_API + "hubs"
         data = {"name": hub_identifier}
 
         try:
@@ -121,7 +128,7 @@ class Canvas():
         hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
+        url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/users"
 
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
@@ -129,6 +136,7 @@ class Canvas():
         try:
             response = requests.get(url, headers=headers).json()
             if "users" in response:
+                self._logger.info("Got list of registered users.")
                 users = response["users"]
                 updated_users = {}
                 for user in users:
@@ -202,7 +210,7 @@ class Canvas():
     def enableWebsocketConnection(self):
         # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            url = "ws://hub.canvas3d.io:8443"
+            url = "ws://" + BASE_URL_WS + "8443"
             self.ws = websocket.WebSocketApp(url,
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
@@ -236,7 +244,7 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        url = "https://api.canvas3d.io/users/login"
+        url = "https://" + BASE_URL_API + "users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
@@ -260,7 +268,7 @@ class Canvas():
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
-        url = "https://slice.api.canvas3d.io/projects/" + \
+        url = "https://slice." + BASE_URL_API + "projects/" + \
             project_id + "/download"
 
         try:
@@ -323,7 +331,7 @@ class Canvas():
             "userToken": data["token"]
         }
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
+        url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/register"
 
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
