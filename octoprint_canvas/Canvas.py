@@ -44,6 +44,8 @@ class Canvas():
         self.ws_disconnect = False
         self.hub_registered = False
 
+        self._logger.info(env_path)
+
         self.hub_yaml = self.loadHubData()
         self.registerHub()
         if self.ws_connection is False:
