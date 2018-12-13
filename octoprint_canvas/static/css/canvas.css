@@ -401,14 +401,20 @@
 .canvas-theme #settings_dialog .pull-right .btn:hover i {
   color: #363636;
 }
-.canvas-theme .ui-pnotify .alert {
+.canvas-theme .ui-pnotify .alert,
+.canvas-theme .alert {
   color: #363636;
   background-color: white;
   border: 1px solid #363636;
 }
 .canvas-theme .ui-pnotify .alert h4,
-.canvas-theme .ui-pnotify .alert a {
+.canvas-theme .alert h4,
+.canvas-theme .ui-pnotify .alert a,
+.canvas-theme .alert a {
   color: #363636;
+}
+.canvas-theme #wizard_plugin_tracking_link a {
+  background-color: #363636;
 }
 .canvas-theme .ui-pnotify-icon span {
   margin-top: 3px;

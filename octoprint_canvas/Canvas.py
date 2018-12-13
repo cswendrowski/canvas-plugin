@@ -120,7 +120,7 @@ class Canvas():
                 self.hub_registered = True
                 self.updateUI({"command": "HubRegistered"})
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     ##############
     # 2. CLIENT UI STARTUP FUNCTIONS
@@ -152,7 +152,7 @@ class Canvas():
             self.enableWebsocketConnection()
 
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     def checkUserThemeSetting(self):
         if self._settings.get(["applyTheme"]):
@@ -165,8 +165,8 @@ class Canvas():
     ##############
 
     def ws_on_message(self, ws, message):
-        print("Just received a message from Canvas Server!")
-        print("Received: " + message)
+        self._logger.info("Just received a message from Canvas Server!")
+        self._logger.info("Received: " + message)
 
         if is_json(message) is True:
             response = json.loads(message)
@@ -175,30 +175,30 @@ class Canvas():
             elif "CONN/CLOSED" in response["type"]:
                 self.ws.close()
             elif "OP/DOWNLOAD" in response["type"]:
-                print("HANDLING DL")
+                self._logger.info("HANDLING DL")
                 self.downloadPrintFiles(response, response["filename"])
             elif "ERROR/INVALID_TOKEN" in response["type"]:
-                print("HANDLING ERROR/INVALID_TOKEN")
+                self._logger.info("HANDLING ERROR/INVALID_TOKEN")
                 self.ws.close()
             elif "AUTH/UNREGISTER_USER" in response["type"]:
-                print("REMOVING USER")
+                self._logger.info("REMOVING USER")
                 self.removeUserFromYAML(response["userId"])
 
     def ws_on_error(self, ws, error):
-        print("WS ERROR: " + str(error))
+        self._logger.info("WS ERROR: " + str(error))
 
     def ws_on_close(self, ws):
-        print("### Closing Websocket ###")
+        self._logger.info("### Closing Websocket ###")
         self.ws_connection = False
         self.checkWebsocketConnection()
 
     def ws_on_open(self, ws):
-        print("### Opening Websocket ###")
+        self._logger.info("### Opening Websocket ###")
         self.ws_connection = True
         self.checkWebsocketConnection()
 
     def ws_on_pong(self, ws, pong):
-        print("Received WS Pong")
+        self._logger.info("Received WS Pong")
 
     def runWebSocket(self):
         self.ws.run_forever(ping_interval=30, ping_timeout=5,
@@ -206,7 +206,7 @@ class Canvas():
         # if websocket connection was disconnected, try to reconnect again
         if self.hub_yaml["canvas-users"]:
             time.sleep(10)
-            print("Trying to reconnect...")
+            self._logger.info("Trying to reconnect...")
             self.enableWebsocketConnection()
 
     def enableWebsocketConnection(self):
@@ -263,7 +263,7 @@ class Canvas():
             else:
                 self.verifyUserInYAML(response)
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     def downloadPrintFiles(self, data, filename):
         token = self.hub_yaml["canvas-hub"]["token"]
@@ -279,7 +279,7 @@ class Canvas():
                 response, filename, project_id)
             self.extractZipfile(downloaded_file, project_id)
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     ##############
     # 5. HELPER FUNCTIONS
@@ -352,7 +352,7 @@ class Canvas():
                 self.updateUI({"command": "UserConnectedToHUB", "data": data})
 
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
