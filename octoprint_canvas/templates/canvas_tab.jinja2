@@ -2,7 +2,19 @@
 	<div class="distance">
 			<div class="row">
 				<h4>CANVAS</h4>
-				<p>Connection Status: <span id="connection-state-msg-canvas" class="text-muted">Not Connected</span></p>
+				<div class="connection-status-line">
+					<p>
+						<span>Connection Status: </span>
+						<span id="connection-state-msg-canvas" class="text-muted">Not Connected</span>
+					</p>
+					<div class="connection-info-container">
+						<i class="material-icons connection-info-icon">info_outline</i>
+						<div class="connection-info-text">
+							<h6 class="connection-info-heading"></h6>
+							<div class="connection-info-body"></div>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="row form-row">
 				<form class="add-user" data-bind="submit: addUser">

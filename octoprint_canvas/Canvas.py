@@ -183,9 +183,14 @@ class Canvas():
             elif "AUTH/UNREGISTER_USER" in response["type"]:
                 self._logger.info("REMOVING USER")
                 self.removeUserFromYAML(response["userId"])
+            elif "AUTH/CONFIRM_TOKEN" in response["type"]:
+                self.ws_connection = True
+                self.checkWebsocketConnection()
 
     def ws_on_error(self, ws, error):
         self._logger.info("WS ERROR: " + str(error))
+        if str(error) == "Connection is already closed.":
+            self._logger.info("CANVAS server is down.")
 
     def ws_on_close(self, ws):
         self._logger.info("### Closing Websocket ###")
@@ -194,8 +199,6 @@ class Canvas():
 
     def ws_on_open(self, ws):
         self._logger.info("### Opening Websocket ###")
-        self.ws_connection = True
-        self.checkWebsocketConnection()
 
     def ws_on_pong(self, ws, pong):
         self._logger.info("Received WS Pong")
@@ -227,12 +230,18 @@ class Canvas():
             else:
                 self._logger.info(
                     "There are no registered Canvas accounts yet. Connection not established.")
+                self.checkWebsocketConnection()
 
     def checkWebsocketConnection(self):
         if self.ws_connection is True:
             self.updateUI({"command": "Websocket", "data": True})
         else:
-            self.updateUI({"command": "Websocket", "data": False})
+            if not self.hub_yaml["canvas-users"]:
+                self.updateUI({"command": "Websocket", "data": False,
+                               "reason": "account"})
+            else:
+                self.updateUI({"command": "Websocket", "data": False,
+                               "reason": "server"})
 
     def sendInitialHubToken(self):
         data = {
