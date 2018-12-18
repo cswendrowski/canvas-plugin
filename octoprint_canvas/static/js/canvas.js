@@ -141,7 +141,7 @@ canvasApp.handleWebsocketConnection = data => {
       $(".connection-info-body")
         .empty()
         .append(
-          `<p>There seems to be an issue connecting to the CANVAS server. In the meanwhile, please download your CANVAS files manually and upload them to the Hub.</p>`
+          `<p>There seems to be an issue connecting to the CANVAS server. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub.</p>`
         );
     }
   }
