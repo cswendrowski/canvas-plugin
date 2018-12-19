@@ -66,6 +66,9 @@
 .toggle-remove-users span {
   text-decoration: underline;
 }
+#connection-state-msg-canvas {
+  margin-left: 3px;
+}
 .connection-status-line {
   font-weight: 400;
   display: -webkit-box;
