@@ -122,11 +122,36 @@ canvasApp.handleWebsocketConnection = data => {
     $("#connection-state-msg-canvas")
       .html("Connected")
       .css("color", "green");
+    $(".connection-info-heading").text("Connected to CANVAS server");
+    $(".connection-info-body")
+      .empty()
+      .append(`<p>Your Hub is properly connected to the CANVAS server.</p>`);
   } else {
     $("#connection-state-msg-canvas")
       .html("Not Connected")
       .css("color", "red");
+    $(".connection-info-heading").text("Not connected to CANVAS server");
+    if (data.reason === "account") {
+      $(".connection-info-body")
+        .empty()
+        .append(
+          `<p>No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection.</p>`
+        );
+    } else if (data.reason === "server") {
+      $(".connection-info-body")
+        .empty()
+        .append(
+          `<p>There seems to be an issue connecting to the CANVAS server. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub.</p>`
+        );
+    }
   }
+};
+
+/* 5.1 Toggle connection status */
+canvasApp.clickListenerStatus = () => {
+  $(".connection-info-icon").on("click", event => {
+    $(".connection-info-text").toggle(50);
+  });
 };
 
 /* 6. Display popup notifications for files incoming and received from Canvas */
@@ -332,6 +357,7 @@ function CanvasViewModel(parameters) {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
+    canvasApp.clickListenerStatus();
   };
 
   this.onEventFileAdded = payload => {

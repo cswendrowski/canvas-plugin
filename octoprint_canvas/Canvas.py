@@ -13,8 +13,17 @@ try:
     import thread
 except ImportError:
     import _thread as thread
+
 from ruamel.yaml import YAML
 yaml = YAML(typ="safe")
+
+from dotenv import load_dotenv
+env_path = os.path.abspath(".") + "/.env"
+if os.path.abspath(".") is "/":
+    env_path = "/home/pi/.env"
+load_dotenv(env_path)
+BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
+BASE_URL_WS = os.getenv("DEV_BASE_URL_WS", "hub.canvas3d.io:")
 
 
 def is_json(myjson):
@@ -98,7 +107,7 @@ class Canvas():
     def registerHubAPICall(self, hub_identifier):
         self._logger.info("Registering HUB to AMARANTH")
 
-        url = "https://api.canvas3d.io/hubs"
+        url = "https://" + BASE_URL_API + "hubs"
         data = {"name": hub_identifier}
 
         try:
@@ -111,7 +120,7 @@ class Canvas():
                 self.hub_registered = True
                 self.updateUI({"command": "HubRegistered"})
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     ##############
     # 2. CLIENT UI STARTUP FUNCTIONS
@@ -121,7 +130,7 @@ class Canvas():
         hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/users"
+        url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/users"
 
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
@@ -129,6 +138,7 @@ class Canvas():
         try:
             response = requests.get(url, headers=headers).json()
             if "users" in response:
+                self._logger.info("Got list of registered users.")
                 users = response["users"]
                 updated_users = {}
                 for user in users:
@@ -142,7 +152,7 @@ class Canvas():
             self.enableWebsocketConnection()
 
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     def checkUserThemeSetting(self):
         if self._settings.get(["applyTheme"]):
@@ -155,8 +165,8 @@ class Canvas():
     ##############
 
     def ws_on_message(self, ws, message):
-        print("Just received a message from Canvas Server!")
-        print("Received: " + message)
+        self._logger.info("Just received a message from Canvas Server!")
+        self._logger.info("Received: " + message)
 
         if is_json(message) is True:
             response = json.loads(message)
@@ -165,30 +175,33 @@ class Canvas():
             elif "CONN/CLOSED" in response["type"]:
                 self.ws.close()
             elif "OP/DOWNLOAD" in response["type"]:
-                print("HANDLING DL")
+                self._logger.info("HANDLING DL")
                 self.downloadPrintFiles(response, response["filename"])
             elif "ERROR/INVALID_TOKEN" in response["type"]:
-                print("HANDLING ERROR/INVALID_TOKEN")
+                self._logger.info("HANDLING ERROR/INVALID_TOKEN")
                 self.ws.close()
             elif "AUTH/UNREGISTER_USER" in response["type"]:
-                print("REMOVING USER")
+                self._logger.info("REMOVING USER")
                 self.removeUserFromYAML(response["userId"])
+            elif "AUTH/CONFIRM_TOKEN" in response["type"]:
+                self.ws_connection = True
+                self.checkWebsocketConnection()
 
     def ws_on_error(self, ws, error):
-        print("WS ERROR: " + str(error))
+        self._logger.info("WS ERROR: " + str(error))
+        if str(error) == "Connection is already closed.":
+            self._logger.info("CANVAS server is down.")
 
     def ws_on_close(self, ws):
-        print("### Closing Websocket ###")
+        self._logger.info("### Closing Websocket ###")
         self.ws_connection = False
         self.checkWebsocketConnection()
 
     def ws_on_open(self, ws):
-        print("### Opening Websocket ###")
-        self.ws_connection = True
-        self.checkWebsocketConnection()
+        self._logger.info("### Opening Websocket ###")
 
     def ws_on_pong(self, ws, pong):
-        print("Received WS Pong")
+        self._logger.info("Received WS Pong")
 
     def runWebSocket(self):
         self.ws.run_forever(ping_interval=30, ping_timeout=5,
@@ -196,13 +209,13 @@ class Canvas():
         # if websocket connection was disconnected, try to reconnect again
         if self.hub_yaml["canvas-users"]:
             time.sleep(10)
-            print("Trying to reconnect...")
+            self._logger.info("Trying to reconnect...")
             self.enableWebsocketConnection()
 
     def enableWebsocketConnection(self):
         # if HUB already has registered Canvas Users, enable websocket client
         if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            url = "ws://hub.canvas3d.io:8443"
+            url = "ws://" + BASE_URL_WS + "8443"
             self.ws = websocket.WebSocketApp(url,
                                              on_message=self.ws_on_message,
                                              on_error=self.ws_on_error,
@@ -217,12 +230,18 @@ class Canvas():
             else:
                 self._logger.info(
                     "There are no registered Canvas accounts yet. Connection not established.")
+                self.checkWebsocketConnection()
 
     def checkWebsocketConnection(self):
         if self.ws_connection is True:
             self.updateUI({"command": "Websocket", "data": True})
         else:
-            self.updateUI({"command": "Websocket", "data": False})
+            if not self.hub_yaml["canvas-users"]:
+                self.updateUI({"command": "Websocket", "data": False,
+                               "reason": "account"})
+            else:
+                self.updateUI({"command": "Websocket", "data": False,
+                               "reason": "server"})
 
     def sendInitialHubToken(self):
         data = {
@@ -236,7 +255,7 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        url = "https://api.canvas3d.io/users/login"
+        url = "https://" + BASE_URL_API + "users/login"
 
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
@@ -253,14 +272,14 @@ class Canvas():
             else:
                 self.verifyUserInYAML(response)
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     def downloadPrintFiles(self, data, filename):
         token = self.hub_yaml["canvas-hub"]["token"]
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
-        url = "https://slice.api.canvas3d.io/projects/" + \
+        url = "https://slice." + BASE_URL_API + "projects/" + \
             project_id + "/download"
 
         try:
@@ -269,7 +288,7 @@ class Canvas():
                 response, filename, project_id)
             self.extractZipfile(downloaded_file, project_id)
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     ##############
     # 5. HELPER FUNCTIONS
@@ -323,7 +342,7 @@ class Canvas():
             "userToken": data["token"]
         }
 
-        url = "https://api.canvas3d.io/hubs/" + hub_id + "/register"
+        url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/register"
 
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
@@ -342,7 +361,7 @@ class Canvas():
                 self.updateUI({"command": "UserConnectedToHUB", "data": data})
 
         except requests.exceptions.RequestException as e:
-            print e
+            self._logger.info(e)
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
