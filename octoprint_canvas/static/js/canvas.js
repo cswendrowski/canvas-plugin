@@ -269,7 +269,6 @@ function CanvasViewModel(parameters) {
   self.applyTheme = false;
 
   self.onBeforeBinding = () => {
-    console.log("ON BEFORE BINDING");
     self.settings = parameters[0];
     self.appearance = parameters[1];
     self.appearance.name("");
@@ -277,9 +276,6 @@ function CanvasViewModel(parameters) {
       return self.appearance.name();
     });
     self.appearance.name("OctoPrint");
-    console.log(parameters[0]);
-    console.log(parameters[1]);
-    console.log(self.settings.settings.plugins.canvas.applyTheme());
     self.toggleTheme();
   };
 
