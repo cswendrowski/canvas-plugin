@@ -1,0 +1,59 @@
+.progress .bar,
+.slider .slider-selection {
+  background-color: fade(@color-1, 70%);
+  background-image: -moz-linear-gradient(top, fade(@color-1, 10%), fade(@color-1, 95%));
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(fade(@color-1, 50%)), to(fade(@color-1, 95%)));
+  background-image: -webkit-linear-gradient(top, fade(@color-1, 10%), fade(@color-1, 95%));
+  background-image: -o-linear-gradient(top, fade(@color-1, 10%), fade(@color-1, 95%));
+  background-image: linear-gradient(to bottom, fade(@color-1, 10%), fade(@color-1, 95%));
+}
+
+.slider .slider-selection:hover,
+.slider .slider-selection:active {
+  background-color: fade(@color-1, 50%);
+}
+
+input.search-query {
+  border-radius: 3px;
+}
+
+#temperature-graph {
+  background-image: none !important;
+}
+
+.ui-pnotify .alert,
+.alert {
+  color: @color-1;
+  background-color: @color-2;
+  border: 1px solid @color-1;
+
+  h4,
+  a {
+    color: @color-1;
+  }
+}
+
+#wizard_plugin_tracking_link a {
+  background-color: @color-1;
+}
+
+.ui-pnotify-icon span {
+  margin-top: 3px;
+  margin-left: 1px;
+}
+
+.hide {
+  display: none;
+}
+
+.material-icons {
+  margin-right: 2px;
+
+  &.md-22 {
+    font-size: 22px;
+  }
+}
+
+hr {
+  margin-left: -20px;
+}

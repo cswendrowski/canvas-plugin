@@ -1,0 +1,51 @@
+.accordion-group {
+  margin-bottom: 10px;
+  border: 1px solid @color-4;
+  border-radius: 0px;
+}
+
+.accordion-heading {
+  background-color: @color-1;
+  border-bottom: 1px solid @color-1;
+}
+
+.accordion-heading a:hover,
+.accordion-toggle {
+  color: @color-2;
+}
+
+.icon-sd-black-14 {
+  background: url(../img/sd-card.png) no-repeat;
+  width: 16px;
+  height: 13px;
+  margin-top: 4px;
+  background-size: contain;
+}
+
+.title.clickable {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.palette-tag {
+  width: 62%;
+  padding-right: 38%;
+  position: relative;
+}
+
+.palette-tag::after {
+  content: "Palette";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: @color-1;
+  padding: 0px 20px;
+  color: @color-2;
+  font-weight: 700;
+  border-radius: 1px;
+  cursor: auto;
+}
+
+#files .form-search {
+  text-align: left;
+}

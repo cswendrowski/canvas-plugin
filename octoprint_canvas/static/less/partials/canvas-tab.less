@@ -1,0 +1,79 @@
+.add-user {
+  margin-top: 10px;
+}
+
+.label-spacing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 60%;
+
+  input[type="password"] {
+    margin-bottom: 0;
+  }
+}
+
+.connect-canvas-button {
+  margin-top: 20px;
+}
+
+#connection-state-msg-canvas {
+  color: red;
+}
+
+.registered-accounts {
+  margin-left: 0;
+  margin-bottom: 0;
+}
+
+.registered-canvas-user {
+  list-style: none;
+  font-weight: 500;
+  color: @color-1;
+  background-color: @color-2;
+  margin: 7.5px 10px 7.5px 0;
+  padding: 5px 15px 5px 10px;
+  font-weight: 500;
+  display: inline-flex;
+  justify-content: center;
+  position: relative;
+  transition: 0.15s all;
+  border: 1px solid @color-1;
+  border-radius: 2px;
+}
+
+.username {
+  display: flex;
+  align-self: center;
+}
+
+.canvas-plugin {
+  display: block;
+  margin-left: 30px;
+}
+
+a.canvas-register,
+a.canvas-register:visited {
+  text-decoration: underline;
+  font-weight: 400;
+  opacity: 1;
+  color: @color-1;
+}
+
+a.canvas-hub-manage,
+a.canvas-hub-manage:visited {
+  font-weight: 400;
+  opacity: 1;
+  color: @color-1;
+  text-decoration: underline;
+}
+
+.btn:hover .canvas-hub-manage {
+  color: @color-1;
+  text-decoration: none;
+}
+
+.hub-manage-container {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
