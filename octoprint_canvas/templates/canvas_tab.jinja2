@@ -5,13 +5,13 @@
 				<div class="connection-status-line">
 					<p>
 						<span>Connection Status: </span>
-						<span id="connection-state-msg-canvas" class="text-muted">Not Connected</span>
+						<span id="connection-state-msg-canvas" class="text-muted" data-bind="text: connectionStatus"></span>
 					</p>
 					<div class="connection-info-container">
-						<i class="material-icons connection-info-icon">info_outline</i>
+						<i class="material-icons connection-info-icon" data-bind="click: toggleStatusInfo">info_outline</i>
 						<div class="connection-info-text">
-							<h6 class="connection-info-heading"></h6>
-							<div class="connection-info-body"></div>
+							<h6 class="connection-info-heading" data-bind="text: connectionInfoHeading"></h6>
+							<div class="connection-info-body"><p data-bind="text: connectionInfoBody"></p></div>
 						</div>
 					</div>
 				</div>
@@ -26,8 +26,15 @@
 			</div>
 			<hr>
 			<div class="row">
-				<h4 class="registered-accounts-title">Linked CANVAS Accounts:</h4>
-				<ul class="registered-accounts"></ul>
+				<h4 class="registered-accounts-title">Linked Accounts:</h4>
+				<ul class="registered-accounts" data-bind="foreach: users, visible: users().length > 0">
+					<li class="registered-canvas-user">
+        		<i class="material-icons md-18">person</i>
+        		<span class="username" data-bind="text: username"></span>
+        	</li>
+				</ul>
+				<h5 class="hub-manage-container"><a class="canvas-hub-manage" target="_blank" href="https://canvas3d.io/hubs">Manage Hub Accounts</a></h5>
+				{# <button class="btn btn-primary hub-manage-container"><a class="canvas-hub-manage" target="_blank" href="https://canvas3d.io/hubs">Manage Hub Accounts</a></button> #}
 			</div>
 	</div>
 </div>

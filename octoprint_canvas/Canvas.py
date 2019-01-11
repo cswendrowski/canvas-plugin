@@ -154,12 +154,6 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
-    def checkUserThemeSetting(self):
-        if self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": True})
-        elif not self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": False})
-
     ##############
     # 3. WEBSOCKET FUNCTIONS
     ##############

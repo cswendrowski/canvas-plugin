@@ -25,30 +25,13 @@ const canvasApp = {};
   CANVAS THEME FUNCTIONALITIES
   ======================= */
 
-/* 1. Replaces Octoprint Name with Canvas Hub */
-canvasApp.toggleBrandName = name => {
-  if (name === "CANVAS Hub") {
-    $(".brand")
-      .find("span")
-      .removeAttr("data-bind");
-    $(".brand")
-      .find("span")
-      .text(name);
-
-    $("head title")
-      .removeAttr("data-bind")
-      .text(name);
+/* 1. Replaces Octoprint Logo with Mosaic */
+canvasApp.toggleLogo = condition => {
+  if (condition) {
     $("head")
       .find('link[rel="shortcut icon"]')
       .attr("href", "/plugin/canvas/static/img/Mosaic_Icon_Square.png");
   } else {
-    $(".brand")
-      .find("span")
-      .text(name);
-
-    $("head title")
-      .removeAttr("data-bind")
-      .text(name);
     $("head")
       .find('link[rel="shortcut icon"]')
       .attr("href", "/static/img/tentacle-20x20@2x.png");
@@ -81,80 +64,7 @@ canvasApp.removeFolderBinding = () => {
     });
 };
 
-/* 3. Toggle on/off the Canvas Theme */
-canvasApp.toggleTheme = condition => {
-  // FE event listener
-  $(".theme-input").on("change", event => {
-    let checked = event.target.checked;
-
-    if (checked) {
-      $("html").addClass("canvas-theme");
-      canvasApp.toggleBrandName("CANVAS Hub");
-    } else {
-      $("html").removeClass("canvas-theme");
-      canvasApp.toggleBrandName("OctoPrint");
-    }
-  });
-
-  // When receiving initial settings from BE
-  if (condition) {
-    $("html").addClass("canvas-theme");
-    canvasApp.toggleBrandName("CANVAS Hub");
-  }
-};
-
-/* 4. Display all connected Canvas Accounts */
-canvasApp.handleUserDisplay = data => {
-  $(".registered-accounts").html("");
-  if (data.data.length > 0) {
-    data.data.forEach(user => {
-      $(".registered-accounts").append(`<li class="registered-canvas-user">
-        <i class="material-icons md-18">person</i>
-        <span class="username">${user.username}</span>
-        </li>`);
-    });
-  }
-};
-
-/* 5. Display that Websockets are enabled between Hub and Canvas */
-canvasApp.handleWebsocketConnection = data => {
-  if (data.data === true) {
-    $("#connection-state-msg-canvas")
-      .html("Connected")
-      .css("color", "green");
-    $(".connection-info-heading").text("Connected to CANVAS server");
-    $(".connection-info-body")
-      .empty()
-      .append(`<p>Your Hub is properly connected to the CANVAS server.</p>`);
-  } else {
-    $("#connection-state-msg-canvas")
-      .html("Not Connected")
-      .css("color", "red");
-    $(".connection-info-heading").text("Not connected to CANVAS server");
-    if (data.reason === "account") {
-      $(".connection-info-body")
-        .empty()
-        .append(
-          `<p>No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection.</p>`
-        );
-    } else if (data.reason === "server") {
-      $(".connection-info-body")
-        .empty()
-        .append(
-          `<p>There seems to be an issue connecting to the CANVAS server. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub.</p>`
-        );
-    }
-  }
-};
-
-/* 5.1 Toggle connection status */
-canvasApp.clickListenerStatus = () => {
-  $(".connection-info-icon").on("click", event => {
-    $(".connection-info-text").toggle(50);
-  });
-};
-
-/* 6. Display popup notifications for files incoming and received from Canvas */
+/* 3. Display popup notifications for files incoming and received from Canvas */
 canvasApp.displayNotification = data => {
   // if a prior popup with the same file is currently on the page, remove it
   if ($("body").find(`#${data.projectId}`).length > 0) {
@@ -182,7 +92,7 @@ canvasApp.displayNotification = data => {
   notification.fadeIn(200);
 };
 
-/* 6.1 Update the download progress (%) on UI */
+/* 3.1 Update the download progress (%) on UI */
 canvasApp.updateDownloadProgress = data => {
   if (data.current === 0) {
     $("body")
@@ -220,7 +130,7 @@ canvasApp.updateDownloadProgress = data => {
     .text(data.current + "%");
 };
 
-/* 6.2 Update download progress when file is received and extracted */
+/* 3.2 Update download progress when file is received and extracted */
 canvasApp.updateFileReceived = data => {
   $("body")
     .find(`#${data.projectId} .popup-title`)
@@ -240,7 +150,7 @@ canvasApp.updateFileReceived = data => {
     .fadeIn(200);
 };
 
-/* 6.3 Update download progress when file analysis is done */
+/* 3.3 Update download progress when file analysis is done */
 canvasApp.updateFileReady = filename => {
   $("body")
     .find(`.progress-bar .file-download-name:contains("${filename}")`)
@@ -262,7 +172,7 @@ canvasApp.updateFileReady = filename => {
   }, 400);
 };
 
-/* 7. Remove popup notifications */
+/* 4. Remove popup notifications */
 canvasApp.removePopup = () => {
   $("body").on("click", ".side-notifications-list .remove-popup", function() {
     $(this)
@@ -273,7 +183,7 @@ canvasApp.removePopup = () => {
   });
 };
 
-/* 8. Apply additional tagging function for slower DOM-binding scenarios*/
+/* 5. Apply additional tagging function for slower DOM-binding scenarios*/
 canvasApp.applyExtraTagging = () => {
   let count = 0;
   let applyTagging = setInterval(function() {
@@ -290,7 +200,7 @@ canvasApp.applyExtraTagging = () => {
   }, 100);
 };
 
-/* 9. Loader */
+/* 6. Loader */
 canvasApp.loadingOverlay = condition => {
   if (condition) {
     $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
@@ -301,7 +211,7 @@ canvasApp.loadingOverlay = condition => {
   }
 };
 
-/* 10. Add Notification List To DOM */
+/* 7. Add Notification List To DOM */
 canvasApp.addNotificationList = () => {
   if ($("body").find(".side-notifications-list").length === 0) {
     $("body")
@@ -310,8 +220,7 @@ canvasApp.addNotificationList = () => {
   }
 };
 
-/* 11. Alert Texts */
-
+/* 8. Alert Texts */
 canvasApp.userAddedSuccess = username => {
   return swal({
     type: "success",
@@ -349,56 +258,80 @@ canvasApp.userDeletedSuccess = username => {
   ======================= */
 
 function CanvasViewModel(parameters) {
-  this.userInput = ko.observable();
-  this.password = ko.observable();
+  var self = this;
 
-  this.onStartupComplete = () => {
-    canvasApp.toggleTheme();
+  self.userInput = ko.observable();
+  self.password = ko.observable();
+  self.connectionStatus = ko.observable();
+  self.connectionInfoHeading = ko.observable();
+  self.connectionInfoBody = ko.observable();
+  self.users = ko.observable([]);
+  self.applyTheme = false;
+
+  self.onBeforeBinding = () => {
+    console.log("ON BEFORE BINDING");
+    self.settings = parameters[0];
+    self.appearance = parameters[1];
+    self.appearance.name("");
+    self.appearance.title = ko.pureComputed(function() {
+      return self.appearance.name();
+    });
+    self.appearance.name("OctoPrint");
+    console.log(parameters[0]);
+    console.log(parameters[1]);
+    console.log(self.settings.settings.plugins.canvas.applyTheme());
+    self.toggleTheme();
+  };
+
+  self.onStartupComplete = () => {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
-    canvasApp.clickListenerStatus();
   };
 
-  this.onEventFileAdded = payload => {
+  self.onEventFileAdded = payload => {
     canvasApp.tagPaletteFiles();
     if ($("body").find(`.progress-bar .file-download-name:contains("${payload.name}")`)) {
       canvasApp.updateFileReady(payload.name);
     }
   };
 
-  this.onEventFileRemoved = () => {
+  self.onEventFileRemoved = () => {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onEventMetadataAnalysisFinished = payload => {
+  self.onEventMetadataAnalysisFinished = payload => {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onEventUpdatedFiles = () => {
+  self.onEventUpdatedFiles = () => {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onEventFileSelected = () => {
+  self.onEventFileSelected = () => {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onEventFileDeselected = () => {
+  self.onEventFileDeselected = () => {
     canvasApp.tagPaletteFiles();
   };
 
-  this.onDataUpdaterReconnect = () => {
+  self.onDataUpdaterReconnect = () => {
     canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
   };
 
-  this.addUser = () => {
-    canvasApp.loadingOverlay(true);
-    let payload = { command: "addUser", data: { username: this.userInput(), password: this.password() } };
+  self.onEventConnected = () => {
+    self.toggleTheme();
+  };
 
-    if (this.userInput().includes("@")) {
-      payload = { command: "addUser", data: { email: this.userInput(), password: this.password() } };
+  self.addUser = () => {
+    canvasApp.loadingOverlay(true);
+    let payload = { command: "addUser", data: { username: self.userInput(), password: self.password() } };
+
+    if (self.userInput().includes("@")) {
+      payload = { command: "addUser", data: { email: self.userInput(), password: self.password() } };
     }
 
     $.ajax({
@@ -413,13 +346,69 @@ function CanvasViewModel(parameters) {
     });
   };
 
+  self.handleWebsocketConnection = data => {
+    if (data.data === true) {
+      self.connectionStatus("Connected");
+      $("#connection-state-msg-canvas").css("color", "green");
+      self.connectionInfoHeading("Connected to CANVAS server");
+      self.connectionInfoBody("Your Hub is properly connected to the CANVAS server");
+    } else {
+      self.connectionStatus("Not Connected");
+      $("#connection-state-msg-canvas").css("color", "red");
+      self.connectionInfoHeading("Not connected to CANVAS server");
+      if (data.reason === "account") {
+        self.connectionInfoBody(
+          "No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection."
+        );
+      } else if (data.reason === "server") {
+        self.connectionInfoBody(
+          "There seems to be an issue connecting to the CANVAS server. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub."
+        );
+      }
+    }
+  };
+
+  self.toggleStatusInfo = () => {
+    $(".connection-info-text").toggle(50);
+  };
+
+  self.toggleTheme = condition => {
+    let applyTheme = self.settings.settings.plugins.canvas.applyTheme();
+
+    // Apply theme immediately
+    if (applyTheme) {
+      self.appearance.name("CANVAS Hub");
+      $("html").addClass("canvas-theme");
+      canvasApp.toggleLogo(applyTheme);
+    } else {
+      self.appearance.name("OctoPrint");
+      $("html").removeClass("canvas-theme");
+      canvasApp.toggleLogo(applyTheme);
+    }
+
+    // Event listener for when user changes the theme settings
+    $(".theme-input").on("change", event => {
+      applyTheme = self.settings.settings.plugins.canvas.applyTheme();
+
+      if (applyTheme) {
+        self.appearance.name("CANVAS Hub");
+        $("html").addClass("canvas-theme");
+        canvasApp.toggleLogo(applyTheme);
+      } else {
+        self.appearance.name("OctoPrint");
+        $("html").removeClass("canvas-theme");
+        canvasApp.toggleLogo(applyTheme);
+      }
+    });
+  };
+
   // Receive messages from the OctoPrint server
-  this.onDataUpdaterPluginMessage = (pluginIdent, message) => {
+  self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
       if (message.command === "DisplayRegisteredUsers") {
-        canvasApp.handleUserDisplay(message);
+        self.users(message.data);
       } else if (message.command === "Websocket") {
-        canvasApp.handleWebsocketConnection(message);
+        self.handleWebsocketConnection(message);
       } else if (message.command === "UserConnectedToHUB") {
         canvasApp.userAddedSuccess(message.data.username);
       } else if (message.command === "UserAlreadyExists") {
@@ -428,13 +417,6 @@ function CanvasViewModel(parameters) {
         canvasApp.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
         canvasApp.userDeletedSuccess(message.data);
-      } else if (message.command === "toggleTheme") {
-        if (message.data) {
-          $(".theme-input").attr("checked", true);
-          canvasApp.toggleTheme(true);
-        } else {
-          $(".theme-input").attr("checked", false);
-        }
       } else if (message.command === "CANVASDownload") {
         if (message.status === "starting") {
           canvasApp.displayNotification(message.data);
@@ -456,10 +438,8 @@ $(function() {
   CanvasViewModel();
   OCTOPRINT_VIEWMODELS.push({
     // This is the constructor to call for instantiating the plugin
-    construct: CanvasViewModel,
-    // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
-    dependencies: ["settingsViewModel"],
-    // Finally, this is the list of selectors for all elements we want this view model to be bound to.
+    construct: CanvasViewModel, // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
+    dependencies: ["settingsViewModel", "appearanceViewModel"], // Finally, this is the list of selectors for all elements we want this view model to be bound to.
     elements: ["#tab_plugin_canvas"]
   });
 });
