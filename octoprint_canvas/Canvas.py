@@ -154,12 +154,6 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
-    def checkUserThemeSetting(self):
-        if self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": True})
-        elif not self._settings.get(["applyTheme"]):
-            self.updateUI({"command": "toggleTheme", "data": False})
-
     ##############
     # 3. WEBSOCKET FUNCTIONS
     ##############
@@ -289,6 +283,11 @@ class Canvas():
             self.extractZipfile(downloaded_file, project_id)
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
+
+    def changeImportantUpdateSettings(self, condition):
+        self._logger.info("Changing Important Update Settings")
+        self._settings.set(["importantUpdate"], condition, force=True)
+        self._logger.info(self._settings.get(["importantUpdate"]))
 
     ##############
     # 5. HELPER FUNCTIONS

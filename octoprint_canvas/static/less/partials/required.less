@@ -1,0 +1,166 @@
+.canvas-plugin {
+  margin-left: 30px;
+}
+.form-row {
+  margin-top: 10px;
+}
+.label-spacing {
+  display: flex;
+  justify-content: space-between;
+  width: 60%;
+}
+.connect-canvas-button {
+  margin-top: 7px;
+}
+.registered-accounts {
+  list-style: none;
+  margin-left: 0;
+}
+.registered-canvas-user {
+  display: flex;
+  align-items: center;
+
+  i {
+    font-size: 20px;
+  }
+  .username {
+    margin: 0 7px 0 5px;
+  }
+  .remove-user {
+    cursor: pointer;
+    transition: 0.1s all;
+    font-size: 14px;
+    color: @color-1;
+    background-color: @color-2;
+    border: 1px solid @color-1;
+    border-radius: 50%;
+  }
+  .hide {
+    display: none;
+  }
+}
+.toggle-remove-users {
+  display: none;
+  cursor: pointer;
+  margin-top: 0;
+  font-weight: 400;
+  align-items: center;
+
+  i {
+    font-size: 12px;
+  }
+
+  span:hover {
+    text-shadow: 0.25px 0px 0px @color-1;
+  }
+
+  span {
+    text-decoration: underline;
+  }
+}
+
+#connection-state-msg-canvas {
+  margin-left: 3px;
+}
+
+.connection-status-line {
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
+
+  .connection-info-container {
+    margin-left: 2.5px;
+    position: relative;
+    display: flex;
+
+    .connection-info-icon {
+      font-size: 17px;
+      line-height: 20px;
+      cursor: pointer;
+    }
+    .connection-info-text {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      width: 250px;
+      left: 35px;
+      bottom: -18px;
+      background-color: @color-5;
+      border: 1px solid @color-1;
+      border-radius: 3px;
+      padding: 10px;
+
+      &::after,
+      &::before {
+        content: "";
+        position: absolute;
+        display: block;
+        right: 100%;
+        width: 0;
+        height: 0;
+        border-style: solid;
+      }
+
+      // fill
+      &::after {
+        bottom: 17px;
+        border-color: transparent @color-5 transparent transparent;
+        border-width: 10px;
+      }
+
+      // border
+      &::before {
+        bottom: 16px;
+        border-color: transparent @color-1 transparent transparent;
+        border-width: 11px;
+      }
+
+      .connection-info-heading {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .connection-info-body {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.loading-overlay-container {
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background-color: fade(@color-4, 50%);
+}
+
+.loader {
+  width: 4em;
+  height: 4em;
+  border: 8px solid fade(@color-2, 40%);
+  border-top-color: @color-2;
+  border-radius: 50%;
+  animation: rotate360 1.5s linear infinite;
+}
+
+@keyframes rotate360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

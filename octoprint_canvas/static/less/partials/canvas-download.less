@@ -1,0 +1,126 @@
+.side-notifications-list {
+  position: fixed;
+  top: 15%;
+  left: 0;
+  margin: 0;
+}
+
+.popup-notification {
+  position: relative;
+  list-style: none;
+  text-align: right;
+  width: 200px;
+  padding: 0.5rem 1.1rem;
+  margin-bottom: 7px;
+  border: 1px solid @color-1;
+  border-left: none;
+  z-index: 5;
+  background-color: @color-5;
+  border-top-right-radius: 1px;
+  border-bottom-right-radius: 1px;
+  word-wrap: break-word;
+
+  i {
+    cursor: pointer;
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    border: 1px solid @color-2;
+    background-color: @color-1;
+    color: @color-2;
+    border-radius: 50%;
+    padding: 1px;
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .popup-title,
+  h6 {
+    margin: 0;
+    margin-bottom: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    @color-2-space: nowrap;
+  }
+}
+
+.total-bar {
+  width: 100%;
+  background-color: fade(@color-1, 20%);
+  border-radius: 3px;
+  margin-top: 25px;
+}
+
+.current-bar {
+  width: 0%;
+  background-color: fade(@color-1, 80%);
+  position: relative;
+  transition: 0.1s;
+  border-radius: 3px;
+}
+
+.progression-tool-tip {
+  position: absolute;
+  left: 0;
+  top: -125%;
+  padding: 1px 5px;
+  background-color: @color-1;
+  color: @color-2;
+  border-radius: 5px;
+  font-size: 9px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  visibility: hidden;
+}
+
+.tool-tip-arrow {
+  &::after {
+    content: " ";
+    position: absolute;
+    bottom: -35%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: @color-1 transparent transparent transparent;
+  }
+}
+
+.highlight-glow-received {
+  animation: highlight-received 1.5s 1;
+}
+
+@keyframes highlight-received {
+  0% {
+    background: #ebf2e8;
+  }
+  100% {
+    background: @color-5;
+  }
+}
+
+.popup-heading {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.small-loader {
+  display: none;
+  overflow: hidden;
+  margin-top: 2px;
+  margin-left: 5px;
+  width: 11.9px;
+  height: 11.9px;
+  border: 2px solid fade(@color-1, 20%);
+  border-top-color: @color-1;
+  border-radius: 50%;
+  animation: rotate360 1.5s linear infinite;
+}
