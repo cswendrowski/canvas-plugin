@@ -36,7 +36,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         )
 
     def get_settings_defaults(self):
-        return dict(applyTheme=True)
+        return dict(applyTheme=True, importantUpdate=True)
 
     def get_latest(self, target, check, full_data=False, online=True):
         resp = requests.get(
@@ -58,6 +58,12 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("remote version: %s" % version)
         needs_update = LooseVersion(current_version) < LooseVersion(version)
         self._logger.info("needs update: %s" % needs_update)
+
+        # check if feature-breaking update is upcoming
+        if current_version == "1.3.0" and version == "2.0.0" and needs_update:
+            self._logger.info("Important Update Detected")
+            self.displayImportantUpdateAlert = True
+
         return information, not needs_update
 
     def get_update_information(self):
@@ -81,18 +87,26 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     # SIMPLEAPIPLUGIN POST, runs first before on_api_commands, responds to commands from palette,js, any strings inside array = mandatory
     def get_api_commands(self):
         return dict(
-            addUser=["data"]
+            addUser=["data"],
+            changeImportantUpdateSettings=["condition"]
         )
 
     # SIMPLEAPIPLUGIN POST, to handle commands listed in get_api_commands
     def on_api_command(self, command, data):
         if command == "addUser":
             self.canvas.addUser(data)
+        elif command == "changeImportantUpdateSettings":
+            self.canvas.changeImportantUpdateSettings(data["condition"])
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
         self._logger.info("EVENT: " + event)
-        if "ClientOpened" in event:
+        if "Startup" in event:
+            self.displayImportantUpdateAlert = False
+        elif "ClientOpened" in event:
+            if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
+                self.canvas.updateUI(
+                    {"command": "importantUpdate", "data": "2.0.0"})
             self.canvas.getRegisteredUsers()
             self.canvas.checkWebsocketConnection()
         elif "Shutdown" in event:

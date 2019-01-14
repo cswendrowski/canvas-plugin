@@ -253,6 +253,19 @@ canvasApp.userDeletedSuccess = username => {
   });
 };
 
+canvasApp.importantUpdate = version => {
+  return swal({
+    type: "info",
+    title: `Important Update (Version ${version})`,
+    html: `CANVAS Plugin - Version ${version} is available for download.
+    <br /><br />This version of the plugin contains important changes that allow a more stable connection to CANVAS. Due to changes on the CANVAS servers to facilitate these improvements, this update is required for 'Send to CANVAS Hub' functionality.
+    <br /><br />We apologize for the inconvenience.`,
+    input: "checkbox",
+    inputClass: "update-checkbox",
+    inputPlaceholder: "Don't show me this again"
+  });
+};
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -269,7 +282,6 @@ function CanvasViewModel(parameters) {
   self.applyTheme = false;
 
   self.onBeforeBinding = () => {
-    console.log("ON BEFORE BINDING");
     self.settings = parameters[0];
     self.appearance = parameters[1];
     self.appearance.name("");
@@ -277,9 +289,6 @@ function CanvasViewModel(parameters) {
       return self.appearance.name();
     });
     self.appearance.name("OctoPrint");
-    console.log(parameters[0]);
-    console.log(parameters[1]);
-    console.log(self.settings.settings.plugins.canvas.applyTheme());
     self.toggleTheme();
   };
 
@@ -402,6 +411,25 @@ function CanvasViewModel(parameters) {
     });
   };
 
+  self.changeImportantUpdateSettings = condition => {
+    displayImportantUpdateAlert = !condition;
+
+    let payload = {
+      command: "changeImportantUpdateSettings",
+      condition: displayImportantUpdateAlert
+    };
+
+    $.ajax({
+      url: API_BASEURL + "plugin/canvas",
+      type: "POST",
+      dataType: "json",
+      data: JSON.stringify(payload),
+      contentType: "application/json; charset=UTF-8"
+    }).then(res => {
+      self.settings.saveData();
+    });
+  };
+
   // Receive messages from the OctoPrint server
   self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
@@ -425,6 +453,11 @@ function CanvasViewModel(parameters) {
         } else if (message.status === "received") {
           canvasApp.updateFileReceived(message.data);
         }
+      } else if (message.command === "importantUpdate") {
+        $("body").on("click", ".update-checkbox input", event => {
+          self.changeImportantUpdateSettings(event.target.checked);
+        });
+        canvasApp.importantUpdate(message.data);
       }
     }
   };

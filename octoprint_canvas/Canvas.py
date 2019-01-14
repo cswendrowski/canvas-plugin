@@ -284,6 +284,11 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
+    def changeImportantUpdateSettings(self, condition):
+        self._logger.info("Changing Important Update Settings")
+        self._settings.set(["importantUpdate"], condition, force=True)
+        self._logger.info(self._settings.get(["importantUpdate"]))
+
     ##############
     # 5. HELPER FUNCTIONS
     ##############
