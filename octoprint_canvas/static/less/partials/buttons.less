@@ -1,0 +1,29 @@
+.btn {
+  background: @color-1 !important;
+  border-radius: 3px !important;
+  opacity: 1;
+  text-shadow: none !important;
+  color: @color-2 !important;
+  transition: 0.1s;
+}
+
+.btn:hover:not(:disabled),
+.btn:hover:not([disabled]) {
+  background-color: fade(@color-1, 10%) !important;
+  color: @color-1 !important;
+  transition: 0.1s;
+}
+
+.btn.disabled:hover {
+  background-color: @color-2 !important;
+  color: @color-3 !important;
+  cursor: default;
+}
+
+.btn-primary[disabled],
+.btn[disabled],
+.btn.disabled {
+  border: 1px solid @color-3 !important;
+  color: @color-3 !important;
+  background-color: @color-2 !important;
+}
