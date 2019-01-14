@@ -257,9 +257,8 @@ canvasApp.importantUpdate = version => {
   return swal({
     type: "info",
     title: `Important Update (Version ${version})`,
-    html: `Version ${version} is available for download.
-    <br /><br />The following version of the plugin contains important changes as well as a server restructuring on the CANVAS side.
-    <br /><br />As such, sending files directly from CANVAS to the Hub may temporarily be down during the new server deployment. We recommend you download and manually upload your files onto your Hub in the meanwhile.
+    html: `CANVAS Plugin - Version ${version} is available for download.
+    <br /><br />This version of the plugin contains important changes that allow a more stable connection to CANVAS. Due to changes on the CANVAS servers to facilitate these improvements, this update is required for 'Send to CANVAS Hub' functionality.
     <br /><br />We apologize for the inconvenience.`,
     input: "checkbox",
     inputClass: "update-checkbox",
