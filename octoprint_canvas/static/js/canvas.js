@@ -253,6 +253,20 @@ canvasApp.userDeletedSuccess = username => {
   });
 };
 
+canvasApp.importantUpdate = version => {
+  return swal({
+    type: "info",
+    title: `Important Update (Version ${version})`,
+    html: `Version ${version} is available for download.
+    <br /><br />The following version of the plugin contains important changes as well as a server restructuring on the CANVAS side.
+    <br /><br />As such, sending files directly from CANVAS to the Hub may temporarily be down during the new server deployment. We recommend you download and manually upload your files onto your Hub in the meanwhile.
+    <br /><br />We apologize for the inconvenience.`,
+    input: "checkbox",
+    inputClass: "update-checkbox",
+    inputPlaceholder: "Don't show me this again"
+  });
+};
+
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -398,6 +412,25 @@ function CanvasViewModel(parameters) {
     });
   };
 
+  self.changeImportantUpdateSettings = condition => {
+    displayImportantUpdateAlert = !condition;
+
+    let payload = {
+      command: "changeImportantUpdateSettings",
+      condition: displayImportantUpdateAlert
+    };
+
+    $.ajax({
+      url: API_BASEURL + "plugin/canvas",
+      type: "POST",
+      dataType: "json",
+      data: JSON.stringify(payload),
+      contentType: "application/json; charset=UTF-8"
+    }).then(res => {
+      self.settings.saveData();
+    });
+  };
+
   // Receive messages from the OctoPrint server
   self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
@@ -421,6 +454,11 @@ function CanvasViewModel(parameters) {
         } else if (message.status === "received") {
           canvasApp.updateFileReceived(message.data);
         }
+      } else if (message.command === "importantUpdate") {
+        $("body").on("click", ".update-checkbox input", event => {
+          self.changeImportantUpdateSettings(event.target.checked);
+        });
+        canvasApp.importantUpdate(message.data);
       }
     }
   };
