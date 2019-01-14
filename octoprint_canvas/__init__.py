@@ -63,8 +63,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         if current_version == "1.3.0" and version == "2.0.0" and needs_update:
             self._logger.info("Important Update Detected")
             self.displayImportantUpdateAlert = True
-        else:
-            self.displayImportantUpdateAlert = False
 
         return information, not needs_update
 
@@ -103,7 +101,9 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
         self._logger.info("EVENT: " + event)
-        if "ClientOpened" in event:
+        if "Startup" in event:
+            self.displayImportantUpdateAlert = False
+        elif "ClientOpened" in event:
             if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
                 self.canvas.updateUI(
                     {"command": "importantUpdate", "data": "2.0.0"})
