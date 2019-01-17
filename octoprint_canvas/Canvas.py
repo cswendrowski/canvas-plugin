@@ -346,6 +346,8 @@ class Canvas():
             else:
                 self._logger.info(response)
                 self.saveUpgradeResponse(response)
+                if not self.aws_connection and self.hub_yaml["canvas-users"]:
+                    self.makeShadowDeviceClient()
 
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
