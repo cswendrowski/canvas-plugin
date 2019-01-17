@@ -33,7 +33,8 @@ plugin_url = "https://gitlab.com/mosaic-mfg/canvas-plugin"
 plugin_license = "AGPLv3"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = ["websocket-client", "ruamel.yaml", "python-dotenv"]
+plugin_requires = ["websocket-client", "ruamel.yaml",
+                   "python-dotenv", "AWSIoTPythonSDK"]
 
 # Additional package data to install for this plugin. The subfolders "templates", "static" and "translations" will
 # already be installed automatically if they exist.
