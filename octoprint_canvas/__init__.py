@@ -108,11 +108,12 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
                 self.canvas.updateUI(
                     {"command": "importantUpdate", "data": "2.0.0"})
-            self.canvas.getRegisteredUsers()
-            self.canvas.checkWebsocketConnection()
+            self.canvas.checkAWSConnection()
+            if self.canvas.hub_registered is True:
+                self.canvas.getRegisteredUsers()
         elif "Shutdown" in event:
-            if self.canvas.ws_connection is True:
-                self.canvas.ws.close()
+            if self.canvas.aws_connection is True:
+                self.canvas.myShadowClient.disconnect()
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py

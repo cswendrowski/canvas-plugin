@@ -45,8 +45,7 @@ class Canvas():
         self._identifier = plugin._identifier
         self._settings = plugin._settings
 
-        self.ws_connection = False
-        self.ws_disconnect = False
+        self.aws_connection = False
         self.hub_registered = False
 
         self.hub_yaml = self.loadHubData()
@@ -134,7 +133,9 @@ class Canvas():
     ##############
 
     def getRegisteredUsers(self):
-        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        # hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        hub_id = self.hub_yaml["canvas-hub"]["id"]
+
         hub_token = self.hub_yaml["canvas-hub"]["token"]
 
         url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/users"
@@ -165,91 +166,91 @@ class Canvas():
     # 3. WEBSOCKET FUNCTIONS
     ##############
 
-    def ws_on_message(self, ws, message):
-        self._logger.info("Just received a message from Canvas Server!")
-        self._logger.info("Received: " + message)
+    # def ws_on_message(self, ws, message):
+    #     self._logger.info("Just received a message from Canvas Server!")
+    #     self._logger.info("Received: " + message)
 
-        if is_json(message) is True:
-            response = json.loads(message)
-            if "CONN/OPEN" in response["type"]:
-                self.sendInitialHubToken()
-            elif "CONN/CLOSED" in response["type"]:
-                self.ws.close()
-            elif "OP/DOWNLOAD" in response["type"]:
-                self._logger.info("HANDLING DL")
-                self.downloadPrintFiles(response)
-            elif "ERROR/INVALID_TOKEN" in response["type"]:
-                self._logger.info("HANDLING ERROR/INVALID_TOKEN")
-                self.ws.close()
-            elif "AUTH/UNREGISTER_USER" in response["type"]:
-                self._logger.info("REMOVING USER")
-                self.removeUserFromYAML(response["userId"])
-            elif "AUTH/CONFIRM_TOKEN" in response["type"]:
-                self.ws_connection = True
-                self.checkWebsocketConnection()
+    #     if is_json(message) is True:
+    #         response = json.loads(message)
+    #         if "CONN/OPEN" in response["type"]:
+    #             self.sendInitialHubToken()
+    #         elif "CONN/CLOSED" in response["type"]:
+    #             self.ws.close()
+    #         elif "OP/DOWNLOAD" in response["type"]:
+    #             self._logger.info("HANDLING DL")
+    #             self.downloadPrintFiles(response)
+    #         elif "ERROR/INVALID_TOKEN" in response["type"]:
+    #             self._logger.info("HANDLING ERROR/INVALID_TOKEN")
+    #             self.ws.close()
+    #         elif "AUTH/UNREGISTER_USER" in response["type"]:
+    #             self._logger.info("REMOVING USER")
+    #             self.removeUserFromYAML(response["userId"])
+    #         elif "AUTH/CONFIRM_TOKEN" in response["type"]:
+    #             self.ws_connection = True
+    #             self.checkWebsocketConnection()
 
-    def ws_on_error(self, ws, error):
-        self._logger.info("WS ERROR: " + str(error))
-        if str(error) == "Connection is already closed.":
-            self._logger.info("CANVAS server is down.")
+    # def ws_on_error(self, ws, error):
+    #     self._logger.info("WS ERROR: " + str(error))
+    #     if str(error) == "Connection is already closed.":
+    #         self._logger.info("CANVAS server is down.")
 
-    def ws_on_close(self, ws):
-        self._logger.info("### Closing Websocket ###")
-        self.ws_connection = False
-        self.checkWebsocketConnection()
+    # def ws_on_close(self, ws):
+    #     self._logger.info("### Closing Websocket ###")
+    #     self.ws_connection = False
+    #     self.checkWebsocketConnection()
 
-    def ws_on_open(self, ws):
-        self._logger.info("### Opening Websocket ###")
+    # def ws_on_open(self, ws):
+    #     self._logger.info("### Opening Websocket ###")
 
-    def ws_on_pong(self, ws, pong):
-        self._logger.info("Received WS Pong")
+    # def ws_on_pong(self, ws, pong):
+    #     self._logger.info("Received WS Pong")
 
-    def runWebSocket(self):
-        self.ws.run_forever(ping_interval=30, ping_timeout=5,
-                            sslopt={"cert_reqs": ssl.CERT_NONE})
-        # if websocket connection was disconnected, try to reconnect again
-        if self.hub_yaml["canvas-users"]:
-            time.sleep(10)
-            self._logger.info("Trying to reconnect...")
-            self.enableWebsocketConnection()
+    # def runWebSocket(self):
+    #     self.ws.run_forever(ping_interval=30, ping_timeout=5,
+    #                         sslopt={"cert_reqs": ssl.CERT_NONE})
+    #     # if websocket connection was disconnected, try to reconnect again
+    #     if self.hub_yaml["canvas-users"]:
+    #         time.sleep(10)
+    #         self._logger.info("Trying to reconnect...")
+    #         self.enableWebsocketConnection()
 
-    def enableWebsocketConnection(self):
-        # if HUB already has registered Canvas Users, enable websocket client
-        if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
-            url = "ws://" + BASE_URL_WS + "8443"
-            self.ws = websocket.WebSocketApp(url,
-                                             on_message=self.ws_on_message,
-                                             on_error=self.ws_on_error,
-                                             on_close=self.ws_on_close,
-                                             on_open=self.ws_on_open,
-                                             on_pong=self.ws_on_pong
-                                             )
-            thread.start_new_thread(self.runWebSocket, ())
-        else:
-            if self.ws_connection is True:
-                self._logger.info("Websocket already enabled.")
-            else:
-                self._logger.info(
-                    "There are no registered Canvas accounts yet. Connection not established.")
-                self.checkWebsocketConnection()
+    # def enableWebsocketConnection(self):
+    #     # if HUB already has registered Canvas Users, enable websocket client
+    #     if "canvas-users" in self.hub_yaml and self.hub_yaml["canvas-users"] and self.ws_connection is False:
+    #         url = "ws://" + BASE_URL_WS + "8443"
+    #         self.ws = websocket.WebSocketApp(url,
+    #                                          on_message=self.ws_on_message,
+    #                                          on_error=self.ws_on_error,
+    #                                          on_close=self.ws_on_close,
+    #                                          on_open=self.ws_on_open,
+    #                                          on_pong=self.ws_on_pong
+    #                                          )
+    #         thread.start_new_thread(self.runWebSocket, ())
+    #     else:
+    #         if self.ws_connection is True:
+    #             self._logger.info("Websocket already enabled.")
+    #         else:
+    #             self._logger.info(
+    #                 "There are no registered Canvas accounts yet. Connection not established.")
+    #             self.checkWebsocketConnection()
 
-    def checkWebsocketConnection(self):
-        if self.ws_connection is True:
-            self.updateUI({"command": "Websocket", "data": True})
+    def checkAWSConnection(self):
+        if self.aws_connection is True:
+            self.updateUI({"command": "AWS", "data": True})
         else:
             if not self.hub_yaml["canvas-users"]:
-                self.updateUI({"command": "Websocket", "data": False,
+                self.updateUI({"command": "AWS", "data": False,
                                "reason": "account"})
             else:
-                self.updateUI({"command": "Websocket", "data": False,
+                self.updateUI({"command": "AWS", "data": False,
                                "reason": "server"})
 
-    def sendInitialHubToken(self):
-        data = {
-            "type": "AUTH/TOKEN",
-            "token": self.hub_yaml["canvas-hub"]["token"]
-        }
-        self.ws.send(json.dumps(data))
+    # def sendInitialHubToken(self):
+    #     data = {
+    #         "type": "AUTH/TOKEN",
+    #         "token": self.hub_yaml["canvas-hub"]["token"]
+    #     }
+    #     self.ws.send(json.dumps(data))
 
     ##############
     # 4. USER FUNCTIONS
@@ -332,8 +333,9 @@ class Canvas():
                 lambda user: {key: user[key] for key in ["username"]}, self.hub_yaml["canvas-users"].values())
             self.updateUI(
                 {"command": "DisplayRegisteredUsers", "data": list_of_users})
-            if not self.hub_yaml["canvas-users"] and self.ws_connection is True:
-                self.ws.close()
+            # if there are no linked users, disconnect shadow client
+            if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
+                self.myShadowClient.disconnect()
 
     def updateYAMLInfo(self):
         hub_data_path = os.path.expanduser(
@@ -343,7 +345,9 @@ class Canvas():
         hub_data.close()
 
     def registerUserAndHub(self, data):
-        hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        # hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
+        hub_id = self.hub_yaml["canvas-hub"]["id"]
+
         hub_token = self.hub_yaml["canvas-hub"]["token"]
         payload = {
             "userToken": data["token"]
@@ -364,8 +368,10 @@ class Canvas():
                 self.hub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
                 self.updateRegisteredUsers()
-                # self.enableWebsocketConnection()
                 self.updateUI({"command": "UserConnectedToHUB", "data": data})
+                if not self.aws_connection:
+                    self.makeShadowDeviceClient()
+                # self.enableWebsocketConnection()
 
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
@@ -457,7 +463,11 @@ class Canvas():
             self._logger.info("Unable to get hostname")
 
     def saveUpgradeResponse(self, response):
-        self.hub_yaml["canvas-hub"].update(response["hub"])
+        if "token" in response:
+            self.hub_yaml["canvas-hub"].update(response["hub"],
+                                               token=response["token"])
+        else:
+            self.hub_yaml["canvas-hub"].update(response["hub"])
         self.updateYAMLInfo()
 
         path = os.path.expanduser('~') + "/.mosaicdata/"
@@ -499,10 +509,36 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
-                self.hub_yaml["canvas-hub"].update(response)
-                self.updateYAMLInfo()
+                self.saveUpgradeResponse(response)
                 self.hub_registered = True
-                self.updateUI({"command": "HubRegistered"})
+        except requests.exceptions.RequestException as e:
+            self._logger.info(e)
+
+    def updateHostname(self, new_hostname):
+        self._logger.info("Updating Hostname")
+
+        hub_id = self.hub_yaml["canvas-hub"]["id"]
+        # name = self.hub_yaml["canvas-hub"]["hub"]["name"]
+        hub_id = self.hub_yaml["canvas-hub"]["serialNumber"]
+
+        hub_token = self.hub_yaml["canvas-hub"]["token"]
+
+        url = "https://" + BASE_URL_API + "hubs/" + hub_id
+        payload = {
+            "name": name,
+            "hostname": new_hostname
+        }
+        authorization = "Bearer " + hub_token
+        headers = {"Authorization": authorization}
+
+        try:
+            response = requests.post(url, json=payload, headers=headers).json()
+            if response.get("status") >= 400:
+                self._logger.info(response)
+            else:
+                self._logger.info("Hostname updated: %s" % new_hostname)
+                self.hub_yaml["canvas-hub"]["hostname"] = new_hostname
+                self.updateYAMLInfo()
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
@@ -515,7 +551,15 @@ class Canvas():
                 self.upgradeToV2()
             else:
                 self._logger.info("HUB version is 2 --- NO UPGRADE NEEDED")
-                self.makeShadowDeviceClient()
+                if self.hub_yaml["canvas-hub"]["hostname"] != self.getHostname():
+                    new_hostname = self.getHostname()
+                    self.updateHostname(new_hostname)
+                self.getRegisteredUsers()
+                if self.hub_yaml["canvas-users"]:
+                    self.makeShadowDeviceClient()
+                else:
+                    self._logger.info(
+                        "There are no linked Canvas accounts yet. Connection not established.")
         if self.hub_registered is False:
             self._logger.info("HUB not registered yet. Registering...")
             self.registerHubV2()
@@ -525,11 +569,12 @@ class Canvas():
         self._logger.info("Payload: %s" % payload)
         self._logger.info("Status: %s" % responseStatus)
         self._logger.info("Token: %s" % token)
+
         payload = json.loads(payload)
         if responseStatus == "accepted" and "delta" in payload["state"]:
             delta = payload["state"]["delta"]
             desired = payload["state"]["desired"]
-            self.handleDelta(delta, desired)
+            self.handleDeltaFromGet(delta, desired)
         else:
             self._logger.info("No delta found in object. No action needed.")
 
@@ -551,6 +596,14 @@ class Canvas():
         self._logger.info("Status: %s" % responseStatus)
         self._logger.info("Token: %s" % token)
 
+    def onOnline(self):
+        self._logger.info("Shadow Client is online")
+
+    def onOffline(self):
+        self._logger.info("Shadow Client is offline")
+        self.aws_connection = False
+        self.checkAWSConnection()
+
     def makeShadowDeviceClient(self):
         self._logger.info("Making Shadow Client")
         # self.hubShadowClient = ShadowClient.ShadowClient(self.hub_yaml)
@@ -561,30 +614,40 @@ class Canvas():
         private_key_path = mosaic_path + "private.pem.key"
         certificate_path = mosaic_path + "certificate.pem.crt"
 
-        myShadowClient = AWSIoTMQTTShadowClient(hub_id)
-        myShadowClient.configureEndpoint(host, 8883)
-        myShadowClient.configureCredentials(
+        # Initialization
+        self.myShadowClient = AWSIoTMQTTShadowClient(hub_id)
+        self.myShadowClient.configureEndpoint(host, 8883)
+        self.myShadowClient.configureCredentials(
             root_ca_path, private_key_path, certificate_path)
-        myShadowClient.configureConnectDisconnectTimeout(15)  # 10 sec
-        myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
-        self._logger.info("Shadow Client Created")
 
-        myShadowClient.connect()
-        self._logger.info("Shadow Client Connected")
+        # Configuration
+        self.myShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
+        self.myShadowClient.configureConnectDisconnectTimeout(15)  # 10 sec
+        self.myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
+        self.myShadowClient.onOnline = self.onOnline
+        self.myShadowClient.onOffline = self.onOffline
+        self._logger.info("Shadow Client initialized")
 
-        # topic to listen to subscribe to
+        # Connect to AWS IoT
+        self.myShadowClient.connect()
+        self._logger.info("Shadow Client connected")
+        self.aws_connection = True
+        self.checkAWSConnection()
+
+        # Topic to subscribe to
         shadow_topic = "canvas-hub-" + hub_id
 
-        self.myDeviceShadow = myShadowClient.createShadowHandlerWithName(
+        # Create device shadow with persistent subscription to the above topic
+        self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(
             shadow_topic, True)
-        # initialize listener for deltas + get object upon connection
+
+        # initialize listener for device shadow deltas + get object upon connection
         self.myDeviceShadow.shadowRegisterDeltaCallback(self.onDelta)
         self.myDeviceShadow.shadowGet(self.onGetShadowObj, 10)
 
-    def handleDelta(self, delta, desired):
-        self._logger.info("Handling Delta")
+    def handleDeltaFromGet(self, delta, desired):
+        self._logger.info("Handling Delta From Get")
         if "userIds" in delta:
-
             current_users_in_yaml = self.hub_yaml["canvas-users"].keys()
             users_shadow_doc = delta["userIds"]
 
@@ -607,7 +670,6 @@ class Canvas():
             elif len(diff) > 0:
                 self.handleUserListChanges()
         if "queuedPrint" in delta:
-            self._logger.info("HANDLE PRINT")
             self.handlePrint(delta)
 
     def handlePrint(self, payload):
