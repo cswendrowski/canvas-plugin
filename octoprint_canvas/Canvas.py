@@ -479,7 +479,7 @@ class Canvas():
 
         payload = json.loads(payload)
         if "userIds" in payload["state"]:
-            self.handleUserListChanges()
+            self.handleUserListChanges(payload["state"])
         if "queuedPrint" in payload["state"]:
             self.handlePrint(payload["state"])
 
@@ -541,27 +541,7 @@ class Canvas():
     def handleDeltaFromGet(self, delta, desired):
         self._logger.info("Handling Delta From Get")
         if "userIds" in delta:
-            current_users_in_yaml = self.hub_yaml["canvas-users"].keys()
-            users_shadow_doc = delta["userIds"]
-
-            self._logger.info("YAML: %s" % current_users_in_yaml)
-            self._logger.info("DELTA: %s" % users_shadow_doc)
-
-            diff = list(
-                set(current_users_in_yaml) ^ set(users_shadow_doc))
-            self._logger.info(diff)
-            # if first time putting up a reported state
-            if len(diff) == 0:
-                reportedState = {
-                    "state": {
-                        "reported": desired
-                    }
-                }
-                self.myDeviceShadow.shadowUpdate(
-                    json.dumps(reportedState), self.onUpdate, 10)
-            # if there is a difference, not the first time
-            elif len(diff) > 0:
-                self.handleUserListChanges()
+            self.handleUserListChanges(delta)
         if "queuedPrint" in delta:
             self.handlePrint(delta)
 
@@ -582,14 +562,28 @@ class Canvas():
         self.myDeviceShadow.shadowUpdate(
             json.dumps(state_to_send_back), self.onUpdate, 10)
 
-    def handleUserListChanges(self):
-        self._logger.info("Handling User List Changes")
-        self.getRegisteredUsers()
-        reported_users = self.hub_yaml["canvas-users"].keys()
+    def handleUserListChanges(self, payload):
+        self._logger.info("Handling user list delta")
+        current_yaml_users = self.hub_yaml["canvas-users"].keys()
+        delta_users = payload["userIds"]
+
+        self._logger.info("YAML: %s" % current_yaml_users)
+        self._logger.info("DELTA: %s" % delta_users)
+
+        sameListContent = set(
+            current_yaml_users) == set(delta_users)
+
+        # if contents are not the same, get new list of registered users
+        if not sameListContent:
+            self._logger.info(
+                "Content not the same. Updating yaml user list first.")
+            self.getRegisteredUsers()
+
+        users_to_report = self.hub_yaml["canvas-users"].keys()
         reportedState = {
             "state": {
                 "reported": {
-                    "userIds": reported_users
+                    "userIds": users_to_report
                 }
             }
         }
