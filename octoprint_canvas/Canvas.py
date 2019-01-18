@@ -311,7 +311,6 @@ class Canvas():
 
     def upgradeToV2(self):
         self._logger.info("UPGRADING TO AMARANTH V2")
-
         hostname = self.getHostname()
         self._logger.info("Hostname: %s" % hostname)
 
@@ -384,7 +383,6 @@ class Canvas():
 
     def registerHubV2(self):
         self._logger.info("REGISTERING HUB (V2)")
-
         hostname = self.getHostname()
 
         if not "serial-number" in self.hub_yaml["canvas-hub"]:
@@ -416,16 +414,11 @@ class Canvas():
 
     def updateHostname(self, new_hostname):
         self._logger.info("Updating Hostname")
-
         hub_id = self.hub_yaml["canvas-hub"]["id"]
-        # name = self.hub_yaml["canvas-hub"]["hub"]["name"]
-        hub_id = self.hub_yaml["canvas-hub"]["serialNumber"]
-
         hub_token = self.hub_yaml["canvas-hub"]["token"]
 
         url = "https://" + BASE_URL_API + "hubs/" + hub_id
         payload = {
-            "name": name,
             "hostname": new_hostname
         }
         authorization = "Bearer " + hub_token
@@ -602,3 +595,19 @@ class Canvas():
         }
         self.myDeviceShadow.shadowUpdate(
             json.dumps(reportedState), self.onUpdate, 10)
+
+    def checkIfRootCertExists(self):
+        root_ca_path = os.path.expanduser('~') + "/.mosaicdata/root-ca.crt"
+        if not os.path.isfile(root_ca_path):
+            self._logger.info("DOWNLOADING ROOT-CA CERT")
+            url = "https://www.amazontrust.com/repository/AmazonRootCA1.pem"
+            try:
+                response = requests.get(url)
+                root_ca = open(root_ca_path, "w")
+                root_ca.write(response.content)
+                root_ca.close()
+                self._logger.info("ROOT-CA DOWNLOADED")
+            except requests.exceptions.RequestException as e:
+                self._logger.info(e)
+        else:
+            self._logger.info("ROOT-CA ALREADY THERE")
