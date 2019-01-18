@@ -480,7 +480,7 @@ class Canvas():
         payload = json.loads(payload)
         if "userIds" in payload["state"]:
             self.handleUserListChanges()
-        elif "queuedPrint" in payload["state"]:
+        if "queuedPrint" in payload["state"]:
             self.handlePrint(payload["state"])
 
     def onUpdate(self, payload, responseStatus, token):
