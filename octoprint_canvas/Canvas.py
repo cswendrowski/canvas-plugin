@@ -315,8 +315,7 @@ class Canvas():
         self._logger.info("Hostname: %s" % hostname)
 
         payload = {
-            "hostname": hostname,
-            "serialNumber": "6C3TOOSf72FWhrhcm9fwtRD0tt4aQpEe"
+            "hostname": hostname
         }
 
         self._logger.info(json.dumps(payload))
@@ -347,7 +346,6 @@ class Canvas():
                 self.saveUpgradeResponse(response)
                 if not self.aws_connection and self.hub_yaml["canvas-users"]:
                     self.makeShadowDeviceClient()
-
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
