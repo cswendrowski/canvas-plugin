@@ -19,6 +19,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def on_after_startup(self):
         self._logger.info("Canvas Plugin STARTED")
         self.canvas = Canvas.Canvas(self)
+        self.canvas.checkFor0cf0()
         self.canvas.checkIfRootCertExists()
         self.canvas.checkForRegistrationAndVersion()
 

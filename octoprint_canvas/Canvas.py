@@ -45,6 +45,13 @@ class Canvas():
     # 1. SERVER STARTUP FUNCTIONS
     ##############
 
+    def checkFor0cf0(self):
+        if os.path.isdir("/home/pi/.mosaicdata/turquoise/") and self.hub_yaml["canvas-hub"]["hub"]["name"] == "0cf0-ch" and self.hub_yaml["canvas-hub"]["hub"]["id"] == "46f352c67dd7bc1e5a28b66cf960290d" and self.hub_yaml["canvas-hub"]["token"] == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDIzODIxMTQsImlzcyI6IkNhbnZhc0h1YiIsInN1YiI6IjQ2ZjM1MmM2N2RkN2JjMWU1YTI4YjY2Y2Y5NjAyOTBkIn0.CMDTVKAuI2USNwvx1gjKVBMgTRCnOX8WBhp2XTjjhLM":
+            self._logger.info("MUST DELETE CREDENTIALS.")
+            del self.hub_yaml["canvas-hub"]["hub"]
+            del self.hub_yaml["canvas-hub"]["token"]
+            self.updateYAMLInfo()
+
     def loadHubData(self):
         self._logger.info("Loading HUB data")
         hub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
