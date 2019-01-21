@@ -121,7 +121,6 @@ class Shadow():
             delta = payload["state"]["delta"]
             desired = payload["state"]["desired"]
 
-            self._logger.info("Handling Delta From Get")
             if "userIds" in delta:
                 self.handleUserListChanges(delta)
             if "queuedPrint" in delta:
