@@ -126,7 +126,6 @@ class Shadow():
                 self.handleUserListChanges(delta)
             if "queuedPrint" in delta:
                 self.handlePrint(delta)
-            # self.handleDeltaFromGet(delta, desired)
         else:
             self._logger.info("No delta found in object. No action needed.")
 

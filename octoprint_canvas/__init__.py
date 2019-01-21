@@ -62,7 +62,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("needs update: %s" % needs_update)
 
         # check if feature-breaking update is upcoming
-        if current_version == "1.3.0" and version == "2.0.0" and needs_update:
+        if current_version == "2.0.0" and version == "x.x.x" and needs_update:
             self._logger.info("Important Update Detected")
             self.displayImportantUpdateAlert = True
 
@@ -108,12 +108,15 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         elif "ClientOpened" in event:
             if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
                 self.canvas.updateUI(
-                    {"command": "importantUpdate", "data": "2.0.0"})
+                    {"command": "importantUpdate", "data": "x.x.x"})
             self.canvas.checkAWSConnection()
             if self.canvas.hub_registered is True:
                 self.canvas.getRegisteredUsers()
             if self.canvas.aws_connection is True:
-                self.canvas.myShadow.shadowGet()
+                try:
+                    self.canvas.myShadow.shadowGet()
+                except:
+                    self._logger.info("Shadow Device not created yet")
         elif "Shutdown" in event:
             if self.canvas.aws_connection is True:
                 self.canvas.myShadow.disconnect()
