@@ -113,11 +113,10 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             if self.canvas.hub_registered is True:
                 self.canvas.getRegisteredUsers()
             if self.canvas.aws_connection is True:
-                self.canvas.myDeviceShadow.shadowGet(
-                    self.canvas.onGetShadowObj, 10)
+                self.canvas.myShadow.shadowGet()
         elif "Shutdown" in event:
             if self.canvas.aws_connection is True:
-                self.canvas.myShadowClient.disconnect()
+                self.canvas.myShadow.disconnect()
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
