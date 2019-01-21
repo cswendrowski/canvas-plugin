@@ -112,6 +112,9 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.canvas.checkAWSConnection()
             if self.canvas.hub_registered is True:
                 self.canvas.getRegisteredUsers()
+            if self.canvas.aws_connection is True:
+                self.canvas.myDeviceShadow.shadowGet(
+                    self.canvas.onGetShadowObj, 10)
         elif "Shutdown" in event:
             if self.canvas.aws_connection is True:
                 self.canvas.myShadowClient.disconnect()

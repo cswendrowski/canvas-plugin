@@ -342,7 +342,6 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
-                self._logger.info(response)
                 self.saveUpgradeResponse(response)
                 if not self.aws_connection and self.hub_yaml["canvas-users"]:
                     self.makeShadowDeviceClient()
@@ -577,7 +576,8 @@ class Canvas():
                 "Content not the same. Updating yaml user list first.")
             self.getRegisteredUsers()
 
-        users_to_report = self.hub_yaml["canvas-users"].keys()
+        # users_to_report = self.hub_yaml["canvas-users"].keys()
+        users_to_report = delta_users
         reportedState = {
             "state": {
                 "reported": {
