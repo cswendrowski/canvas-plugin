@@ -42,6 +42,7 @@ class Shadow():
         # Create device shadow with persistent subscription to the above topic
         self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(
             shadow_topic, True)
+        self._logger.info("Device Shadow created")
 
         # initialize listener for device shadow deltas + get object upon connection
         self.myDeviceShadow.shadowRegisterDeltaCallback(self.onDelta)
