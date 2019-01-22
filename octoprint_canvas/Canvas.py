@@ -36,6 +36,7 @@ class Canvas():
         self._plugin_manager = plugin._plugin_manager
         self._identifier = plugin._identifier
         self._settings = plugin._settings
+        self._plugin_version = plugin._plugin_version
 
         self.aws_connection = False
         self.hub_registered = False
@@ -154,6 +155,20 @@ class Canvas():
         if self.hub_registered is False:
             self._logger.info("HUB not registered yet. Registering...")
             self.registerHubV2()
+
+    def updateCurrentVersions(self):
+        updated = False
+        # canvas
+        if self.hub_yaml["versions"]["canvas-plugin"] != self._plugin_version:
+            self.hub_yaml["versions"]["canvas-plugin"] = self._plugin_version
+            updated = True
+        # palette 2
+        if self._plugin_manager.get_plugin_info("palette2") and self.hub_yaml["versions"]["palette-plugin"] != self._plugin_manager.get_plugin_info("palette2").version:
+            self.hub_yaml["versions"]["palette-plugin"] = self._plugin_manager.get_plugin_info(
+                "palette2").version
+            updated = True
+        if updated:
+            self.updateYAMLInfo()
 
     ##############
     # 2. CLIENT UI STARTUP FUNCTIONS
