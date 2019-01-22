@@ -427,6 +427,81 @@ function CanvasViewModel(parameters) {
     });
   };
 
+  self.handleWebsocketConnection = data => {
+    if (data.data === true) {
+      self.connectionStatus("Connected");
+      $("#connection-state-msg-canvas").css("color", "green");
+      self.connectionInfoHeading("Connected to CANVAS server");
+      self.connectionInfoBody("Your Hub is properly connected to the CANVAS server");
+    } else {
+      self.connectionStatus("Not Connected");
+      $("#connection-state-msg-canvas").css("color", "red");
+      self.connectionInfoHeading("Not connected to CANVAS server");
+      if (data.reason === "account") {
+        self.connectionInfoBody(
+          "No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection."
+        );
+      } else if (data.reason === "server") {
+        self.connectionInfoBody(
+          "There seems to be an issue connecting to the CANVAS server. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub."
+        );
+      }
+    }
+  };
+
+  self.toggleStatusInfo = () => {
+    $(".connection-info-text").toggle(50);
+  };
+
+  self.toggleTheme = condition => {
+    let applyTheme = self.settings.settings.plugins.canvas.applyTheme();
+
+    // Apply theme immediately
+    if (applyTheme) {
+      self.appearance.name("CANVAS Hub");
+      $("html").addClass("canvas-theme");
+      canvasApp.toggleLogo(applyTheme);
+    } else {
+      self.appearance.name("OctoPrint");
+      $("html").removeClass("canvas-theme");
+      canvasApp.toggleLogo(applyTheme);
+    }
+
+    // Event listener for when user changes the theme settings
+    $(".theme-input").on("change", event => {
+      applyTheme = self.settings.settings.plugins.canvas.applyTheme();
+
+      if (applyTheme) {
+        self.appearance.name("CANVAS Hub");
+        $("html").addClass("canvas-theme");
+        canvasApp.toggleLogo(applyTheme);
+      } else {
+        self.appearance.name("OctoPrint");
+        $("html").removeClass("canvas-theme");
+        canvasApp.toggleLogo(applyTheme);
+      }
+    });
+  };
+
+  self.changeImportantUpdateSettings = condition => {
+    displayImportantUpdateAlert = !condition;
+
+    let payload = {
+      command: "changeImportantUpdateSettings",
+      condition: displayImportantUpdateAlert
+    };
+
+    $.ajax({
+      url: API_BASEURL + "plugin/canvas",
+      type: "POST",
+      dataType: "json",
+      data: JSON.stringify(payload),
+      contentType: "application/json; charset=UTF-8"
+    }).then(res => {
+      self.settings.saveData();
+    });
+  };
+
   // Receive messages from the OctoPrint server
   self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
