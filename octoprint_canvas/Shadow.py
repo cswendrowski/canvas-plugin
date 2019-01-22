@@ -30,10 +30,7 @@ class Shadow():
         self._logger.info("Shadow Client initialized")
 
         # Connect to AWS IoT
-        self.myShadowClient.connect()
-        self._logger.info("Shadow Client connected")
-        self.canvas.aws_connection = True
-        self.canvas.checkAWSConnection()
+        self.myShadowClient.connect(30)
 
         # Topic to subscribe to
         hub_id = self.canvas.hub_yaml["canvas-hub"]["id"]
@@ -148,6 +145,8 @@ class Shadow():
 
     def onOnline(self):
         self._logger.info("Shadow Client is online")
+        self.canvas.aws_connection = True
+        self.canvas.checkAWSConnection()
 
     def onOffline(self):
         self._logger.info("Shadow Client is offline")

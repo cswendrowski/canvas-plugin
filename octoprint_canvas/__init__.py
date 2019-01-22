@@ -113,7 +113,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             self.canvas.checkAWSConnection()
             if self.canvas.hub_registered is True:
                 self.canvas.getRegisteredUsers()
-            if self.canvas.aws_connection is True:
+            if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
                 try:
                     self.canvas.myShadow.shadowGet()
                 except:
