@@ -10,6 +10,7 @@ import socket
 
 from ruamel.yaml import YAML
 yaml = YAML(typ="safe")
+yaml.default_flow_style = False
 
 from dotenv import load_dotenv
 env_path = os.path.abspath(".") + "/.env"
