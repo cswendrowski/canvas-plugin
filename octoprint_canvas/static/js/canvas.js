@@ -349,29 +349,26 @@ function CanvasViewModel(parameters) {
       dataType: "json",
       data: JSON.stringify(payload),
       contentType: "application/json; charset=UTF-8"
-    }).then(res => {
-      $(".add-user input").val("");
-      canvasApp.loadingOverlay(false);
     });
   };
 
-  self.handleWebsocketConnection = data => {
+  self.handleAWSConnection = data => {
     if (data.data === true) {
       self.connectionStatus("Connected");
       $("#connection-state-msg-canvas").css("color", "green");
-      self.connectionInfoHeading("Connected to CANVAS server");
-      self.connectionInfoBody("Your Hub is properly connected to the CANVAS server");
+      self.connectionInfoHeading("Connected to CANVAS");
+      self.connectionInfoBody("Your Hub is properly connected to CANVAS");
     } else {
       self.connectionStatus("Not Connected");
       $("#connection-state-msg-canvas").css("color", "red");
-      self.connectionInfoHeading("Not connected to CANVAS server");
+      self.connectionInfoHeading("Not connected to CANVAS");
       if (data.reason === "account") {
         self.connectionInfoBody(
           "No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection."
         );
       } else if (data.reason === "server") {
         self.connectionInfoBody(
-          "There seems to be an issue connecting to the CANVAS server. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub."
+          "There seems to be an issue connecting to CANVAS. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub."
         );
       }
     }
@@ -435,13 +432,19 @@ function CanvasViewModel(parameters) {
     if (pluginIdent === "canvas") {
       if (message.command === "DisplayRegisteredUsers") {
         self.users(message.data);
-      } else if (message.command === "Websocket") {
-        self.handleWebsocketConnection(message);
+      } else if (message.command === "AWS") {
+        self.handleAWSConnection(message);
       } else if (message.command === "UserConnectedToHUB") {
+        $(".add-user input").val("");
+        canvasApp.loadingOverlay(false);
         canvasApp.userAddedSuccess(message.data.username);
       } else if (message.command === "UserAlreadyExists") {
+        $(".add-user input").val("");
+        canvasApp.loadingOverlay(false);
         canvasApp.userExistsAlready(message.data.username);
       } else if (message.command === "invalidUserCredentials") {
+        $(".add-user input").val("");
+        canvasApp.loadingOverlay(false);
         canvasApp.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
         canvasApp.userDeletedSuccess(message.data);

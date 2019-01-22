@@ -33,8 +33,7 @@
         		<span class="username" data-bind="text: username"></span>
         	</li>
 				</ul>
-				<h5 class="hub-manage-container"><a class="canvas-hub-manage" target="_blank" href="https://canvas3d.io/hubs">Manage Hub Accounts</a></h5>
-				{# <button class="btn btn-primary hub-manage-container"><a class="canvas-hub-manage" target="_blank" href="https://canvas3d.io/hubs">Manage Hub Accounts</a></button> #}
+				<h5 class="hub-manage-container"><a class="canvas-hub-manage" target="_blank" href="https://canvas3d.io/hubs" data-bind="visible: users().length > 0">Manage Hub Accounts</a></h5>
 			</div>
 	</div>
 </div>
