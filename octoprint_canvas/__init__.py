@@ -17,8 +17,12 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     # STARTUPPLUGIN
     def on_after_startup(self):
-        self._logger.info("Canvas Plugin STARTED")
+        self._logger.info("%s Plugin STARTED" % self._plugin_info)
         self.canvas = Canvas.Canvas(self)
+        self.canvas.checkFor0cf0()
+        self.canvas.checkIfRootCertExists()
+        self.canvas.updatePluginVersions()
+        self.canvas.checkForRegistrationAndVersion()
 
     # TEMPLATEPLUGIN
     def get_template_configs(self):
@@ -60,7 +64,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self._logger.info("needs update: %s" % needs_update)
 
         # check if feature-breaking update is upcoming
-        if current_version == "1.3.0" and version == "2.0.0" and needs_update:
+        if current_version == "2.0.0" and version == "x.x.x" and needs_update:
             self._logger.info("Important Update Detected")
             self.displayImportantUpdateAlert = True
 
@@ -106,12 +110,18 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         elif "ClientOpened" in event:
             if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
                 self.canvas.updateUI(
-                    {"command": "importantUpdate", "data": "2.0.0"})
-            self.canvas.getRegisteredUsers()
-            self.canvas.checkWebsocketConnection()
+                    {"command": "importantUpdate", "data": "x.x.x"})
+            self.canvas.checkAWSConnection()
+            if self.canvas.hub_registered is True:
+                self.canvas.getRegisteredUsers()
+            if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
+                try:
+                    self.canvas.myShadow.shadowGet()
+                except:
+                    self._logger.info("Shadow Device not created yet")
         elif "Shutdown" in event:
-            if self.canvas.ws_connection is True:
-                self.canvas.ws.close()
+            if self.canvas.aws_connection is True:
+                self.canvas.myShadow.disconnect()
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py

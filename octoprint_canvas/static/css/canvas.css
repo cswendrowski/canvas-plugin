@@ -27,6 +27,7 @@
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  padding: 4px 0;
 }
 .registered-canvas-user i {
   font-size: 20px;
@@ -34,38 +35,7 @@
 .registered-canvas-user .username {
   margin: 0 7px 0 5px;
 }
-.registered-canvas-user .remove-user {
-  cursor: pointer;
-  -webkit-transition: 0.1s all;
-  -o-transition: 0.1s all;
-  transition: 0.1s all;
-  font-size: 14px;
-  color: #363636;
-  background-color: #ffffff;
-  border: 1px solid #363636;
-  border-radius: 50%;
-}
-.registered-canvas-user .hide {
-  display: none;
-}
-.toggle-remove-users {
-  display: none;
-  cursor: pointer;
-  margin-top: 0;
-  font-weight: 400;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-.toggle-remove-users i {
-  font-size: 12px;
-}
-.toggle-remove-users span:hover {
-  text-shadow: 0.25px 0px 0px #363636;
-}
-.toggle-remove-users span {
-  text-decoration: underline;
-}
+/* CONNECTION STATUS STYLING */
 #connection-state-msg-canvas {
   margin-left: 3px;
 }
@@ -102,7 +72,7 @@
   position: absolute;
   width: 250px;
   left: 35px;
-  bottom: -18px;
+  top: -30px;
   background-color: #f5f5f5;
   border: 1px solid #363636;
   border-radius: 3px;
@@ -119,12 +89,12 @@
   border-style: solid;
 }
 .connection-status-line .connection-info-container .connection-info-text::after {
-  bottom: 17px;
+  top: 29px;
   border-color: transparent #f5f5f5 transparent transparent;
   border-width: 10px;
 }
 .connection-status-line .connection-info-container .connection-info-text::before {
-  bottom: 16px;
+  top: 28px;
   border-color: transparent #363636 transparent transparent;
   border-width: 11px;
 }
@@ -135,6 +105,7 @@
 .connection-status-line .connection-info-container .connection-info-text .connection-info-body {
   font-size: 12px;
 }
+/* LOADER STYLING */
 .loading-overlay-container {
   z-index: 999;
   position: fixed;
@@ -186,6 +157,143 @@
     transform: rotate(360deg);
   }
 }
+/* DOWNLOAD PROGRESS BAR STYLING */
+.side-notifications-list {
+  position: fixed;
+  top: 15%;
+  left: 0;
+  margin: 0;
+}
+.popup-notification {
+  position: relative;
+  list-style: none;
+  text-align: right;
+  width: 200px;
+  padding: 0.5rem 1.1rem;
+  margin-bottom: 7px;
+  border: 1px solid #363636;
+  border-left: none;
+  z-index: 5;
+  background-color: #f5f5f5;
+  border-top-right-radius: 1px;
+  border-bottom-right-radius: 1px;
+  word-wrap: break-word;
+}
+.popup-notification i {
+  cursor: pointer;
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  border: 1px solid #ffffff;
+  background-color: #363636;
+  color: #ffffff;
+  border-radius: 50%;
+  padding: 1px;
+  font-size: 12px;
+  margin: 0;
+}
+.popup-notification .popup-title,
+.popup-notification h6 {
+  margin: 0;
+  margin-bottom: 2px;
+}
+.popup-notification p {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
+.total-bar {
+  width: 100%;
+  background-color: rgba(54, 54, 54, 0.2);
+  border-radius: 3px;
+  margin-top: 25px;
+}
+.current-bar {
+  width: 0%;
+  background-color: rgba(54, 54, 54, 0.8);
+  position: relative;
+  -webkit-transition: 0.1s;
+  -o-transition: 0.1s;
+  transition: 0.1s;
+  border-radius: 3px;
+}
+.progression-tool-tip {
+  position: absolute;
+  left: 0;
+  top: -125%;
+  padding: 1px 5px;
+  background-color: #363636;
+  color: #ffffff;
+  border-radius: 5px;
+  font-size: 9px;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  visibility: hidden;
+}
+.tool-tip-arrow::after {
+  content: " ";
+  position: absolute;
+  bottom: -35%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #363636 transparent transparent transparent;
+}
+.highlight-glow-received {
+  -webkit-animation: highlight-received 1.5s 1;
+  animation: highlight-received 1.5s 1;
+}
+@-webkit-keyframes highlight-received {
+  0% {
+    background: #ebf2e8;
+  }
+  100% {
+    background: #f5f5f5;
+  }
+}
+@keyframes highlight-received {
+  0% {
+    background: #ebf2e8;
+  }
+  100% {
+    background: #f5f5f5;
+  }
+}
+.popup-heading {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+}
+.small-loader {
+  display: none;
+  overflow: hidden;
+  margin-top: 2px;
+  margin-left: 5px;
+  width: 11.9px;
+  height: 11.9px;
+  border: 2px solid rgba(54, 54, 54, 0.2);
+  border-top-color: #363636;
+  border-radius: 50%;
+  -webkit-animation: rotate360 1.5s linear infinite;
+  animation: rotate360 1.5s linear infinite;
+}
 .canvas-theme {
   /* 1. Switch Octoprint Logo for Canvas Logo */
   /* 2. Button Styling */
@@ -196,8 +304,7 @@
   /* 7. Specific Canvas Tab Styling */
   /* 8. Settings Modal Styling */
   /* 9. SWEET ALERT 2 STYLING */
-  /* 10. CANVAS FILE DOWNLOAD PROGRESS NOTIFICATION */
-  /* 11. EXTRA/OTHER Styling */
+  /* 10. EXTRA/OTHER Styling */
 }
 .canvas-theme .brand span {
   color: #ffffff;
@@ -732,142 +839,6 @@
     right: 0.2em;
     width: 2.9375em;
   }
-}
-.canvas-theme .side-notifications-list {
-  position: fixed;
-  top: 15%;
-  left: 0;
-  margin: 0;
-}
-.canvas-theme .popup-notification {
-  position: relative;
-  list-style: none;
-  text-align: right;
-  width: 200px;
-  padding: 0.5rem 1.1rem;
-  margin-bottom: 7px;
-  border: 1px solid #363636;
-  border-left: none;
-  z-index: 5;
-  background-color: #f5f5f5;
-  border-top-right-radius: 1px;
-  border-bottom-right-radius: 1px;
-  word-wrap: break-word;
-}
-.canvas-theme .popup-notification i {
-  cursor: pointer;
-  position: absolute;
-  top: -7px;
-  right: -7px;
-  border: 1px solid #ffffff;
-  background-color: #363636;
-  color: #ffffff;
-  border-radius: 50%;
-  padding: 1px;
-  font-size: 12px;
-  margin: 0;
-}
-.canvas-theme .popup-notification .popup-title,
-.canvas-theme .popup-notification h6 {
-  margin: 0;
-  margin-bottom: 2px;
-}
-.canvas-theme .popup-notification p {
-  margin: 0;
-  font-size: 12px;
-  font-style: italic;
-  overflow: hidden;
-  -o-text-overflow: ellipsis;
-  text-overflow: ellipsis;
-}
-.canvas-theme .total-bar {
-  width: 100%;
-  background-color: rgba(54, 54, 54, 0.2);
-  border-radius: 3px;
-  margin-top: 25px;
-}
-.canvas-theme .current-bar {
-  width: 0%;
-  background-color: rgba(54, 54, 54, 0.8);
-  position: relative;
-  -webkit-transition: 0.1s;
-  -o-transition: 0.1s;
-  transition: 0.1s;
-  border-radius: 3px;
-}
-.canvas-theme .progression-tool-tip {
-  position: absolute;
-  left: 0;
-  top: -125%;
-  padding: 1px 5px;
-  background-color: #363636;
-  color: #ffffff;
-  border-radius: 5px;
-  font-size: 9px;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  visibility: hidden;
-}
-.canvas-theme .tool-tip-arrow::after {
-  content: " ";
-  position: absolute;
-  bottom: -35%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #363636 transparent transparent transparent;
-}
-.canvas-theme .highlight-glow-received {
-  -webkit-animation: highlight-received 1.5s 1;
-  animation: highlight-received 1.5s 1;
-}
-@-webkit-keyframes highlight-received {
-  0% {
-    background: #ebf2e8;
-  }
-  100% {
-    background: #f5f5f5;
-  }
-}
-@keyframes highlight-received {
-  0% {
-    background: #ebf2e8;
-  }
-  100% {
-    background: #f5f5f5;
-  }
-}
-.canvas-theme .popup-heading {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
-  -webkit-box-align: start;
-  -ms-flex-align: start;
-  align-items: flex-start;
-}
-.canvas-theme .small-loader {
-  display: none;
-  overflow: hidden;
-  margin-top: 2px;
-  margin-left: 5px;
-  width: 11.9px;
-  height: 11.9px;
-  border: 2px solid rgba(54, 54, 54, 0.2);
-  border-top-color: #363636;
-  border-radius: 50%;
-  -webkit-animation: rotate360 1.5s linear infinite;
-  animation: rotate360 1.5s linear infinite;
 }
 .canvas-theme .progress .bar,
 .canvas-theme .slider .slider-selection {
