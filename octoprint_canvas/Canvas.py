@@ -156,7 +156,7 @@ class Canvas():
             self._logger.info("HUB not registered yet. Registering...")
             self.registerHubV2()
 
-    def updateCurrentVersions(self):
+    def updatePluginVersions(self):
         updated = False
         # canvas
         if self.hub_yaml["versions"]["canvas-plugin"] != self._plugin_version:

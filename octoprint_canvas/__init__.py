@@ -21,7 +21,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self.canvas = Canvas.Canvas(self)
         self.canvas.checkFor0cf0()
         self.canvas.checkIfRootCertExists()
-        self.canvas.updateCurrentVersions()
+        self.canvas.updatePluginVersions()
         self.canvas.checkForRegistrationAndVersion()
 
     # TEMPLATEPLUGIN
