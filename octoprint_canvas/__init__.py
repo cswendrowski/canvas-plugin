@@ -104,7 +104,6 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
-        self._logger.info("EVENT: " + event)
         if "Startup" in event:
             self.displayImportantUpdateAlert = False
         elif "ClientOpened" in event:
