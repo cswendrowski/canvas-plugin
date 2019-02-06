@@ -37,8 +37,7 @@ class Shadow():
         shadow_topic = "canvas-hub-" + hub_id
 
         # Create device shadow with persistent subscription to the above topic
-        self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(
-            shadow_topic, True)
+        self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(shadow_topic, True)
         self._logger.info("Device Shadow created")
 
         # initialize listener for device shadow deltas + get object upon connection
@@ -72,8 +71,7 @@ class Shadow():
                 }
             }
         }
-        self.myDeviceShadow.shadowUpdate(
-            json.dumps(state_to_send_back), self.onUpdate, 10)
+        self.myDeviceShadow.shadowUpdate(json.dumps(state_to_send_back), self.onUpdate, 10)
 
     def handleUserListChanges(self, payload):
         self._logger.info("Handling user list delta")
@@ -88,8 +86,7 @@ class Shadow():
 
         # if contents are not the same, get new list of registered users
         if not sameListContent:
-            self._logger.info(
-                "Content not the same. Updating yaml user list first.")
+            self._logger.info("Content not the same. Updating yaml user list first.")
             self.canvas.getRegisteredUsers()
 
         users_to_report = delta_users
@@ -100,8 +97,7 @@ class Shadow():
                 }
             }
         }
-        self.myDeviceShadow.shadowUpdate(
-            json.dumps(reportedState), self.onUpdate, 10)
+        self.myDeviceShadow.shadowUpdate(json.dumps(reportedState), self.onUpdate, 10)
 
     ##############
     # CALLBACKS

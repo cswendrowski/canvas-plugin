@@ -22,14 +22,6 @@ BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
 from . import Shadow
 
 
-def is_json(myjson):
-    try:
-        json_object = json.loads(myjson)
-    except ValueError as e:
-        return False
-    return True
-
-
 class Canvas():
     def __init__(self, plugin):
         self._logger = plugin._logger
@@ -150,8 +142,7 @@ class Canvas():
                 if self.hub_yaml["canvas-users"]:
                     self.makeShadowDeviceClient()
                 else:
-                    self._logger.info(
-                        "There are no linked Canvas accounts yet. Connection not established.")
+                    self._logger.info("There are no linked Canvas accounts yet. Connection not established.")
         if self.hub_registered is False:
             self._logger.info("HUB not registered yet. Registering...")
             self.registerHubV2()
@@ -164,8 +155,7 @@ class Canvas():
             updated = True
         # palette 2
         if self._plugin_manager.get_plugin_info("palette2") and self.hub_yaml["versions"]["palette-plugin"] != self._plugin_manager.get_plugin_info("palette2").version:
-            self.hub_yaml["versions"]["palette-plugin"] = self._plugin_manager.get_plugin_info(
-                "palette2").version
+            self.hub_yaml["versions"]["palette-plugin"] = self._plugin_manager.get_plugin_info("palette2").version
             updated = True
         if updated:
             self.updateYAMLInfo()
@@ -195,8 +185,7 @@ class Canvas():
                 self.hub_yaml["canvas-users"] = updated_users
                 self.updateYAMLInfo()
             else:
-                self._logger.info(
-                    "Could not get updated list of registered users.")
+                self._logger.info("Could not get updated list of registered users.")
             self.updateRegisteredUsers()
 
         except requests.exceptions.RequestException as e:
@@ -207,11 +196,9 @@ class Canvas():
             self.updateUI({"command": "AWS", "data": True})
         else:
             if not self.hub_yaml["canvas-users"]:
-                self.updateUI({"command": "AWS", "data": False,
-                               "reason": "account"})
+                self.updateUI({"command": "AWS", "data": False, "reason": "account"})
             else:
-                self.updateUI({"command": "AWS", "data": False,
-                               "reason": "server"})
+                self.updateUI({"command": "AWS", "data": False, "reason": "server"})
 
     ##############
     # 3. USER FUNCTIONS
@@ -242,14 +229,12 @@ class Canvas():
         authorization = "Bearer " + token
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
-        url = "https://slice." + BASE_URL_API + "projects/" + \
-            project_id + "/download"
+        url = "https://slice." + BASE_URL_API + "projects/" + project_id + "/download"
 
         filename = data["filename"]
         try:
             response = requests.get(url, headers=headers, stream=True)
-            downloaded_file = self.streamFileProgress(
-                response, filename, project_id)
+            downloaded_file = self.streamFileProgress(response, filename, project_id)
             self.extractZipfile(downloaded_file, project_id)
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
@@ -285,17 +270,14 @@ class Canvas():
     def updateRegisteredUsers(self):
         # make a list of usernames
         if "canvas-users" in self.hub_yaml:
-            list_of_users = map(
-                lambda user: {key: user[key] for key in ["username"]}, self.hub_yaml["canvas-users"].values())
-            self.updateUI(
-                {"command": "DisplayRegisteredUsers", "data": list_of_users})
+            list_of_users = map(lambda user: {key: user[key] for key in ["username"]}, self.hub_yaml["canvas-users"].values())
+            self.updateUI({"command": "DisplayRegisteredUsers", "data": list_of_users})
             # if there are no linked users, disconnect shadow client
             if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
                 self.myShadow.disconnect()
 
     def updateYAMLInfo(self):
-        hub_data_path = os.path.expanduser(
-            '~') + "/.mosaicdata/canvas-hub-data.yml"
+        hub_data_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
         hub_data = open(hub_data_path, "w")
         yaml.dump(self.hub_yaml, hub_data)
         hub_data.close()
@@ -336,8 +318,7 @@ class Canvas():
 
     def streamFileProgress(self, response, filename, project_id):
         total_length = response.headers.get('content-length')
-        self.updateUI({"command": "CANVASDownload",
-                       "data": {"filename": filename, "projectId": project_id}, "status": "starting"})
+        self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "starting"})
 
         actual_file = ""
         current_downloaded = 0.00
@@ -347,19 +328,16 @@ class Canvas():
         for data in response.iter_content(chunk_size=stream_size):
             actual_file += data
             current_downloaded += len(data)
-            percentage_completion = int(math.floor(
-                (current_downloaded/total_length)*100))
-            self.updateUI({"command": "CANVASDownload",
-                           "data": {"current": percentage_completion, "projectId": project_id}, "status": "downloading"})
+            percentage_completion = int(math.floor((current_downloaded/total_length)*100))
+            self.updateUI({"command": "CANVASDownload", "data": {"current": percentage_completion, "projectId": project_id}, "status": "downloading"})
         return actual_file
 
     def extractZipfile(self, file, project_id):
         z = zipfile.ZipFile(StringIO.StringIO(file))
         filename = z.namelist()[0]
         watched_path = self._settings.global_get_basefolder("watched")
+        self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "received"})
         z.extractall(watched_path)
-        self.updateUI({"command": "CANVASDownload",
-                       "data": {"filename": filename, "projectId": project_id}, "status": "received"})
 
     ##############
     # 5. AWS IOT / UPGRADE RELATED FUNCTIONS
