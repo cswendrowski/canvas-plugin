@@ -490,12 +490,12 @@
   padding-bottom: 1px;
 }
 .canvas-theme .palette-tag {
-  width: 62%;
-  padding-right: 38%;
+  width: 60%;
+  padding-right: 40%;
   position: relative;
 }
 .canvas-theme .palette-tag::after {
-  content: "Palette";
+  content: "Palette 2";
   position: absolute;
   top: 0;
   right: 0;
