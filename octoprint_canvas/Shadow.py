@@ -18,8 +18,7 @@ class Shadow():
         # Initialization
         self.myShadowClient = AWSIoTMQTTShadowClient(hub_id)
         self.myShadowClient.configureEndpoint(host, 8883)
-        self.myShadowClient.configureCredentials(
-            root_ca_path, private_key_path, certificate_path)
+        self.myShadowClient.configureCredentials(root_ca_path, private_key_path, certificate_path)
 
         # Configuration
         self.myShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
@@ -81,8 +80,7 @@ class Shadow():
         self._logger.info("YAML: %s" % current_yaml_users)
         self._logger.info("DELTA: %s" % delta_users)
 
-        sameListContent = set(
-            current_yaml_users) == set(delta_users)
+        sameListContent = set(current_yaml_users) == set(delta_users)
 
         # if contents are not the same, get new list of registered users
         if not sameListContent:
@@ -112,7 +110,6 @@ class Shadow():
         payload = json.loads(payload)
         if responseStatus == "accepted" and "delta" in payload["state"]:
             delta = payload["state"]["delta"]
-            desired = payload["state"]["desired"]
 
             if "userIds" in delta:
                 self.handleUserListChanges(delta)
