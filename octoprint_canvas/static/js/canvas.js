@@ -337,12 +337,10 @@ function CanvasViewModel(parameters) {
   self.handleAWSConnection = data => {
     if (data.data === true) {
       self.connectionStatus("Connected");
-      $("#connection-state-msg-canvas").css("color", "green");
       self.connectionInfoHeading("Connected to CANVAS");
       self.connectionInfoBody("Your Hub is properly connected to CANVAS");
     } else {
       self.connectionStatus("Not Connected");
-      $("#connection-state-msg-canvas").css("color", "red");
       self.connectionInfoHeading("Not connected to CANVAS");
       if (data.reason === "account") {
         self.connectionInfoBody(
