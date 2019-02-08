@@ -115,7 +115,6 @@ class Canvas():
             }
 
         url = "https://" + BASE_URL_API + "hubs"
-
         try:
             response = requests.put(url, json=payload).json()
             if response.get("status") >= 400:
@@ -166,14 +165,10 @@ class Canvas():
 
     def getRegisteredUsers(self):
         hub_id = self.hub_yaml["canvas-hub"]["id"]
-
         hub_token = self.hub_yaml["canvas-hub"]["token"]
-
         url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/users"
-
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
-
         try:
             response = requests.get(url, headers=headers).json()
             if "users" in response:
@@ -187,7 +182,6 @@ class Canvas():
             else:
                 self._logger.info("Could not get updated list of registered users.")
             self.updateRegisteredUsers()
-
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
@@ -205,15 +199,13 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        url = "https://" + BASE_URL_API + "users/login"
-
         if "username" in loginInfo["data"]:
             data = {"username": loginInfo["data"]["username"],
                     "password": loginInfo["data"]["password"]}
         elif "email" in loginInfo["data"]:
             data = {"email": loginInfo["data"]["email"],
                     "password": loginInfo["data"]["password"]}
-
+        url = "https://" + BASE_URL_API + "users/login"
         try:
             response = requests.post(url, json=data).json()
             if response.get("status") >= 400:
@@ -230,7 +222,6 @@ class Canvas():
         headers = {"Authorization": authorization}
         project_id = data["projectId"]
         url = "https://slice." + BASE_URL_API + "projects/" + project_id + "/download"
-
         filename = data["filename"]
         try:
             response = requests.get(url, headers=headers, stream=True)
@@ -284,17 +275,13 @@ class Canvas():
 
     def registerUserAndHub(self, data):
         hub_id = self.hub_yaml["canvas-hub"]["id"]
-
         hub_token = self.hub_yaml["canvas-hub"]["token"]
         payload = {
             "userToken": data["token"]
         }
-
         url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/register"
-
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
-
         try:
             response = requests.post(url, json=payload, headers=headers).json()
             if response.get("status") >= 400:
@@ -308,7 +295,6 @@ class Canvas():
                 self.updateUI({"command": "UserConnectedToHUB", "data": data})
                 if not self.aws_connection:
                     self.makeShadowDeviceClient()
-
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
@@ -351,7 +337,6 @@ class Canvas():
         payload = {
             "hostname": hostname
         }
-
         self._logger.info(json.dumps(payload))
 
         if "serial-number" in self.hub_yaml["canvas-hub"]:
@@ -365,12 +350,9 @@ class Canvas():
 
         hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
-
         url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/upgrade"
-
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
-
         try:
             response = requests.post(url, json=payload, headers=headers).json()
             if response.get("status") >= 400:
@@ -384,8 +366,7 @@ class Canvas():
 
     def saveUpgradeResponse(self, response):
         if "token" in response:
-            self.hub_yaml["canvas-hub"].update(response["hub"],
-                                               token=response["token"])
+            self.hub_yaml["canvas-hub"].update(response["hub"], token=response["token"])
         else:
             self.hub_yaml["canvas-hub"].update(response["hub"])
         self.updateYAMLInfo()
@@ -416,14 +397,12 @@ class Canvas():
         self._logger.info("Updating Hostname")
         hub_id = self.hub_yaml["canvas-hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
-
         url = "https://" + BASE_URL_API + "hubs/" + hub_id
         payload = {
             "hostname": new_hostname
         }
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
-
         try:
             response = requests.post(url, json=payload, headers=headers).json()
             if response.get("status") >= 400:
