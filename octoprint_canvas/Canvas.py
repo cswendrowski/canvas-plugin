@@ -97,22 +97,23 @@ class Canvas():
 
     def registerHubV2(self):
         self._logger.info("REGISTERING HUB (V2)")
-        hostname = self.getHostname()
-
         if not "serial-number" in self.hub_yaml["canvas-hub"]:
             name = yaml.load(self._settings.config_yaml)["server"]["secretKey"]
             payload = {
-                "hostname": hostname,
                 "name": name
             }
         else:
             name = self.hub_yaml["canvas-hub"]["serial-number"]
             serialNumber = self.hub_yaml["canvas-hub"]["serial-number"]
             payload = {
-                "hostname": hostname,
+                "hostname": serialNumber + "-canvas-hub.local/",
                 "name": name,
                 "serialNumber": serialNumber
             }
+
+        hostname = self.getHostname()
+        if hostname:
+            payload["hostname"] = hostname
 
         url = "https://" + BASE_URL_API + "hubs"
         try:
@@ -134,9 +135,12 @@ class Canvas():
                 self.upgradeToV2()
             else:
                 self._logger.info("HUB version is 2 --- NO UPGRADE NEEDED")
-                if self.hub_yaml["canvas-hub"]["hostname"] != self.getHostname():
-                    new_hostname = self.getHostname()
-                    self.updateHostname(new_hostname)
+                new_hostname = self.getHostname()
+                if self.hub_yaml["canvas-hub"]["hostname"] != new_hostname:
+                    if self.hub_yaml["canvas-hub"]["hostname"] == "" and new_hostname == None:
+                        pass
+                    else:
+                        self.updateHostname(new_hostname)
                 self.getRegisteredUsers()
                 if self.hub_yaml["canvas-users"]:
                     self.makeShadowDeviceClient()
@@ -331,22 +335,22 @@ class Canvas():
 
     def upgradeToV2(self):
         self._logger.info("UPGRADING TO AMARANTH V2")
-        hostname = self.getHostname()
-        self._logger.info("Hostname: %s" % hostname)
-
-        payload = {
-            "hostname": hostname
-        }
-        self._logger.info(json.dumps(payload))
+        payload = {}
 
         if "serial-number" in self.hub_yaml["canvas-hub"]:
             self._logger.info("Serial Number Found")
             serialNumber = self.hub_yaml["canvas-hub"]["serial-number"]
             payload = {
-                "hostname": hostname,
+                "hostname": serialNumber + "-canvas-hub.local/",
                 "serialNumber": serialNumber
             }
             self._logger.info("Serial Number: %s" % serialNumber)
+
+        hostname = self.getHostname()
+        if hostname:
+            payload["hostname"] = hostname
+
+        self._logger.info(json.dumps(payload))
 
         hub_id = self.hub_yaml["canvas-hub"]["hub"]["id"]
         hub_token = self.hub_yaml["canvas-hub"]["token"]
@@ -392,6 +396,7 @@ class Canvas():
             return ip
         except:
             self._logger.info("Unable to get hostname")
+            return None
 
     def updateHostname(self, new_hostname):
         self._logger.info("Updating Hostname")
