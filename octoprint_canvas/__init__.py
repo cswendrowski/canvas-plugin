@@ -43,8 +43,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         return dict(applyTheme=True, importantUpdate=True)
 
     def get_latest(self, target, check, full_data=False, online=True):
-        resp = requests.get(
-            "http://emerald.mosaicmanufacturing.com/canvas-hub-canvas/latest")
+        resp = requests.get("http://emerald.mosaicmanufacturing.com/canvas-hub-canvas/latest")
         version_data = resp.json()
         version = version_data["versions"][0]["version"]
         current_version = check.get("current")
@@ -104,13 +103,11 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
-        self._logger.info("EVENT: " + event)
         if "Startup" in event:
             self.displayImportantUpdateAlert = False
         elif "ClientOpened" in event:
             if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
-                self.canvas.updateUI(
-                    {"command": "importantUpdate", "data": "x.x.x"})
+                self.canvas.updateUI({"command": "importantUpdate", "data": "x.x.x"})
             self.canvas.checkAWSConnection()
             if self.canvas.hub_registered is True:
                 self.canvas.getRegisteredUsers()

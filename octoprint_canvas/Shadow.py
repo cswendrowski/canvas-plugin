@@ -18,8 +18,7 @@ class Shadow():
         # Initialization
         self.myShadowClient = AWSIoTMQTTShadowClient(hub_id)
         self.myShadowClient.configureEndpoint(host, 8883)
-        self.myShadowClient.configureCredentials(
-            root_ca_path, private_key_path, certificate_path)
+        self.myShadowClient.configureCredentials(root_ca_path, private_key_path, certificate_path)
 
         # Configuration
         self.myShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
@@ -37,8 +36,7 @@ class Shadow():
         shadow_topic = "canvas-hub-" + hub_id
 
         # Create device shadow with persistent subscription to the above topic
-        self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(
-            shadow_topic, True)
+        self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(shadow_topic, True)
         self._logger.info("Device Shadow created")
 
         # initialize listener for device shadow deltas + get object upon connection
@@ -72,8 +70,7 @@ class Shadow():
                 }
             }
         }
-        self.myDeviceShadow.shadowUpdate(
-            json.dumps(state_to_send_back), self.onUpdate, 10)
+        self.myDeviceShadow.shadowUpdate(json.dumps(state_to_send_back), self.onUpdate, 10)
 
     def handleUserListChanges(self, payload):
         self._logger.info("Handling user list delta")
@@ -83,13 +80,11 @@ class Shadow():
         self._logger.info("YAML: %s" % current_yaml_users)
         self._logger.info("DELTA: %s" % delta_users)
 
-        sameListContent = set(
-            current_yaml_users) == set(delta_users)
+        sameListContent = set(current_yaml_users) == set(delta_users)
 
         # if contents are not the same, get new list of registered users
         if not sameListContent:
-            self._logger.info(
-                "Content not the same. Updating yaml user list first.")
+            self._logger.info("Content not the same. Updating yaml user list first.")
             self.canvas.getRegisteredUsers()
 
         users_to_report = delta_users
@@ -100,8 +95,7 @@ class Shadow():
                 }
             }
         }
-        self.myDeviceShadow.shadowUpdate(
-            json.dumps(reportedState), self.onUpdate, 10)
+        self.myDeviceShadow.shadowUpdate(json.dumps(reportedState), self.onUpdate, 10)
 
     ##############
     # CALLBACKS
@@ -116,7 +110,6 @@ class Shadow():
         payload = json.loads(payload)
         if responseStatus == "accepted" and "delta" in payload["state"]:
             delta = payload["state"]["delta"]
-            desired = payload["state"]["desired"]
 
             if "userIds" in delta:
                 self.handleUserListChanges(delta)

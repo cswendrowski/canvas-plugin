@@ -38,33 +38,7 @@ canvasApp.toggleLogo = condition => {
   }
 };
 
-/* 2. Add Palette Tag to .mcf.gcode files */
-canvasApp.tagPaletteFiles = () => {
-  canvasApp.removeFolderBinding();
-  canvasApp.handleGCODEFolders();
-  canvasApp.applyExtraTagging();
-};
-
-/* 2.1 Event listener for clicking back and forth between GCODE folders.
-Use this function to keep Palette files tagged */
-canvasApp.handleGCODEFolders = () => {
-  canvasApp.removeFolderBinding();
-  $("#files .gcode_files .entry.back.clickable").on("click", () => {
-    canvasApp.applyExtraTagging();
-  });
-};
-
-/* 2.2 Specific Fevent listener for clicking and seeing folder dynamic elements */
-canvasApp.removeFolderBinding = () => {
-  $("#files .gcode_files .scroll-wrapper")
-    .find(".folder .title")
-    .removeAttr("data-bind")
-    .on("click", event => {
-      canvasApp.applyExtraTagging();
-    });
-};
-
-/* 3. Display popup notifications for files incoming and received from Canvas */
+/* 2. Display popup notifications for files incoming and received from Canvas */
 canvasApp.displayNotification = data => {
   // if a prior popup with the same file is currently on the page, remove it
   if ($("body").find(`#${data.projectId}`).length > 0) {
@@ -92,7 +66,7 @@ canvasApp.displayNotification = data => {
   notification.fadeIn(200);
 };
 
-/* 3.1 Update the download progress (%) on UI */
+/* 2.1 Update the download progress (%) on UI */
 canvasApp.updateDownloadProgress = data => {
   if (data.current === 0) {
     $("body")
@@ -130,7 +104,7 @@ canvasApp.updateDownloadProgress = data => {
     .text(data.current + "%");
 };
 
-/* 3.2 Update download progress when file is received and extracted */
+/* 2.2 Update download progress when file is received and extracted */
 canvasApp.updateFileReceived = data => {
   $("body")
     .find(`#${data.projectId} .popup-title`)
@@ -150,7 +124,7 @@ canvasApp.updateFileReceived = data => {
     .fadeIn(200);
 };
 
-/* 3.3 Update download progress when file analysis is done */
+/* 2.3 Update download progress when file analysis is done */
 canvasApp.updateFileReady = filename => {
   $("body")
     .find(`.progress-bar .file-download-name:contains("${filename}")`)
@@ -172,7 +146,7 @@ canvasApp.updateFileReady = filename => {
   }, 400);
 };
 
-/* 4. Remove popup notifications */
+/* 3. Remove popup notifications */
 canvasApp.removePopup = () => {
   $("body").on("click", ".side-notifications-list .remove-popup", function() {
     $(this)
@@ -183,24 +157,7 @@ canvasApp.removePopup = () => {
   });
 };
 
-/* 5. Apply additional tagging function for slower DOM-binding scenarios*/
-canvasApp.applyExtraTagging = () => {
-  let count = 0;
-  let applyTagging = setInterval(function() {
-    if (count > 20) {
-      clearInterval(applyTagging);
-    }
-    let allPrintFiles = $("#files .gcode_files .scroll-wrapper").find(".entry .title");
-    allPrintFiles.each((index, printFile) => {
-      if (printFile.innerHTML.includes(".mcf.gcode")) {
-        $(printFile).addClass("palette-tag");
-      }
-    });
-    count++;
-  }, 100);
-};
-
-/* 6. Loader */
+/* 4. Loader */
 canvasApp.loadingOverlay = condition => {
   if (condition) {
     $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
@@ -211,7 +168,7 @@ canvasApp.loadingOverlay = condition => {
   }
 };
 
-/* 7. Add Notification List To DOM */
+/* 5. Add Notification List To DOM */
 canvasApp.addNotificationList = () => {
   if ($("body").find(".side-notifications-list").length === 0) {
     $("body")
@@ -220,7 +177,7 @@ canvasApp.addNotificationList = () => {
   }
 };
 
-/* 8. Alert Texts */
+/* 6. Alert Texts */
 canvasApp.userAddedSuccess = username => {
   return swal({
     type: "success",
@@ -273,6 +230,10 @@ canvasApp.importantUpdate = version => {
 function CanvasViewModel(parameters) {
   var self = this;
 
+  self.settings = parameters[0];
+  self.appearance = parameters[1];
+  self.files = parameters[2];
+
   self.userInput = ko.observable();
   self.password = ko.observable();
   self.connectionStatus = ko.observable();
@@ -281,52 +242,73 @@ function CanvasViewModel(parameters) {
   self.users = ko.observable([]);
   self.applyTheme = false;
 
-  self.onBeforeBinding = () => {
-    self.settings = parameters[0];
-    self.appearance = parameters[1];
-    self.appearance.name("");
-    self.appearance.title = ko.pureComputed(function() {
-      return self.appearance.name();
+  self.modifyAppearanceVM = () => {
+    self.appearance.brand = ko.pureComputed(function() {
+      if (self.appearance.name()) {
+        return self.appearance.name();
+      } else {
+        return gettext("OctoPrint");
+      }
     });
-    self.appearance.name("OctoPrint");
+
+    self.appearance.fullbrand = ko.pureComputed(function() {
+      if (self.appearance.name()) {
+        return self.appearance.name();
+      } else {
+        return gettext("OctoPrint");
+      }
+    });
+
+    self.appearance.title = ko.pureComputed(function() {
+      if (self.appearance.name()) {
+        return self.appearance.name();
+      } else {
+        return gettext("OctoPrint");
+      }
+    });
+  };
+
+  self.modifyFilesVM = () => {
+    self.files.getSuccessClass = function(data) {
+      if (!data["prints"] || !data["prints"]["last"]) {
+        if (data.name.includes(".mcf.gcode")) {
+          return "palette-tag";
+        } else {
+          return "";
+        }
+      } else {
+        if (data.name.includes(".mcf.gcode")) {
+          return data["prints"]["last"]["success"] ? "text-success palette-tag" : "text-error palette-tag";
+        } else {
+          return data["prints"]["last"]["success"] ? "text-success" : "text-error";
+        }
+      }
+    };
+  };
+
+  self.onBeforeBinding = () => {
+    self.appearance.name("");
+    self.modifyAppearanceVM();
+    self.modifyFilesVM();
+  };
+
+  self.onAfterBinding = () => {
     self.toggleTheme();
+    self.files.requestData();
   };
 
   self.onStartupComplete = () => {
-    canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
   };
 
   self.onEventFileAdded = payload => {
-    canvasApp.tagPaletteFiles();
     if ($("body").find(`.progress-bar .file-download-name:contains("${payload.name}")`)) {
       canvasApp.updateFileReady(payload.name);
     }
   };
 
-  self.onEventFileRemoved = () => {
-    canvasApp.tagPaletteFiles();
-  };
-
-  self.onEventMetadataAnalysisFinished = payload => {
-    canvasApp.tagPaletteFiles();
-  };
-
-  self.onEventUpdatedFiles = () => {
-    canvasApp.tagPaletteFiles();
-  };
-
-  self.onEventFileSelected = () => {
-    canvasApp.tagPaletteFiles();
-  };
-
-  self.onEventFileDeselected = () => {
-    canvasApp.tagPaletteFiles();
-  };
-
   self.onDataUpdaterReconnect = () => {
-    canvasApp.tagPaletteFiles();
     canvasApp.removePopup();
     canvasApp.addNotificationList();
   };
@@ -355,12 +337,10 @@ function CanvasViewModel(parameters) {
   self.handleAWSConnection = data => {
     if (data.data === true) {
       self.connectionStatus("Connected");
-      $("#connection-state-msg-canvas").css("color", "green");
       self.connectionInfoHeading("Connected to CANVAS");
       self.connectionInfoBody("Your Hub is properly connected to CANVAS");
     } else {
       self.connectionStatus("Not Connected");
-      $("#connection-state-msg-canvas").css("color", "red");
       self.connectionInfoHeading("Not connected to CANVAS");
       if (data.reason === "account") {
         self.connectionInfoBody(
@@ -471,11 +451,10 @@ function CanvasViewModel(parameters) {
   ======================= */
 
 $(function() {
-  CanvasViewModel();
   OCTOPRINT_VIEWMODELS.push({
     // This is the constructor to call for instantiating the plugin
     construct: CanvasViewModel, // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
-    dependencies: ["settingsViewModel", "appearanceViewModel"], // Finally, this is the list of selectors for all elements we want this view model to be bound to.
+    dependencies: ["settingsViewModel", "appearanceViewModel", "filesViewModel"], // Finally, this is the list of selectors for all elements we want this view model to be bound to.
     elements: ["#tab_plugin_canvas"]
   });
 });
