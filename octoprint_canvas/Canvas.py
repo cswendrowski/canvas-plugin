@@ -136,7 +136,10 @@ class Canvas():
             else:
                 self._logger.info("HUB version is 2 --- NO UPGRADE NEEDED")
                 new_hostname = self.getHostname()
-                if self.hub_yaml["canvas-hub"]["hostname"] != new_hostname:
+                # TODO: how to handle case where hub had a hostname before but no longer is able to find one
+                if not "hostname" in self.hub_yaml["canvas-hub"] and new_hostname:
+                    self.updateHostname(new_hostname)
+                elif "hostname" in self.hub_yaml["canvas-hub"] and self.hub_yaml["canvas-hub"]["hostname"] != new_hostname:
                     if self.hub_yaml["canvas-hub"]["hostname"] == "" and new_hostname == None:
                         pass
                     else:
