@@ -136,7 +136,6 @@ class Canvas():
             else:
                 self._logger.info("HUB version is 2 --- NO UPGRADE NEEDED")
                 new_hostname = self.getHostname()
-                # TODO: how to handle case where hub had a hostname before but no longer is able to find one
                 if not "hostname" in self.hub_yaml["canvas-hub"] and new_hostname:
                     self.updateHostname(new_hostname)
                 elif "hostname" in self.hub_yaml["canvas-hub"] and self.hub_yaml["canvas-hub"]["hostname"] != new_hostname:
@@ -416,9 +415,13 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response)
             else:
-                self._logger.info("Hostname updated: %s" % new_hostname)
-                self.hub_yaml["canvas-hub"]["hostname"] = new_hostname
-                self.updateYAMLInfo()
+                if new_hostname:
+                    self._logger.info("Hostname updated: %s" % new_hostname)
+                    self.hub_yaml["canvas-hub"]["hostname"] = new_hostname
+                    self.updateYAMLInfo()
+                else:
+                    self._logger.info("Deleting hostname")
+                    del self.hub_yaml["canvas-hub"]["hostname"]
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
 
