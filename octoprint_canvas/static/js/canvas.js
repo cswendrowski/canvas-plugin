@@ -295,8 +295,6 @@ function CanvasViewModel(parameters) {
     });
   };
 
-  self.modifyAppearanceVM();
-
   self.modifyFilesVM = () => {
     self.files.getSuccessClass = function(data) {
       if (!data["prints"] || !data["prints"]["last"]) {
