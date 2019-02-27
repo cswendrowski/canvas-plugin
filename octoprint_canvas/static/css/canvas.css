@@ -179,7 +179,7 @@
   border-bottom-right-radius: 1px;
   word-wrap: break-word;
 }
-.popup-notification i {
+.popup-notification .remove-popup {
   cursor: pointer;
   position: absolute;
   top: -7px;
