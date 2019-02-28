@@ -324,9 +324,6 @@ function CanvasViewModel(parameters) {
 
   self.onBeforeBinding = () => {
     self.applyTheme(self.settings.settings.plugins.canvas.applyTheme());
-    // if (self.appearance.name() === "CANVAS Hub" || self.appearance.name() === "OctoPrint") {
-    //   self.appearance.name("");
-    // }
   };
 
   self.onAfterBinding = () => {
