@@ -246,6 +246,12 @@ function CanvasViewModel(parameters) {
   });
 
   self.modifyAppearanceVM = () => {
+    self.appearance.name.subscribe(function() {
+      if (self.appearance.name() === "CANVAS Hub" || self.appearance.name() === "OctoPrint") {
+        self.appearance.name("");
+      }
+    });
+
     self.appearance.brand = ko.pureComputed(function() {
       if (self.applyTheme()) {
         if (self.appearance.name()) {
@@ -318,6 +324,9 @@ function CanvasViewModel(parameters) {
 
   self.onBeforeBinding = () => {
     self.applyTheme(self.settings.settings.plugins.canvas.applyTheme());
+    // if (self.appearance.name() === "CANVAS Hub" || self.appearance.name() === "OctoPrint") {
+    //   self.appearance.name("");
+    // }
   };
 
   self.onAfterBinding = () => {
