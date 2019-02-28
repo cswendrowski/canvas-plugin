@@ -240,30 +240,63 @@ function CanvasViewModel(parameters) {
   self.connectionInfoHeading = ko.observable();
   self.connectionInfoBody = ko.observable();
   self.users = ko.observable([]);
-  self.applyTheme = false;
+  self.applyTheme = ko.observable();
+  self.brand = ko.computed(function() {
+    return self.applyTheme() ? "CANVAS Hub" : "OctoPrint";
+  });
 
   self.modifyAppearanceVM = () => {
+    self.appearance.name.subscribe(function() {
+      if (self.appearance.name() === "CANVAS Hub" || self.appearance.name() === "OctoPrint") {
+        self.appearance.name("");
+      }
+    });
+
     self.appearance.brand = ko.pureComputed(function() {
-      if (self.appearance.name()) {
-        return self.appearance.name();
+      if (self.applyTheme()) {
+        if (self.appearance.name()) {
+          return self.brand() + " (" + self.appearance.name() + ")";
+        } else {
+          return self.brand();
+        }
       } else {
-        return gettext("OctoPrint");
+        if (self.appearance.name()) {
+          return self.appearance.name();
+        } else {
+          return self.brand();
+        }
       }
     });
 
     self.appearance.fullbrand = ko.pureComputed(function() {
-      if (self.appearance.name()) {
-        return self.appearance.name();
+      if (self.applyTheme()) {
+        if (self.appearance.name()) {
+          return self.brand() + ": " + self.appearance.name();
+        } else {
+          return self.brand();
+        }
       } else {
-        return gettext("OctoPrint");
+        if (self.appearance.name()) {
+          return self.brand() + ": " + self.appearance.name();
+        } else {
+          return self.brand();
+        }
       }
     });
 
     self.appearance.title = ko.pureComputed(function() {
-      if (self.appearance.name()) {
-        return self.appearance.name();
+      if (self.applyTheme()) {
+        if (self.appearance.name()) {
+          return self.appearance.name() + " [" + self.brand() + "]";
+        } else {
+          return self.brand();
+        }
       } else {
-        return gettext("OctoPrint");
+        if (self.appearance.name()) {
+          return self.appearance.name() + " [" + self.brand() + "]";
+        } else {
+          return self.brand();
+        }
       }
     });
   };
@@ -286,10 +319,11 @@ function CanvasViewModel(parameters) {
     };
   };
 
+  self.modifyAppearanceVM();
+  self.modifyFilesVM();
+
   self.onBeforeBinding = () => {
-    self.appearance.name("");
-    self.modifyAppearanceVM();
-    self.modifyFilesVM();
+    self.applyTheme(self.settings.settings.plugins.canvas.applyTheme());
   };
 
   self.onAfterBinding = () => {
@@ -363,11 +397,11 @@ function CanvasViewModel(parameters) {
 
     // Apply theme immediately
     if (applyTheme) {
-      self.appearance.name("CANVAS Hub");
+      self.applyTheme(true);
       $("html").addClass("canvas-theme");
       canvasApp.toggleLogo(applyTheme);
     } else {
-      self.appearance.name("OctoPrint");
+      self.applyTheme(false);
       $("html").removeClass("canvas-theme");
       canvasApp.toggleLogo(applyTheme);
     }
@@ -377,11 +411,11 @@ function CanvasViewModel(parameters) {
       applyTheme = self.settings.settings.plugins.canvas.applyTheme();
 
       if (applyTheme) {
-        self.appearance.name("CANVAS Hub");
+        self.applyTheme(true);
         $("html").addClass("canvas-theme");
         canvasApp.toggleLogo(applyTheme);
       } else {
-        self.appearance.name("OctoPrint");
+        self.applyTheme(false);
         $("html").removeClass("canvas-theme");
         canvasApp.toggleLogo(applyTheme);
       }

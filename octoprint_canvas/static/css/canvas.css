@@ -99,11 +99,11 @@
   border-width: 11px;
 }
 .connection-status-line .connection-info-container .connection-info-text .connection-info-heading {
-  margin: 0;
-  font-size: 14px;
+  margin: 0 0 3px 0;
+  font-size: 15px;
 }
 .connection-status-line .connection-info-container .connection-info-text .connection-info-body {
-  font-size: 12px;
+  font-size: 13px;
 }
 /* LOADER STYLING */
 .loading-overlay-container {
@@ -179,7 +179,7 @@
   border-bottom-right-radius: 1px;
   word-wrap: break-word;
 }
-.popup-notification i {
+.popup-notification .remove-popup {
   cursor: pointer;
   position: absolute;
   top: -7px;
