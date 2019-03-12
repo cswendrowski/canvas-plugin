@@ -48,7 +48,7 @@ canvasApp.displayNotification = data => {
         this.remove();
       });
   }
-  let notification = $(`<li id="${data.projectId}" class="progress-bar popup-notification">
+  let notification = $(`<li id="${data.projectId}" class="canvas-progress-bar popup-notification">
             <i class="material-icons remove-popup">clear</i>
             <div class="popup-heading">
               <h6 class="popup-title">CANVAS File Incoming...</h6>
@@ -127,20 +127,20 @@ canvasApp.updateFileReceived = data => {
 /* 2.3 Update download progress when file analysis is done */
 canvasApp.updateFileReady = filename => {
   $("body")
-    .find(`.progress-bar .file-download-name:contains("${filename}")`)
+    .find(`.canvas-progress-bar .file-download-name:contains("${filename}")`)
     .siblings(".popup-heading")
     .children(".popup-title")
     .text("CANVAS File Added")
     .hide()
     .fadeIn(200);
   $("body")
-    .find(`.progress-bar .file-download-name:contains("${filename}")`)
+    .find(`.canvas-progress-bar .file-download-name:contains("${filename}")`)
     .siblings(".popup-heading")
     .children(".small-loader")
     .remove();
   setTimeout(function() {
     $("body")
-      .find(`.progress-bar .file-download-name:contains("${filename}")`)
+      .find(`.canvas-progress-bar .file-download-name:contains("${filename}")`)
       .closest("li")
       .addClass("highlight-glow-received");
   }, 400);
@@ -337,7 +337,7 @@ function CanvasViewModel(parameters) {
   };
 
   self.onEventFileAdded = payload => {
-    if ($("body").find(`.progress-bar .file-download-name:contains("${payload.name}")`)) {
+    if ($("body").find(`.canvas-progress-bar .file-download-name:contains("${payload.name}")`)) {
       canvasApp.updateFileReady(payload.name);
     }
   };
