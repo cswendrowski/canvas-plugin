@@ -95,7 +95,7 @@ class Canvas():
         else:
             self._logger.info("ROOT-CA ALREADY THERE")
 
-    def registerHubV2(self):
+    def registerHub(self):
         self._logger.info("REGISTERING HUB (V2)")
         if not "serial-number" in self.hub_yaml["canvas-hub"]:
             name = yaml.load(self._settings.config_yaml)["server"]["secretKey"]
@@ -150,7 +150,7 @@ class Canvas():
                     self._logger.info("There are no linked Canvas accounts yet. Connection not established.")
         if self.hub_registered is False:
             self._logger.info("HUB not registered yet. Registering...")
-            self.registerHubV2()
+            self.registerHub()
 
     def updatePluginVersions(self):
         updated = False
