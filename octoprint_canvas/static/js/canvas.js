@@ -124,39 +124,35 @@ function CanvasViewModel(parameters) {
 
   self.addUser = () => {
     UI.loadingOverlay(true);
-    let payload = { command: "addUser", data: { username: self.userInput(), password: self.password() } };
-
-    if (self.userInput().includes("@")) {
-      payload = { command: "addUser", data: { email: self.userInput(), password: self.password() } };
-    }
-
-    $.ajax({
-      url: API_BASEURL + "plugin/canvas",
-      type: "POST",
-      dataType: "json",
-      data: JSON.stringify(payload),
-      contentType: "application/json; charset=UTF-8"
-    });
+    const propertyName = self.userInput().includes("@") ? "email" : "username"
+    const payload = {
+      command: "addUser",
+      data: {
+        [propertyName]: self.userInput(),
+        password: self.password(),
+      },
+    };
+    self.ajaxRequest(payload);
   };
 
   self.handleAWSConnection = data => {
+    let textToDisplay = ["", "", ""];
     if (data.data === true) {
-      self.connectionStatus("Connected");
-      self.connectionInfoHeading("Connected to CANVAS");
-      self.connectionInfoBody("Your Hub is properly connected to CANVAS");
+      textToDisplay = ["Connected", "Connected to CANVAS", "Your Hub is properly connected to CANVAS"];
     } else {
-      self.connectionStatus("Not Connected");
-      self.connectionInfoHeading("Not connected to CANVAS");
+      textToDisplay[0] = "Not Connected";
+      textToDisplay[1] = "Not connected to CANVAS";
       if (data.reason === "account") {
-        self.connectionInfoBody(
-          "No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection."
-        );
+        textToDisplay[2] = "No CANVAS accounts linked to this Hub. Please make sure you have at least 1 CANVAS account linked to enable the connection.";
       } else if (data.reason === "server") {
-        self.connectionInfoBody(
-          "There seems to be an issue connecting to CANVAS. The plugin will automatically try to re-connect until the connection is re-established. In the meanwhile, please download your CANVAS files manually and upload them to the Hub."
-        );
+        textToDisplay[2] = `There seems to be an issue connecting to CANVAS.
+        The plugin will automatically try to re-connect until the connection is re-established.
+        In the meanwhile, please download your CANVAS files manually and upload them to the Hub.`;
       }
     }
+    self.connectionStatus(textToDisplay[0]);
+    self.connectionInfoHeading(textToDisplay[1]);
+    self.connectionInfoBody(textToDisplay[2]);
   };
 
   self.toggleStatusInfo = () => {
@@ -201,21 +197,24 @@ function CanvasViewModel(parameters) {
       condition: displayImportantUpdateAlert
     };
 
-    $.ajax({
+    self.ajaxRequest(payload).then(res => {
+      self.settings.saveData();
+    });
+  };
+
+  self.ajaxRequest = payload => {
+    return $.ajax({
       url: API_BASEURL + "plugin/canvas",
       type: "POST",
       dataType: "json",
       data: JSON.stringify(payload),
       contentType: "application/json; charset=UTF-8"
-    }).then(res => {
-      self.settings.saveData();
     });
   };
 
   // Receive messages from the OctoPrint server
   self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
-      console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
         self.users(message.data);
       } else if (message.command === "AWS") {
