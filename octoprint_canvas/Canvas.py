@@ -17,7 +17,7 @@ env_path = os.path.abspath(".") + "/.env"
 if os.path.abspath(".") is "/":
     env_path = "/home/pi/.env"
 load_dotenv(env_path)
-BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
+BASE_URL_API = os.getenv("EAP_BASE_URL_API", "api.canvas3d.io/")
 
 from . import Shadow
 

@@ -85,6 +85,9 @@ class Shadow():
         # if contents are not the same, get new list of registered users
         if not sameListContent:
             self._logger.info("Content not the same. Updating yaml user list first.")
+            if len(delta_users) < len(current_yaml_users):
+                removed_user = str(set(current_yaml_users).difference(set(delta_users)).pop())
+                self.canvas.removeUserFromYAML(removed_user)
             self.canvas.getRegisteredUsers()
 
         users_to_report = delta_users

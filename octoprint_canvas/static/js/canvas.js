@@ -44,7 +44,7 @@ canvasApp.displayNotification = data => {
   if ($("body").find(`#${data.projectId}`).length > 0) {
     $("body")
       .find(`#${data.projectId}`)
-      .fadeOut(1000, function() {
+      .fadeOut(1000, function () {
         this.remove();
       });
   }
@@ -138,7 +138,7 @@ canvasApp.updateFileReady = filename => {
     .siblings(".popup-heading")
     .children(".small-loader")
     .remove();
-  setTimeout(function() {
+  setTimeout(function () {
     $("body")
       .find(`.canvas-progress-bar .file-download-name:contains("${filename}")`)
       .closest("li")
@@ -148,10 +148,10 @@ canvasApp.updateFileReady = filename => {
 
 /* 3. Remove popup notifications */
 canvasApp.removePopup = () => {
-  $("body").on("click", ".side-notifications-list .remove-popup", function() {
+  $("body").on("click", ".side-notifications-list .remove-popup", function () {
     $(this)
       .closest("li")
-      .fadeOut(200, function() {
+      .fadeOut(200, function () {
         $(this).remove();
       });
   });
@@ -177,52 +177,6 @@ canvasApp.addNotificationList = () => {
   }
 };
 
-/* 6. Alert Texts */
-canvasApp.userAddedSuccess = username => {
-  return swal({
-    type: "success",
-    title: "CANVAS user successfully added",
-    text: `${username} is now linked to this CANVAS Hub.`
-  });
-};
-
-canvasApp.userExistsAlready = username => {
-  return swal({
-    type: "info",
-    title: "CANVAS user already linked",
-    text: `${username} is already linked to this CANVAS Hub.`
-  });
-};
-
-canvasApp.userInvalidCredentials = () => {
-  return swal({
-    type: "error",
-    title: "Incorrect Login Information",
-    text: "User credentials are incorrect. Please try again."
-  });
-};
-
-canvasApp.userDeletedSuccess = username => {
-  return swal({
-    type: "success",
-    title: "CANVAS user successfully removed",
-    text: `${username} is now removed from this CANVAS Hub.`
-  });
-};
-
-canvasApp.importantUpdate = version => {
-  return swal({
-    type: "info",
-    title: `Important Update (Version ${version})`,
-    html: `CANVAS Plugin - Version ${version} is available for download.
-    <br /><br />This version of the plugin contains important changes that allow a more stable connection to CANVAS. Due to changes on the CANVAS servers to facilitate these improvements, this update is required for 'Send to CANVAS Hub' functionality.
-    <br /><br />We apologize for the inconvenience.`,
-    input: "checkbox",
-    inputClass: "update-checkbox",
-    inputPlaceholder: "Don't show me this again"
-  });
-};
-
 /* ======================
   CANVAS VIEW MODEL FOR OCTOPRINT
   ======================= */
@@ -241,18 +195,18 @@ function CanvasViewModel(parameters) {
   self.connectionInfoBody = ko.observable();
   self.users = ko.observable([]);
   self.applyTheme = ko.observable();
-  self.brand = ko.computed(function() {
+  self.brand = ko.computed(function () {
     return self.applyTheme() ? "CANVAS Hub" : "OctoPrint";
   });
 
   self.modifyAppearanceVM = () => {
-    self.appearance.name.subscribe(function() {
+    self.appearance.name.subscribe(function () {
       if (self.appearance.name() === "CANVAS Hub" || self.appearance.name() === "OctoPrint") {
         self.appearance.name("");
       }
     });
 
-    self.appearance.brand = ko.pureComputed(function() {
+    self.appearance.brand = ko.pureComputed(function () {
       if (self.applyTheme()) {
         if (self.appearance.name()) {
           return self.brand() + " (" + self.appearance.name() + ")";
@@ -268,7 +222,7 @@ function CanvasViewModel(parameters) {
       }
     });
 
-    self.appearance.fullbrand = ko.pureComputed(function() {
+    self.appearance.fullbrand = ko.pureComputed(function () {
       if (self.applyTheme()) {
         if (self.appearance.name()) {
           return self.brand() + ": " + self.appearance.name();
@@ -284,7 +238,7 @@ function CanvasViewModel(parameters) {
       }
     });
 
-    self.appearance.title = ko.pureComputed(function() {
+    self.appearance.title = ko.pureComputed(function () {
       if (self.applyTheme()) {
         if (self.appearance.name()) {
           return self.appearance.name() + " [" + self.brand() + "]";
@@ -302,7 +256,7 @@ function CanvasViewModel(parameters) {
   };
 
   self.modifyFilesVM = () => {
-    self.files.getSuccessClass = function(data) {
+    self.files.getSuccessClass = function (data) {
       if (!data["prints"] || !data["prints"]["last"]) {
         if (data.name.includes(".mcf.gcode")) {
           return "palette-tag";
@@ -444,6 +398,7 @@ function CanvasViewModel(parameters) {
   // Receive messages from the OctoPrint server
   self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
+      console.log(message);
       if (message.command === "DisplayRegisteredUsers") {
         self.users(message.data);
       } else if (message.command === "AWS") {
@@ -451,17 +406,17 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "UserConnectedToHUB") {
         $(".add-user input").val("");
         canvasApp.loadingOverlay(false);
-        canvasApp.userAddedSuccess(message.data.username);
+        Alerts.userAddedSuccess(message.data.username);
       } else if (message.command === "UserAlreadyExists") {
         $(".add-user input").val("");
         canvasApp.loadingOverlay(false);
-        canvasApp.userExistsAlready(message.data.username);
+        Alerts.userExistsAlready(message.data.username);
       } else if (message.command === "invalidUserCredentials") {
         $(".add-user input").val("");
         canvasApp.loadingOverlay(false);
-        canvasApp.userInvalidCredentials();
+        Alerts.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
-        canvasApp.userDeletedSuccess(message.data);
+        Alerts.userDeletedSuccess(message.data);
       } else if (message.command === "CANVASDownload") {
         if (message.status === "starting") {
           canvasApp.displayNotification(message.data);
@@ -474,7 +429,7 @@ function CanvasViewModel(parameters) {
         $("body").on("click", ".update-checkbox input", event => {
           self.changeImportantUpdateSettings(event.target.checked);
         });
-        canvasApp.importantUpdate(message.data);
+        Alerts.importantUpdate(message.data);
       }
     }
   };
@@ -484,7 +439,8 @@ function CanvasViewModel(parameters) {
   RUN
   ======================= */
 
-$(function() {
+
+$(function () {
   OCTOPRINT_VIEWMODELS.push({
     // This is the constructor to call for instantiating the plugin
     construct: CanvasViewModel, // This is a list of dependencies to inject into the plugin. The order will correspond to the "parameters" arguments above
