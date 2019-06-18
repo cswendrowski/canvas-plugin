@@ -119,6 +119,7 @@ class Canvas():
             payload["isHubS"] = True
 
         url = "https://" + BASE_URL_API + "hubs"
+        self._logger.info(payload)
         try:
             response = requests.put(url, json=payload).json()
             if response.get("status") >= 400:
