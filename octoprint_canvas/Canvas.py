@@ -7,6 +7,7 @@ import ssl
 import time
 import math
 import socket
+import threading
 
 from ruamel.yaml import YAML
 yaml = YAML(typ="safe")
@@ -35,6 +36,7 @@ class Canvas():
 
         self.hub_yaml = self.loadHubData()
         self.isHubS = self.determineHubVersion()
+        self.registerThread = None
 
     ##############
     # 1. SERVER STARTUP FUNCTIONS
@@ -131,6 +133,7 @@ class Canvas():
             except requests.exceptions.RequestException as e:
                 self._logger.info(e)
                 time.sleep(10)
+        return
 
     def checkForRegistrationAndVersion(self):
         if "token" in self.hub_yaml["canvas-hub"]:
@@ -156,7 +159,7 @@ class Canvas():
                     self._logger.info("There are no linked Canvas accounts yet. Connection not established.")
         if self.hub_registered is False:
             self._logger.info("HUB not registered yet. Registering...")
-            self.registerHub()
+            self.startRegisterThread()
 
     def updatePluginVersions(self):
         updated = False
@@ -183,6 +186,12 @@ class Canvas():
             if hub_rank == "0.2.0":
                 return True
         return False
+
+    def startRegisterThread(self):
+        if self.registerThread is None:
+            self.registerThread = threading.Thread(target=self.registerHub)
+            self.registerThread.daemon = True
+            self.registerThread.start()
 
     ##############
     # 2. CLIENT UI STARTUP FUNCTIONS
