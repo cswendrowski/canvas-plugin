@@ -1,33 +1,51 @@
-#settings_dialog a,
-#plugin_announcements_dialog a {
-  color: fade(@color-1, 70%);
+#settings_dialog {
+  a {
+    color: fade(@color-2, 70%);
+  }
+
+  a:hover,
+  .nav-header,
+  .pull-right .btn:hover i {
+    color: @color-2;
+  }
+
+  .nav-list > .active > a,
+  .nav-pills > .active > a {
+    color: @color-1;
+    background-color: @color-8;
+  }
+
 }
 
-#settings_dialog a:hover,
-#settings_dialog .nav-header,
-#plugin_announcements_dialog a:hover,
-#plugin_announcements_dialog_content a {
-  color: @color-1;
+#plugin_announcements_dialog {
+  a {
+    color: fade(@color-2, 70%);
+  }
+
+  a:hover {
+    color: @color-2;
+  }
+
+  .nav-list > .active > a {
+    color: @color-1;
+    background-color: @color-8;
+  }
 }
 
-#settings_dialog .nav-list > .active > a,
-#settings_dialog .nav-pills > .active > a,
-#plugin_announcements_dialog .nav-list > .active > a {
-  color: @color-2;
-  background-color: @color-1;
-}
-.configurelink:hover .fa-wrench {
-  color: @color-1;
+#plugin_announcements_dialog_content {
+  a,
+  .configurelink:hover .fa-wrench {
+    color: @color-2;
+  }
 }
 
-#settings_dialog .pull-right .btn:hover i {
-  color: @color-1;
-}
-#settings_plugin_pluginmanager_repositorydialog a {
-  color: fade(@color-1, 80%);
-  text-decoration: underline;
-}
+#settings_plugin_pluginmanager_repositorydialog {
+  a {
+    color: fade(@color-2, 80%);
+    text-decoration: underline;
+  }
 
-#settings_plugin_pluginmanager_repositorydialog a:hover {
-  color: @color-4;
+  a:hover {
+    color: @color-1;
+  }
 }
