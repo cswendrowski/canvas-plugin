@@ -1,12 +1,6 @@
 #settings_dialog {
   a {
-    color: fade(@color-2, 70%);
-  }
-
-  a:hover,
-  .nav-header,
-  .pull-right .btn:hover i {
-    color: @color-2;
+    color: @color-6;
   }
 
   .nav-list > .active > a,
@@ -15,6 +9,22 @@
     background-color: @color-8;
   }
 
+  #settingsTabs {
+    a {
+      color: fade(@color-2, 70%);
+    }
+
+    li.active{
+      a {
+        color: @color-1;
+        background-color: @color-8;
+      }
+    }
+
+    .nav-header {
+      color: @color-6;
+    }
+  }
 }
 
 #plugin_announcements_dialog {
@@ -22,30 +32,140 @@
     color: fade(@color-2, 70%);
   }
 
-  a:hover {
-    color: @color-2;
-  }
-
   .nav-list > .active > a {
     color: @color-1;
     background-color: @color-8;
   }
+
+  article .actions a {
+    color: @color-6;
+  }
+
 }
 
 #plugin_announcements_dialog_content {
   a,
   .configurelink:hover .fa-wrench {
-    color: @color-2;
+    color: @color-6;
   }
 }
 
 #settings_plugin_pluginmanager_repositorydialog {
   a {
-    color: fade(@color-2, 80%);
-    text-decoration: underline;
+    color: @color-6;
   }
 
-  a:hover {
-    color: @color-1;
+
+  .dropdown.pull-right.open {
+    a.dropdown-toggle {
+      border-color: @color-6;
+    }
   }
+
+  a.dropdown-toggle {
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid @color-4;
+
+    &:hover {
+      border-color: @color-6;
+    }
+  }
+
+  .dropdown-menu.pull-right {
+    margin-top: 4px;
+
+    li {
+      a {
+        color: @color-2;
+      }
+
+      a:hover {
+        background: @color-5;
+      }
+    }
+  }
+
+  .close {
+    color: @color-2;
+  }
+}
+
+#settings_plugin_pluginmanager {
+  .settings_plugin_plugin_manager_plugins_actions {
+    a {
+      color: @color-6;
+    }
+  }
+}
+
+#settings_plugin_softwareupdate_updatelist {
+  .settings_plugin_softwareupdate_column_information {
+    a {
+      color: @color-1;
+    }
+  }
+
+}
+
+#about_dialog {
+  a {
+    color: @color-6;
+  }
+
+  #about_dialog_menu {
+    #about_dialog_tabs {
+      li.active{
+        a {
+          color: @color-1;
+          background-color: @color-8;
+        }
+      }
+
+      a {
+        color: fade(@color-2, 70%);
+      }
+    }
+  }
+}
+
+#settings_printerProfiles_editDialog {
+  a {
+    color: @color-6;
+  }
+
+  li.active{
+    a {
+      color: @color-1;
+      background-color: @color-8;
+    }
+  }
+}
+
+#settings_appearance_managelanguagesdialog {
+  a {
+    color: @color-6;
+  }
+}
+
+#settings_plugin_softwareupdate_configurationdialog {
+  a {
+    color: @color-6;
+  }
+}
+
+#settings_plugin_logging {
+  .dropdown-menu {
+    a {
+      color: @color-2;
+    }
+
+    a:hover {
+      background: @color-5;
+    }
+  }
+}
+
+#settings-appearanceLanguages {
+  color: #555;
 }

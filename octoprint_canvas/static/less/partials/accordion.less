@@ -7,7 +7,7 @@
   .accordion-heading {
     border-bottom: 1px solid @color-1;
 
-    a:hover,
+    > a:hover,
     .accordion-toggle {
       color: @color-2;
       font-weight: 500;
@@ -35,6 +35,16 @@
           border-left-color: @color-2;
         }
       }
+    }
+
+    .accordion-heading-button:hover {
+      background-color: #dedede;
+      background-image: -moz-linear-gradient(top, #f2f2f2, #bfbfbf);
+      background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f2f2f2), to(#bfbfbf));
+      background-image: -webkit-linear-gradient(top, #f2f2f2, #bfbfbf);
+      background-image: -o-linear-gradient(top, #f2f2f2, #bfbfbf);
+      background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
+      background-repeat: repeat-x;
     }
   }
 

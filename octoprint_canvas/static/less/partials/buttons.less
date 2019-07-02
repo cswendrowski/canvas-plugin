@@ -3,7 +3,7 @@
   border-radius: 3px;
   opacity: 1;
   text-shadow: none;
-  color: @color-2;
+  color: fade(@color-2, 80%);
   transition: 0.1s;
 
   &:hover {
@@ -34,6 +34,11 @@
 
   &:hover{
     background: @color-6;
+    color: @color-1;
+  }
+
+  i.icon-plus,
+  i.fa-plus {
     color: @color-1;
   }
 }
