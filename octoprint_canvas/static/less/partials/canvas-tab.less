@@ -19,7 +19,7 @@
   }
 
   #connection-state-msg-canvas {
-    color: red;
+    color: @redDefault;
   }
 
   .registered-accounts {
@@ -54,19 +54,19 @@
   }
 
   a.canvas-register,
-  a.canvas-register:visited {
+  a.canvas-register:visited,
+  a.canvas-hub-manage,
+  a.canvas-hub-manage:visited {
     text-decoration: underline;
     font-weight: 400;
     opacity: 1;
     color: @color-2;
   }
 
-  a.canvas-hub-manage,
-  a.canvas-hub-manage:visited {
-    font-weight: 400;
-    opacity: 1;
-    color: @color-2;
-    text-decoration: underline;
+  a.canvas-register:hover,
+  a.canvas-hub-manage:hover {
+    color: @color-9;
+    opacity: 0.9;
   }
 
   .btn:hover .canvas-hub-manage {

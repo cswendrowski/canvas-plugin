@@ -1,6 +1,5 @@
 .swal2-popup {
   border-radius: 1px;
-  border: 1px solid @color-1;
   box-shadow: fade(@color-2, 20%) 0px 0.1em 0.4em 0.2em;
   padding: 1.25em 2em 0.5em;
   width: 30rem;
@@ -10,10 +9,11 @@
   align-items: center;
 }
 .swal2-popup .swal2-title {
-  color: @color-1;
+  color: @color-2;
   font-size: 1.6rem;
   width: 70%;
   text-align: left;
+  font-weight: 500;
 }
 .swal2-popup .swal2-icon {
   margin: 0 1.5rem 1em 0;
@@ -31,11 +31,14 @@
   font-size: 100%;
   padding: 0.4em 2em;
   align-self: flex-end;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 0.2em 1em 0.1em;
 }
 
 .swal2-popup .swal2-styled.swal2-confirm {
-  background-color: @color-1;
+  background-color: @color-8;
+
+  &:hover {
+    background-color: @color-6;
+  }
 }
 .swal2-popup .swal2-styled.swal2-cancel {
   background-color: @color-2;
@@ -47,10 +50,10 @@
 }
 .swal2-popup .swal2-content {
   padding-bottom: 15px;
-  border-bottom: 1px solid fade(@color-1, 50%);
-  color: @color-1;
+  border-bottom: 1px solid fade(@color-2, 50%);
+  color: @color-2;
   letter-spacing: 0.4px;
-  border-bottom: 1px solid @color-1;
+  border-bottom: 1px solid @color-2;
   font-weight: 400;
   text-align: left;
   line-height: 140%;
@@ -69,12 +72,12 @@
   text-align: left;
 }
 .swal2-icon.swal2-info {
-  border-color: @color-1;
-  color: @color-1;
+  border-color: @color-2;
+  color: @color-2;
 }
 .swal2-icon.swal2-success {
-  border-color: @color-1;
-  color: @color-1;
+  border-color: @color-2;
+  color: @color-2;
 
   & [class^="swal2-success-line"][class$="tip"] {
     left: 0.6em;
@@ -83,15 +86,18 @@
   & [class^="swal2-success-line"][class$="long"] {
     right: 0.2em;
   }
+
+  [class^="swal2-success-line"] {
+    background-color: @color-2;
+  }
+
+  .swal2-success-ring {
+    border-color: @color-2;
+  }
 }
-.swal2-icon.swal2-success [class^="swal2-success-line"] {
-  background-color: @color-1;
-}
-.swal2-icon.swal2-success .swal2-success-ring {
-  border-color: @color-1;
-}
+
 .swal2-icon.swal2-error {
-  border-color: @color-1;
+  border-color: @color-2;
 
   & [class^="swal2-x-mark-line"] {
     top: 2.15em;
@@ -104,10 +110,12 @@
   & [class^="swal2-x-mark-line"][class$="right"] {
     right: 0.8em;
   }
+
+  [class^="swal2-x-mark-line"] {
+    background-color: @color-2;
+  }
 }
-.swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
-  background-color: @color-1;
-}
+
 .swal2-popup .swal2-actions {
   margin: 0.5em 0 0 0;
   justify-content: flex-end;

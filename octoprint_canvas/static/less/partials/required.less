@@ -62,8 +62,8 @@
         width: 250px;
         left: 35px;
         top: -30px;
-        background-color: @color-5;
-        border: 1px solid @color-2;
+        background-color: @color-1;
+        border: 1px solid @color-6;
         border-radius: 3px;
         padding: 10px;
 
@@ -81,14 +81,14 @@
         // fill
         &::after {
           top: 29px;
-          border-color: transparent @color-5 transparent transparent;
+          border-color: transparent @color-1 transparent transparent;
           border-width: 10px;
         }
 
         // border
         &::before {
           top: 28px;
-          border-color: transparent @color-2 transparent transparent;
+          border-color: transparent @color-6 transparent transparent;
           border-width: 11px;
         }
 
@@ -120,7 +120,7 @@
   justify-content: center;
   align-items: center;
 
-  background-color: fade(@color-2, 50%);
+  background-color: @shadow;
 }
 
 .loader {
@@ -157,10 +157,10 @@
   width: 200px;
   padding: 0.5rem 1.1rem;
   margin-bottom: 7px;
-  border: 1px solid @color-1;
+  border: 1px solid @color-2;
   border-left: none;
   z-index: 5;
-  background-color: @color-5;
+  background-color: @color-1;
   border-top-right-radius: 1px;
   border-bottom-right-radius: 1px;
   word-wrap: break-word;
@@ -191,20 +191,20 @@
     font-style: italic;
     overflow: hidden;
     text-overflow: ellipsis;
-    @color-2-space: nowrap;
+    white-space: nowrap;
   }
 }
 
 .total-bar {
   width: 100%;
-  background-color: fade(@color-1, 20%);
+  background-color: fade(@color-8, 20%);
   border-radius: 3px;
   margin-top: 25px;
 }
 
 .current-bar {
   width: 0%;
-  background-color: fade(@color-1, 80%);
+  background-color: fade(@color-6, 80%);
   position: relative;
   transition: 0.1s;
   border-radius: 3px;
@@ -215,8 +215,8 @@
   left: 0;
   top: -125%;
   padding: 1px 5px;
-  background-color: @color-1;
-  color: @color-2;
+  background-color: @color-11;
+  color: @color-1;
   border-radius: 5px;
   font-size: 9px;
   justify-content: center;
@@ -234,7 +234,7 @@
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: @color-1 transparent transparent transparent;
+    border-color: @color-11 transparent transparent transparent;
   }
 }
 
@@ -264,8 +264,8 @@
   margin-left: 5px;
   width: 11.9px;
   height: 11.9px;
-  border: 2px solid fade(@color-1, 20%);
-  border-top-color: @color-1;
+  border: 2px solid fade(@color-2, 20%);
+  border-top-color: @color-2;
   border-radius: 50%;
   animation: rotate360 1.5s linear infinite;
 }
