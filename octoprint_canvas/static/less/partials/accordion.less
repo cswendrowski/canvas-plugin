@@ -1,51 +1,82 @@
 .accordion-group {
   margin-bottom: 10px;
-  border: 1px solid @color-4;
-  border-radius: 0px;
-}
-
-.accordion-heading {
+  box-shadow: @shadow 0px 0.1em 0.4em 0.1em;
+  border-radius: 0.2em;
   background-color: @color-1;
-  border-bottom: 1px solid @color-1;
-}
 
-.accordion-heading a:hover,
-.accordion-toggle {
-  color: @color-2;
-}
+  .accordion-heading {
+    border-bottom: 1px solid @color-1;
 
-.icon-sd-black-14 {
-  background: url(../img/sd-card.png) no-repeat;
-  width: 16px;
-  height: 13px;
-  margin-top: 4px;
-  background-size: contain;
-}
+    > a:hover,
+    .accordion-toggle {
+      color: @color-2;
+      font-weight: 500;
+      font-size: 16px;
+    }
 
-.title.clickable {
-  padding-top: 1px;
-  padding-bottom: 1px;
-}
+    .settings-trigger {
+      .dropdown-menu {
+        li {
+          &:hover {
+            background: @color-8;
+          }
 
-.palette-tag {
-  width: 56%;
-  padding-right: 44%;
-  position: relative;
-}
+          a {
+            font-size: 14px;
+            font-weight: 400;
 
-.palette-tag::after {
-  content: "Palette 2";
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: @color-1;
-  padding: 0px 20px;
-  color: @color-2;
-  font-weight: 700;
-  border-radius: 1px;
-  cursor: auto;
-}
+            i {
+              color: @color-2;
+            }
+          }
+        }
 
-#files .form-search {
-  text-align: left;
+        .dropdown-submenu > a:after {
+          border-left-color: @color-2;
+        }
+      }
+    }
+
+    .accordion-heading-button:hover {
+      background-color: #dedede;
+      background-image: -moz-linear-gradient(top, #f2f2f2, #bfbfbf);
+      background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f2f2f2), to(#bfbfbf));
+      background-image: -webkit-linear-gradient(top, #f2f2f2, #bfbfbf);
+      background-image: -o-linear-gradient(top, #f2f2f2, #bfbfbf);
+      background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
+      background-repeat: repeat-x;
+    }
+  }
+
+  #files {
+    .accordion-inner .gcode_files {
+      .title.clickable {
+        padding-top: 1px;
+        padding-bottom: 1px;
+      }
+
+      .palette-tag {
+        width: 56%;
+        padding-right: 44%;
+        position: relative;
+      }
+
+      .palette-tag::after {
+        content: "Palette 2";
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: @color-8;
+        padding: 0px 20px;
+        color: @color-1;
+        font-weight: 500;
+        border-radius: 2px;
+        cursor: auto;
+      }
+    }
+
+    .form-search {
+      text-align: left;
+    }
+  }
 }

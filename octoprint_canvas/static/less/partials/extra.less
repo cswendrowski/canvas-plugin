@@ -1,16 +1,16 @@
 .progress .bar,
 .slider .slider-selection {
-  background-color: fade(@color-1, 70%);
-  background-image: -moz-linear-gradient(top, fade(@color-1, 10%), fade(@color-1, 95%));
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(fade(@color-1, 50%)), to(fade(@color-1, 95%)));
-  background-image: -webkit-linear-gradient(top, fade(@color-1, 10%), fade(@color-1, 95%));
-  background-image: -o-linear-gradient(top, fade(@color-1, 10%), fade(@color-1, 95%));
-  background-image: linear-gradient(to bottom, fade(@color-1, 10%), fade(@color-1, 95%));
+  background-color: fade(@color-6, 70%);
+  background-image: -moz-linear-gradient(top, fade(@color-6, 10%), fade(@color-6, 95%));
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(fade(@color-6, 50%)), to(fade(@color-6, 95%)));
+  background-image: -webkit-linear-gradient(top, fade(@color-6, 10%), fade(@color-6, 95%));
+  background-image: -o-linear-gradient(top, fade(@color-6, 10%), fade(@color-6, 95%));
+  background-image: linear-gradient(to bottom, fade(@color-6, 10%), fade(@color-6, 95%));
 }
 
 .slider .slider-selection:hover,
 .slider .slider-selection:active {
-  background-color: fade(@color-1, 50%);
+  background-color: fade(@color-6, 50%);
 }
 
 input.search-query {
@@ -23,13 +23,13 @@ input.search-query {
 
 .ui-pnotify .alert,
 .alert {
-  color: @color-1;
-  background-color: @color-2;
-  border: 1px solid @color-1;
+  color: @color-2;
+  background-color: @color-1;
+  border: 1px solid @color-2;
 
   h4,
   a {
-    color: @color-1;
+    color: @color-2;
   }
 }
 
@@ -56,4 +56,8 @@ input.search-query {
 
 hr {
   margin-left: -20px;
+}
+
+#footer_version small {
+  color: #484747;
 }
