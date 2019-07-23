@@ -35,7 +35,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def get_assets(self):
         return dict(
             css=["css/canvas.css"],
-            js=["js/canvas.js"],
+            js=["js/canvas.js", "js/utils/alerts.js", "js/utils/ui.js"],
             less=["less/canvas.less"]
         )
 

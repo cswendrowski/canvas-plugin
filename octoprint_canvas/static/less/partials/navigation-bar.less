@@ -3,35 +3,37 @@
   border: none !important;
   background-color: @color-1 !important;
   color: @color-2;
-}
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0.1em 0.4em 0.1em;
 
-#navbar .navbar-inner .brand,
-#navbar .navbar-inner.red .nav > li > a {
-  text-shadow: 0 1px 0 #ccc !important;
-}
+  .brand,
+  &.red .nav > li > a {
+    text-shadow: 0 1px 0 #ccc !important;
+  }
 
-#navbar .navbar-inner .nav > li > a:hover,
-#navbar .navbar-inner.transparent .nav > li > a:hover {
-  background-color: #dedede;
-  background-image: -moz-linear-gradient(top, #f2f2f2, #bfbfbf);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f2f2f2), to(#bfbfbf));
-  background-image: -webkit-linear-gradient(top, #f2f2f2, #bfbfbf);
-  background-image: -o-linear-gradient(top, #f2f2f2, #bfbfbf);
-  background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
-  background-repeat: repeat-x;
-}
+  .nav > li > a:hover,
+  &.transparent .nav > li > a:hover {
+    background-color: #dedede;
+    background-image: -moz-linear-gradient(top, #f2f2f2, #bfbfbf);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f2f2f2), to(#bfbfbf));
+    background-image: -webkit-linear-gradient(top, #f2f2f2, #bfbfbf);
+    background-image: -o-linear-gradient(top, #f2f2f2, #bfbfbf);
+    background-image: linear-gradient(to bottom, #f2f2f2, #bfbfbf);
+    background-repeat: repeat-x;
+  }
 
-#navbar .navbar-inner .nav > li > a .caret {
-  border-bottom-color: @color-2;
-  border-top-color: @color-2;
-}
+  .nav > li > a .caret,
+  .nav > li > a:hover .caret,
+  .nav > li.dropdown.open > .dropdown-toggle .caret {
+    border-bottom-color: @color-2;
+    border-top-color: @color-2;
+  }
 
-#navbar .navbar-inner .nav > li > a:hover .caret,
-#navbar .navbar-inner .nav > li.dropdown.open > .dropdown-toggle .caret {
-  border-bottom-color: @color-1;
-  border-top-color: @color-1;
-}
+  .nav > li.dropdown.open > .dropdown-toggle i {
+    color: @color-2;
+  }
 
-#navbar .navbar-inner .nav > li.dropdown.open > .dropdown-toggle i {
-  color: @color-1;
+  #navbar_systemmenu .dropdown-menu li > a:hover {
+    background-color: @color-6;
+    background-image: linear-gradient(to bottom, @color-8, @color-6);
+  }
 }

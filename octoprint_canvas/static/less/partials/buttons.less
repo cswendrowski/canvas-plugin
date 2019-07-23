@@ -1,29 +1,44 @@
 .btn {
-  background: @color-1 !important;
-  border-radius: 3px !important;
+  background: @color-1;
+  border-radius: 3px;
   opacity: 1;
-  text-shadow: none !important;
-  color: @color-2 !important;
+  text-shadow: none;
+  color: fade(@color-2, 80%);
   transition: 0.1s;
+
+  &:hover {
+    border: 1px solid @color-6;
+  }
+
+  &[disabled],
+  &[disabled]:hover,
+  &:disabled,
+  &:disabled:hover,
+  &.disabled,
+  &.disabled:hover {
+    border: 1px solid @color-3;
+    color: @color-3 ;
+    background: fade(@greyDefault, 50%);
+    cursor: not-allowed;
+  }
+
+  #gcode_upload_sd[disabled],
+  #gcode_upload_sd:disabled {
+    cursor: not-allowed;
+  }
 }
 
-.btn:hover:not(:disabled),
-.btn:hover:not([disabled]) {
-  background-color: fade(@color-1, 10%) !important;
-  color: @color-1 !important;
-  transition: 0.1s;
-}
+.btn-primary {
+  background: @color-8;
+  color: @color-1;
 
-.btn.disabled:hover {
-  background-color: @color-2 !important;
-  color: @color-3 !important;
-  cursor: default;
-}
+  &:hover{
+    background: @color-6;
+    color: @color-1;
+  }
 
-.btn-primary[disabled],
-.btn[disabled],
-.btn.disabled {
-  border: 1px solid @color-3 !important;
-  color: @color-3 !important;
-  background-color: @color-2 !important;
+  i.icon-plus,
+  i.fa-plus {
+    color: @color-1;
+  }
 }

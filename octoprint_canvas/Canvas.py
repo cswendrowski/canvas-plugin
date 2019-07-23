@@ -7,6 +7,7 @@ import ssl
 import time
 import math
 import socket
+import threading
 
 from ruamel.yaml import YAML
 yaml = YAML(typ="safe")
@@ -34,6 +35,7 @@ class Canvas():
         self.hub_registered = False
 
         self.hub_yaml = self.loadHubData()
+        self.registerThread = None
 
     ##############
     # 1. SERVER STARTUP FUNCTIONS
@@ -95,36 +97,40 @@ class Canvas():
         else:
             self._logger.info("ROOT-CA ALREADY THERE")
 
-    def registerHubV2(self):
-        self._logger.info("REGISTERING HUB (V2)")
-        if not "serial-number" in self.hub_yaml["canvas-hub"]:
-            name = yaml.load(self._settings.config_yaml)["server"]["secretKey"]
-            payload = {
-                "name": name
-            }
-        else:
-            name = self.hub_yaml["canvas-hub"]["serial-number"]
-            serialNumber = self.hub_yaml["canvas-hub"]["serial-number"]
-            payload = {
-                "hostname": serialNumber + "-canvas-hub.local/",
-                "name": name,
-                "serialNumber": serialNumber
-            }
-
-        hostname = self.getHostname()
-        if hostname:
-            payload["hostname"] = hostname
-
-        url = "https://" + BASE_URL_API + "hubs"
-        try:
-            response = requests.put(url, json=payload).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
+    def registerHub(self):
+        while not self.hub_registered:
+            self._logger.info("REGISTERING HUB (V2)")
+            if not "serial-number" in self.hub_yaml["canvas-hub"]:
+                name = yaml.load(self._settings.config_yaml)["server"]["secretKey"]
+                payload = {
+                    "name": name
+                }
             else:
-                self.saveUpgradeResponse(response)
-                self.hub_registered = True
-        except requests.exceptions.RequestException as e:
-            self._logger.info(e)
+                name = self.hub_yaml["canvas-hub"]["serial-number"]
+                serialNumber = self.hub_yaml["canvas-hub"]["serial-number"]
+                payload = {
+                    "hostname": serialNumber + "-canvas-hub.local/",
+                    "name": name,
+                    "serialNumber": serialNumber
+                }
+
+            hostname = self.getHostname()
+            if hostname:
+                payload["hostname"] = hostname
+
+            url = "https://" + BASE_URL_API + "hubs"
+            try:
+                response = requests.put(url, json=payload).json()
+                if response.get("status") >= 400:
+                    self._logger.info(response)
+                    time.sleep(30)
+                else:
+                    self.saveUpgradeResponse(response)
+                    self.hub_registered = True
+            except requests.exceptions.RequestException as e:
+                self._logger.info(e)
+                time.sleep(30)
+        return
 
     def checkForRegistrationAndVersion(self):
         if "token" in self.hub_yaml["canvas-hub"]:
@@ -150,7 +156,7 @@ class Canvas():
                     self._logger.info("There are no linked Canvas accounts yet. Connection not established.")
         if self.hub_registered is False:
             self._logger.info("HUB not registered yet. Registering...")
-            self.registerHubV2()
+            self.startRegisterThread()
 
     def updatePluginVersions(self):
         updated = False
@@ -164,6 +170,12 @@ class Canvas():
             updated = True
         if updated:
             self.updateYAMLInfo()
+
+    def startRegisterThread(self):
+        if self.registerThread is None:
+            self.registerThread = threading.Thread(target=self.registerHub)
+            self.registerThread.daemon = True
+            self.registerThread.start()
 
     ##############
     # 2. CLIENT UI STARTUP FUNCTIONS
@@ -205,22 +217,26 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        if "username" in loginInfo["data"]:
-            data = {"username": loginInfo["data"]["username"],
-                    "password": loginInfo["data"]["password"]}
-        elif "email" in loginInfo["data"]:
-            data = {"email": loginInfo["data"]["email"],
-                    "password": loginInfo["data"]["password"]}
-        url = "https://" + BASE_URL_API + "users/login"
-        try:
-            response = requests.post(url, json=data).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
-                self.updateUI({"command": "invalidUserCredentials"})
-            else:
-                self.verifyUserInYAML(response)
-        except requests.exceptions.RequestException as e:
-            self._logger.info(e)
+        if self.hub_registered:
+            if "username" in loginInfo["data"]:
+                data = {"username": loginInfo["data"]["username"],
+                        "password": loginInfo["data"]["password"]}
+            elif "email" in loginInfo["data"]:
+                data = {"email": loginInfo["data"]["email"],
+                        "password": loginInfo["data"]["password"]}
+            url = "https://" + BASE_URL_API + "users/login"
+            try:
+                response = requests.post(url, json=data).json()
+                if response.get("status") >= 400:
+                    self._logger.info(response)
+                    self.updateUI({"command": "invalidUserCredentials"})
+                else:
+                    self.verifyUserInYAML(response)
+            except requests.exceptions.RequestException as e:
+                self._logger.info(e)
+        else:
+            self._logger.info("Hub is not registered yet. Cannot add user")
+            self.updateUI({"command": "hubNotRegistered"})
 
     def downloadPrintFiles(self, data):
         token = self.hub_yaml["canvas-hub"]["token"]
