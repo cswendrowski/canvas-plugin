@@ -1,6 +1,7 @@
 .fa-wrench,
 .accordion-heading i,
-.nav.pull-right i {
+.nav.pull-right i,
+.nav.pull-right a:hover i  {
   color: @color-2;
 }
 
@@ -13,39 +14,4 @@
 .fa-folder:before,
 .fa-upload:before {
   content: none;
-}
-
-.nav.pull-right a:hover i {
-  color: @color-1;
-}
-
-// .fa-check,
-.dropdown-menu li {
-  &:hover a > i,
-  &:active a > i {
-    color: @color-2;
-  }
-  > a i {
-    color: @color-1;
-  }
-}
-
-.dropdown-menu .dropdown-submenu {
-  &:hover {
-    li a i {
-      color: @color-1;
-    }
-    li:hover a i {
-      color: @color-2;
-    }
-  }
-}
-
-.dropdown-menu .dropdown-submenu > a:after {
-  border-left-color: @color-1;
-}
-
-.dropdown-menu .dropdown-submenu:hover > a:after,
-.dropdown-menu .dropdown-submenu:focus > a:after {
-  border-left-color: @color-2;
 }

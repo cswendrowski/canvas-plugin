@@ -35,7 +35,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def get_assets(self):
         return dict(
             css=["css/canvas.css"],
-            js=["js/canvas.js"],
+            js=["js/canvas.js", "js/utils/alerts.js", "js/utils/ui.js"],
             less=["less/canvas.less"]
         )
 
@@ -103,22 +103,25 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):
-        if "Startup" in event:
-            self.displayImportantUpdateAlert = False
-        elif "ClientOpened" in event:
-            if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
-                self.canvas.updateUI({"command": "importantUpdate", "data": "x.x.x"})
-            self.canvas.checkAWSConnection()
-            if self.canvas.hub_registered is True:
-                self.canvas.getRegisteredUsers()
-            if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
-                try:
-                    self.canvas.myShadow.shadowGet()
-                except:
-                    self._logger.info("Shadow Device not created yet")
-        elif "Shutdown" in event:
-            if self.canvas.aws_connection is True:
-                self.canvas.myShadow.disconnect()
+        try:
+            if "Startup" in event:
+                self.displayImportantUpdateAlert = False
+            elif "ClientOpened" in event:
+                if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
+                    self.canvas.updateUI({"command": "importantUpdate", "data": "x.x.x"})
+                self.canvas.checkAWSConnection()
+                if self.canvas.hub_registered is True:
+                    self.canvas.getRegisteredUsers()
+                if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
+                    try:
+                        self.canvas.myShadow.shadowGet()
+                    except:
+                        self._logger.info("Shadow Device not created yet")
+            elif "Shutdown" in event:
+                if self.canvas.aws_connection is True:
+                    self.canvas.myShadow.disconnect()
+        except Exception as e:
+            self._logger.info(e)
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
