@@ -246,6 +246,9 @@ function CanvasViewModel(parameters) {
           self.changeImportantUpdateSettings(event.target.checked);
         });
         Alerts.importantUpdate(message.data);
+      } else if (message.command === "hubNotRegistered") {
+        UI.loadingOverlay(false);
+        Alerts.hubNotRegistered();
       }
     }
   };

@@ -41,6 +41,13 @@ const Alerts = {
       text: `${username} is now removed from this CANVAS Hub.`
     });
   },
+  hubNotRegistered: () => {
+    return swal({
+      type: "info",
+      title: "CANVAS Hub not registered yet",
+      text: `There seems to be an issue registering your CANVAS Hub. Please make sure you are connected to the Internet and try again.`
+    });
+  },
   importantUpdate: version => {
     return swal({
       type: "info",

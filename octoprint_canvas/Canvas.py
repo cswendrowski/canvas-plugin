@@ -217,22 +217,26 @@ class Canvas():
     ##############
 
     def addUser(self, loginInfo):
-        if "username" in loginInfo["data"]:
-            data = {"username": loginInfo["data"]["username"],
-                    "password": loginInfo["data"]["password"]}
-        elif "email" in loginInfo["data"]:
-            data = {"email": loginInfo["data"]["email"],
-                    "password": loginInfo["data"]["password"]}
-        url = "https://" + BASE_URL_API + "users/login"
-        try:
-            response = requests.post(url, json=data).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
-                self.updateUI({"command": "invalidUserCredentials"})
-            else:
-                self.verifyUserInYAML(response)
-        except requests.exceptions.RequestException as e:
-            self._logger.info(e)
+        if self.hub_registered:
+            if "username" in loginInfo["data"]:
+                data = {"username": loginInfo["data"]["username"],
+                        "password": loginInfo["data"]["password"]}
+            elif "email" in loginInfo["data"]:
+                data = {"email": loginInfo["data"]["email"],
+                        "password": loginInfo["data"]["password"]}
+            url = "https://" + BASE_URL_API + "users/login"
+            try:
+                response = requests.post(url, json=data).json()
+                if response.get("status") >= 400:
+                    self._logger.info(response)
+                    self.updateUI({"command": "invalidUserCredentials"})
+                else:
+                    self.verifyUserInYAML(response)
+            except requests.exceptions.RequestException as e:
+                self._logger.info(e)
+        else:
+            self._logger.info("Hub is not registered yet. Cannot add user")
+            self.updateUI({"command": "hubNotRegistered"})
 
     def downloadPrintFiles(self, data):
         token = self.hub_yaml["canvas-hub"]["token"]
