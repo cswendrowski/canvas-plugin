@@ -123,13 +123,13 @@ class Canvas():
                 response = requests.put(url, json=payload).json()
                 if response.get("status") >= 400:
                     self._logger.info(response)
-                    time.sleep(10)
+                    time.sleep(30)
                 else:
                     self.saveUpgradeResponse(response)
                     self.hub_registered = True
             except requests.exceptions.RequestException as e:
                 self._logger.info(e)
-                time.sleep(10)
+                time.sleep(30)
         return
 
     def checkForRegistrationAndVersion(self):
