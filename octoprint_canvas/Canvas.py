@@ -35,7 +35,6 @@ class Canvas():
         self.hub_registered = False
 
         self.hub_yaml = self.loadHubData()
-        self.isHubS = self.determineHubVersion()
         self.registerThread = None
 
     ##############
@@ -118,8 +117,6 @@ class Canvas():
             hostname = self.getHostname()
             if hostname:
                 payload["hostname"] = hostname
-            if self.isHubS:
-                payload["isHubS"] = True
 
             url = "https://" + BASE_URL_API + "hubs"
             try:
@@ -173,19 +170,6 @@ class Canvas():
             updated = True
         if updated:
             self.updateYAMLInfo()
-
-    def determineHubVersion(self):
-        hub_file_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
-
-        if os.path.exists(hub_file_path):
-            hub_data = open(hub_file_path, "r")
-            hub_yaml = yaml.load(hub_data)
-            hub_data.close()
-
-            hub_rank = hub_yaml["versions"]["global"]
-            if hub_rank == "0.2.0":
-                return True
-        return False
 
     def startRegisterThread(self):
         if self.registerThread is None:
