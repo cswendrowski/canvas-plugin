@@ -9,7 +9,10 @@ import math
 import socket
 import threading
 
-from ruamel.yaml import YAML
+try:
+    from ruamel.yaml import YAML
+except ImportError:
+    from ruamel.yaml.main import YAML
 yaml = YAML(typ="safe")
 yaml.default_flow_style = False
 
