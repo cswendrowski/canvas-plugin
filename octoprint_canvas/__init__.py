@@ -4,7 +4,9 @@ from distutils.version import LooseVersion
 
 import requests
 import octoprint.plugin
+import flask
 from . import Canvas
+from . import constants
 
 
 class CanvasPlugin(octoprint.plugin.TemplatePlugin,
@@ -95,11 +97,18 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         )
 
     # SIMPLEAPIPLUGIN POST, to handle commands listed in get_api_commands
-    def on_api_command(self, command, data):
-        if command == "addUser":
-            self.canvas.addUser(data)
-        elif command == "changeImportantUpdateSettings":
-            self.canvas.changeImportantUpdateSettings(data["condition"])
+    def on_api_command(self, command, payload):
+        try:
+            if command == "addUser":
+                self.canvas.addUser(payload)
+            elif command == "changeImportantUpdateSettings":
+                self.canvas.changeImportantUpdateSettings(payload["condition"])
+            response = "POST request (%s) successful" % command
+            return flask.jsonify(response=response, status=constants.API_SUCCESS), constants.API_SUCCESS
+        except Exception as e:
+            error = str(e)
+            self._logger.info("Exception message: %s" % str(e))
+            return flask.jsonify(error=error, status=constants.API_FAILURE), constants.API_FAILURE
 
     # EVENTHANDLERPLUGIN
     def on_event(self, event, payload):

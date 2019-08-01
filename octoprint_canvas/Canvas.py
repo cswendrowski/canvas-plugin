@@ -24,6 +24,7 @@ load_dotenv(env_path)
 BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
 
 from . import Shadow
+from . import constants
 
 
 class Canvas():
@@ -231,15 +232,15 @@ class Canvas():
             try:
                 response = requests.post(url, json=data).json()
                 if response.get("status") >= 400:
-                    self._logger.info(response)
                     self.updateUI({"command": "invalidUserCredentials"})
+                    raise Exception(constants.INVALID_USER_CREDENTIALS)
                 else:
                     self.verifyUserInYAML(response)
             except requests.exceptions.RequestException as e:
-                self._logger.info(e)
+                raise Exception(e)
         else:
-            self._logger.info("Hub is not registered yet. Cannot add user")
             self.updateUI({"command": "hubNotRegistered"})
+            raise Exception(constants.HUB_NOT_REGISTERED)
 
     def downloadPrintFiles(self, data):
         token = self.hub_yaml["canvas-hub"]["token"]
@@ -280,8 +281,8 @@ class Canvas():
             self._logger.info("User is not registered to HUB yet.")
             self.registerUserAndHub(data)
         else:
-            self._logger.info("User already registered to HUB.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
+            raise Exception(constants.USER_ALREADY_LINKED)
 
     def updateRegisteredUsers(self):
         # make a list of usernames
@@ -321,7 +322,7 @@ class Canvas():
                 if not self.aws_connection:
                     self.makeShadowDeviceClient()
         except requests.exceptions.RequestException as e:
-            self._logger.info(e)
+            raise Exception(e)
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")

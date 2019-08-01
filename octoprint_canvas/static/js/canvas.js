@@ -132,7 +132,10 @@ function CanvasViewModel(parameters) {
         password: self.password(),
       },
     };
-    self.ajaxRequest(payload);
+    self.ajaxRequest(payload).always(value => {
+      $(".add-user input").val("");
+      UI.loadingOverlay(false);
+    })
   };
 
   self.handleAWSConnection = data => {
@@ -220,16 +223,10 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "AWS") {
         self.handleAWSConnection(message);
       } else if (message.command === "UserConnectedToHUB") {
-        $(".add-user input").val("");
-        UI.loadingOverlay(false);
         Alerts.userAddedSuccess(message.data.username);
       } else if (message.command === "UserAlreadyExists") {
-        $(".add-user input").val("");
-        UI.loadingOverlay(false);
         Alerts.userExistsAlready(message.data.username);
       } else if (message.command === "invalidUserCredentials") {
-        $(".add-user input").val("");
-        UI.loadingOverlay(false);
         Alerts.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
         Alerts.userDeletedSuccess(message.data);
@@ -247,7 +244,6 @@ function CanvasViewModel(parameters) {
         });
         Alerts.importantUpdate(message.data);
       } else if (message.command === "hubNotRegistered") {
-        UI.loadingOverlay(false);
         Alerts.hubNotRegistered();
       }
     }
