@@ -39,7 +39,7 @@ class Canvas():
         self.aws_connection = False
         self.hub_registered = False
 
-        self.hub_yaml = self.loadHubData()
+        self.hub_yaml = {}
         self.registerThread = None
 
     ##############
