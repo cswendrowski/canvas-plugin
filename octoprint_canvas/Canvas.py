@@ -9,7 +9,10 @@ import math
 import socket
 import threading
 
-from ruamel.yaml import YAML
+try:
+    from ruamel.yaml import YAML
+except ImportError:
+    from ruamel.yaml.main import YAML
 yaml = YAML(typ="safe")
 yaml.default_flow_style = False
 
@@ -19,8 +22,10 @@ if os.path.abspath(".") is "/":
     env_path = "/home/pi/.env"
 load_dotenv(env_path)
 BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
+from subprocess import call
 
 from . import Shadow
+from . import constants
 
 
 class Canvas():
@@ -34,12 +39,23 @@ class Canvas():
         self.aws_connection = False
         self.hub_registered = False
 
-        self.hub_yaml = self.loadHubData()
+        self.hub_yaml = {}
         self.registerThread = None
 
     ##############
     # 1. SERVER STARTUP FUNCTIONS
     ##############
+
+    def checkForRuamelVersion(self):
+        paths = [
+            "/home/pi/oprint/lib/python2.7/site-packages/_ruamel_yaml.so",
+            "/home/pi/oprint/lib/python2.7/site-packages/ruamel.yaml.clib-0.1.0-py2.7-nspkg.pth",
+            "/home/pi/oprint/lib/python2.7/site-packages/ruamel.yaml.clib-0.1.0-py2.7.egg-info",
+        ]
+        for path in paths:
+            if os.path.exists(path):
+                self._logger.info("Deleting file/directory")
+                call(["rm -rf %s" % path], shell=True)
 
     def checkFor0cf0(self):
         if os.path.isdir("/home/pi/.mosaicdata/turquoise/") and "hub" in self.hub_yaml["canvas-hub"] and self.hub_yaml["canvas-hub"]["hub"]["name"] == "0cf0-ch" and self.hub_yaml["canvas-hub"]["hub"]["id"] == "46f352c67dd7bc1e5a28b66cf960290d" and self.hub_yaml["canvas-hub"]["token"] == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDIzODIxMTQsImlzcyI6IkNhbnZhc0h1YiIsInN1YiI6IjQ2ZjM1MmM2N2RkN2JjMWU1YTI4YjY2Y2Y5NjAyOTBkIn0.CMDTVKAuI2USNwvx1gjKVBMgTRCnOX8WBhp2XTjjhLM":
@@ -228,15 +244,15 @@ class Canvas():
             try:
                 response = requests.post(url, json=data).json()
                 if response.get("status") >= 400:
-                    self._logger.info(response)
                     self.updateUI({"command": "invalidUserCredentials"})
+                    raise Exception(constants.INVALID_USER_CREDENTIALS)
                 else:
                     self.verifyUserInYAML(response)
             except requests.exceptions.RequestException as e:
-                self._logger.info(e)
+                raise Exception(e)
         else:
-            self._logger.info("Hub is not registered yet. Cannot add user")
             self.updateUI({"command": "hubNotRegistered"})
+            raise Exception(constants.HUB_NOT_REGISTERED)
 
     def downloadPrintFiles(self, data):
         token = self.hub_yaml["canvas-hub"]["token"]
@@ -277,8 +293,8 @@ class Canvas():
             self._logger.info("User is not registered to HUB yet.")
             self.registerUserAndHub(data)
         else:
-            self._logger.info("User already registered to HUB.")
             self.updateUI({"command": "UserAlreadyExists", "data": data})
+            raise Exception(constants.USER_ALREADY_LINKED)
 
     def updateRegisteredUsers(self):
         # make a list of usernames
@@ -318,7 +334,7 @@ class Canvas():
                 if not self.aws_connection:
                     self.makeShadowDeviceClient()
         except requests.exceptions.RequestException as e:
-            self._logger.info(e)
+            raise Exception(e)
 
     def updateUI(self, data):
         self._logger.info("Sending UIUpdate from Canvas")
