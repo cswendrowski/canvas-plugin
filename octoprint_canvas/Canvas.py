@@ -52,10 +52,14 @@ class Canvas():
             "/home/pi/oprint/lib/python2.7/site-packages/ruamel.yaml.clib-0.1.0-py2.7-nspkg.pth",
             "/home/pi/oprint/lib/python2.7/site-packages/ruamel.yaml.clib-0.1.0-py2.7.egg-info",
         ]
+        path_detected = False
         for path in paths:
             if os.path.exists(path):
                 self._logger.info("Deleting file/directory")
+                path_detected = True
                 call(["rm -rf %s" % path], shell=True)
+        if path_detected:
+            call(["sudo service octoprint restart"], shell=True)
 
     def checkFor0cf0(self):
         if os.path.isdir("/home/pi/.mosaicdata/turquoise/") and "hub" in self.hub_yaml["canvas-hub"] and self.hub_yaml["canvas-hub"]["hub"]["name"] == "0cf0-ch" and self.hub_yaml["canvas-hub"]["hub"]["id"] == "46f352c67dd7bc1e5a28b66cf960290d" and self.hub_yaml["canvas-hub"]["token"] == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NDIzODIxMTQsImlzcyI6IkNhbnZhc0h1YiIsInN1YiI6IjQ2ZjM1MmM2N2RkN2JjMWU1YTI4YjY2Y2Y5NjAyOTBkIn0.CMDTVKAuI2USNwvx1gjKVBMgTRCnOX8WBhp2XTjjhLM":
