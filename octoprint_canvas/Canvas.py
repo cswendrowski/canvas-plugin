@@ -89,7 +89,7 @@ class Canvas():
         hub_data.close()
 
         # if the yaml file exists already but doesn't have a "canvas-users" key and value yet
-        if not "canvas-users" in hub_yaml:
+        if not hub_yaml or not "canvas-users" in hub_yaml:
             hub_yaml["canvas-users"] = {}
             hub_data = open(hub_file_path, "w")
             yaml.dump(hub_yaml, hub_data)
