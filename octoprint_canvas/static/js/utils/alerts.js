@@ -12,7 +12,7 @@ if (!document.getElementById("sweetalert2-script")) {
   document.head.appendChild(script);
 }
 
-const Alerts = {
+const CanvasAlerts = {
   userAddedSuccess: username => {
     return swal({
       type: "success",

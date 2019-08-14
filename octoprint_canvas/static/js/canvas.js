@@ -223,13 +223,13 @@ function CanvasViewModel(parameters) {
       } else if (message.command === "AWS") {
         self.handleAWSConnection(message);
       } else if (message.command === "UserConnectedToHUB") {
-        Alerts.userAddedSuccess(message.data.username);
+        CanvasAlerts.userAddedSuccess(message.data.username);
       } else if (message.command === "UserAlreadyExists") {
-        Alerts.userExistsAlready(message.data.username);
+        CanvasAlerts.userExistsAlready(message.data.username);
       } else if (message.command === "invalidUserCredentials") {
-        Alerts.userInvalidCredentials();
+        CanvasAlerts.userInvalidCredentials();
       } else if (message.command === "UserDeleted") {
-        Alerts.userDeletedSuccess(message.data);
+        CanvasAlerts.userDeletedSuccess(message.data);
       } else if (message.command === "CANVASDownload") {
         if (message.status === "starting") {
           UI.displayNotification(message.data);
@@ -242,9 +242,9 @@ function CanvasViewModel(parameters) {
         $("body").on("click", ".update-checkbox input", event => {
           self.changeImportantUpdateSettings(event.target.checked);
         });
-        Alerts.importantUpdate(message.data);
+        CanvasAlerts.importantUpdate(message.data);
       } else if (message.command === "hubNotRegistered") {
-        Alerts.hubNotRegistered();
+        CanvasAlerts.hubNotRegistered();
       }
     }
   };
