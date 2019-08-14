@@ -103,19 +103,19 @@ function CanvasViewModel(parameters) {
   };
 
   self.onStartupComplete = () => {
-    UI.removePopup();
-    UI.addNotificationList();
+    CanvasUI.removePopup();
+    CanvasUI.addNotificationList();
   };
 
   self.onEventFileAdded = payload => {
     if ($("body").find(`.canvas-progress-bar .file-download-name:contains("${payload.name}")`)) {
-      UI.updateFileReady(payload.name);
+      CanvasUI.updateFileReady(payload.name);
     }
   };
 
   self.onDataUpdaterReconnect = () => {
-    UI.removePopup();
-    UI.addNotificationList();
+    CanvasUI.removePopup();
+    CanvasUI.addNotificationList();
   };
 
   self.onEventConnected = () => {
@@ -123,7 +123,7 @@ function CanvasViewModel(parameters) {
   };
 
   self.addUser = () => {
-    UI.loadingOverlay(true);
+    CanvasUI.loadingOverlay(true);
     const propertyName = self.userInput().includes("@") ? "email" : "username"
     const payload = {
       command: "addUser",
@@ -134,7 +134,7 @@ function CanvasViewModel(parameters) {
     };
     self.ajaxRequest(payload).always(value => {
       $(".add-user input").val("");
-      UI.loadingOverlay(false);
+      CanvasUI.loadingOverlay(false);
     })
   };
 
@@ -169,11 +169,11 @@ function CanvasViewModel(parameters) {
     if (applyTheme) {
       self.applyTheme(true);
       $("html").addClass("canvas-theme");
-      UI.toggleLogo(applyTheme);
+      CanvasUI.toggleLogo(applyTheme);
     } else {
       self.applyTheme(false);
       $("html").removeClass("canvas-theme");
-      UI.toggleLogo(applyTheme);
+      CanvasUI.toggleLogo(applyTheme);
     }
 
     // Event listener for when user changes the theme settings
@@ -183,11 +183,11 @@ function CanvasViewModel(parameters) {
       if (applyTheme) {
         self.applyTheme(true);
         $("html").addClass("canvas-theme");
-        UI.toggleLogo(applyTheme);
+        CanvasUI.toggleLogo(applyTheme);
       } else {
         self.applyTheme(false);
         $("html").removeClass("canvas-theme");
-        UI.toggleLogo(applyTheme);
+        CanvasUI.toggleLogo(applyTheme);
       }
     });
   };
@@ -232,11 +232,11 @@ function CanvasViewModel(parameters) {
         CanvasAlerts.userDeletedSuccess(message.data);
       } else if (message.command === "CANVASDownload") {
         if (message.status === "starting") {
-          UI.displayNotification(message.data);
+          CanvasUI.displayNotification(message.data);
         } else if (message.status === "downloading") {
-          UI.updateDownloadProgress(message.data);
+          CanvasUI.updateDownloadProgress(message.data);
         } else if (message.status === "received") {
-          UI.updateFileReceived(message.data);
+          CanvasUI.updateFileReceived(message.data);
         }
       } else if (message.command === "importantUpdate") {
         $("body").on("click", ".update-checkbox input", event => {
