@@ -6,7 +6,7 @@ if (!document.getElementById("material-icons")) {
   document.head.appendChild(link);
 }
 
-const UI = {
+const CanvasUI = {
   /* 1. Replaces Octoprint Logo with Mosaic */
   toggleLogo: condition => {
     if (condition) {
