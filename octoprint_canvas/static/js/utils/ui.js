@@ -134,9 +134,14 @@ const CanvasUI = {
     });
   },
   /* 4. Loader */
-  loadingOverlay: condition => {
+  loadingOverlay: (condition, status) => {
     if (condition) {
-      $("body").append(`<div class="loading-overlay-container"><div class="loader"></div></div>`);
+      if (status === "addUser") {
+        message = `<h1 class="loading-overlay-message">Linking CANVAS account...</h1>`;
+      }
+      $("body").append(`<div class="loading-overlay-container"><div class="loader"></div>
+      ${message}
+      </div>`);
     } else {
       $("body")
         .find(".loading-overlay-container")

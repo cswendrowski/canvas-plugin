@@ -329,10 +329,10 @@ class Canvas():
                     del data["token"]
                 self.hub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
-                self.updateRegisteredUsers()
-                self.updateUI({"command": "UserConnectedToHUB", "data": data})
                 if not self.aws_connection:
                     self.makeShadowDeviceClient()
+                self.updateRegisteredUsers()
+                self.updateUI({"command": "UserConnectedToHUB", "data": data})
         except requests.exceptions.RequestException as e:
             raise Exception(e)
 

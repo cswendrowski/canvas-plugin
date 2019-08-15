@@ -123,7 +123,7 @@ function CanvasViewModel(parameters) {
   };
 
   self.addUser = () => {
-    CanvasUI.loadingOverlay(true);
+    CanvasUI.loadingOverlay(true, 'addUser');
     const propertyName = self.userInput().includes("@") ? "email" : "username"
     const payload = {
       command: "addUser",
