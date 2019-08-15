@@ -85,10 +85,10 @@ class Canvas():
 
         # access yaml file with all the info
         hub_data = open(hub_file_path, "r")
-        hub_yaml = yaml.load(hub_data)
+        hub_yaml = yaml.load(hub_data) or {}
         hub_data.close()
 
-        # if the yaml file exists already but doesn't have a "canvas-users" key and value yet
+        # if the yaml file doesn't have a "canvas-users" key
         if not "canvas-users" in hub_yaml:
             hub_yaml["canvas-users"] = {}
             hub_data = open(hub_file_path, "w")
@@ -329,10 +329,10 @@ class Canvas():
                     del data["token"]
                 self.hub_yaml["canvas-users"][data.get("id")] = data
                 self.updateYAMLInfo()
-                self.updateRegisteredUsers()
-                self.updateUI({"command": "UserConnectedToHUB", "data": data})
                 if not self.aws_connection:
                     self.makeShadowDeviceClient()
+                self.updateRegisteredUsers()
+                self.updateUI({"command": "UserConnectedToHUB", "data": data})
         except requests.exceptions.RequestException as e:
             raise Exception(e)
 
