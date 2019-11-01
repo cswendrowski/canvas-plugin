@@ -179,16 +179,17 @@ class Canvas():
 
     def updatePluginVersions(self):
         updated = False
-        # canvas
-        if self.hub_yaml["versions"]["canvas-plugin"] != self._plugin_version:
-            self.hub_yaml["versions"]["canvas-plugin"] = self._plugin_version
-            updated = True
-        # palette 2
-        if self._plugin_manager.get_plugin_info("palette2") and self.hub_yaml["versions"]["palette-plugin"] != self._plugin_manager.get_plugin_info("palette2").version:
-            self.hub_yaml["versions"]["palette-plugin"] = self._plugin_manager.get_plugin_info("palette2").version
-            updated = True
-        if updated:
-            self.updateYAMLInfo()
+        if "versions" in self.hub_yaml:
+            # canvas
+            if self.hub_yaml["versions"]["canvas-plugin"] != self._plugin_version:
+                self.hub_yaml["versions"]["canvas-plugin"] = self._plugin_version
+                updated = True
+            # palette 2
+            if self._plugin_manager.get_plugin_info("palette2") and self.hub_yaml["versions"]["palette-plugin"] != self._plugin_manager.get_plugin_info("palette2").version:
+                self.hub_yaml["versions"]["palette-plugin"] = self._plugin_manager.get_plugin_info("palette2").version
+                updated = True
+            if updated:
+                self.updateYAMLInfo()
 
     def determineHubVersion(self):
         hub_file_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
