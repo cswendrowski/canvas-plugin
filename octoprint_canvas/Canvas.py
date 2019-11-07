@@ -98,6 +98,7 @@ class Canvas():
 
         # if, for some reason, yaml file is empty
         if not hub_yaml:
+            self._logger.info("Empty YAML file detected")
             self.writeDefaultYAMLFile(hub_file_path)
             hub_yaml = self.loadYAMLFile(hub_file_path)
 
