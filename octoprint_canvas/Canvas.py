@@ -207,9 +207,7 @@ class Canvas():
         hub_file_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
 
         if os.path.exists(hub_file_path):
-            hub_data = open(hub_file_path, "r")
-            hub_yaml = yaml.load(hub_data)
-            hub_data.close()
+            hub_yaml = self.loadYAMLFile(hub_file_path)
 
             hub_rank = hub_yaml["versions"]["global"]
             if hub_rank == "0.2.0":
