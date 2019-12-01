@@ -141,7 +141,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "CANVAS"
 __plugin_description__ = "A plugin to handle communication with CANVAS"
-
+__plugin_pythoncompat__ = ">=2.7,<4"
 
 def __plugin_load__():
     global __plugin_implementation__

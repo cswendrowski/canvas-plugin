@@ -1,6 +1,6 @@
 import os
 import zipfile
-import StringIO
+from io import StringIO ## for Python 2 & 3
 import json
 import requests
 import ssl
@@ -146,12 +146,13 @@ class Canvas():
 
             url = "https://" + BASE_URL_API + "hubs"
             try:
-                response = requests.put(url, json=payload).json()
-                if response.get("status") >= 400:
-                    self._logger.info(response)
+                response = requests.put(url, json=payload)
+                response_body = response.json()
+                if response.status_code >= 400:
+                    self._logger.info(response_body)
                     time.sleep(30)
                 else:
-                    self.saveUpgradeResponse(response)
+                    self.saveUpgradeResponse(response_body)
                     self.hub_registered = True
             except requests.exceptions.RequestException as e:
                 self._logger.info(e)
@@ -264,12 +265,13 @@ class Canvas():
                         "password": loginInfo["data"]["password"]}
             url = "https://" + BASE_URL_API + "users/login"
             try:
-                response = requests.post(url, json=data).json()
-                if response.get("status") >= 400:
+                response = requests.post(url, json=data)
+                response_body = response.json()
+                if response.status_code >= 400:
                     self.updateUI({"command": "invalidUserCredentials"})
                     raise Exception(constants.INVALID_USER_CREDENTIALS)
                 else:
-                    self.verifyUserInYAML(response)
+                    self.verifyUserInYAML(response_body)
             except requests.exceptions.RequestException as e:
                 raise Exception(e)
         else:
@@ -341,9 +343,10 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.post(url, json=payload, headers=headers).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
+            if response.status_code >= 400:
+                self._logger.info(response_body)
             else:
                 if "token" in data:
                     del data["token"]
@@ -412,11 +415,12 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.post(url, json=payload, headers=headers).json()
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
             if response.get("status") >= 400:
-                self._logger.info(response)
+                self._logger.info(response_body)
             else:
-                self.saveUpgradeResponse(response)
+                self.saveUpgradeResponse(response_body)
                 if not self.aws_connection and self.hub_yaml["canvas-users"]:
                     self.makeShadowDeviceClient()
         except requests.exceptions.RequestException as e:
@@ -463,9 +467,10 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.post(url, json=payload, headers=headers).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
+            if response.status_code >= 400:
+                self._logger.info(response_body)
             else:
                 if new_hostname:
                     self._logger.info("Hostname updated: %s" % new_hostname)
