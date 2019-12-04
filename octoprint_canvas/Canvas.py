@@ -2,7 +2,6 @@ import os
 import zipfile
 import json
 import requests
-import ssl
 import time
 import socket
 import threading
