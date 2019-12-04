@@ -228,10 +228,11 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.get(url, headers=headers).json()
-            if "users" in response:
+            response = requests.get(url, headers=headers)
+            response_body = response.json()
+            if "users" in response_body:
                 self._logger.info("Got list of registered users.")
-                users = response["users"]
+                users = response_body["users"]
                 updated_users = {}
                 for user in users:
                     updated_users[user["id"]] = user
