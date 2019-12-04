@@ -4,7 +4,6 @@ import json
 import requests
 import ssl
 import time
-import math
 import socket
 import threading
 from subprocess import call
@@ -385,8 +384,8 @@ class Canvas():
 
         for data in response.iter_content(chunk_size=chunk_size):
             buffer.write(data)
-            downloaded_bytes = len(buffer.getvalue())
-            percentage_completion = int(math.floor((downloaded_bytes / total_bytes) * 100))
+            downloaded_bytes = float(len(buffer.getvalue()))
+            percentage_completion = int((downloaded_bytes / total_bytes) * 100)
             self._logger.info("%s%% downloaded" % percentage_completion)
             self.updateUI({
                 "command": "CANVASDownload",
