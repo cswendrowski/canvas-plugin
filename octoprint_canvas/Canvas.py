@@ -1,6 +1,5 @@
 import os
 import zipfile
-from io import StringIO ## for Python 2 & 3
 import json
 import requests
 import ssl
@@ -8,6 +7,9 @@ import time
 import math
 import socket
 import threading
+from subprocess import call
+from io import BytesIO, open ## for Python 2 & 3
+from future.utils import listvalues, lmap ## for Python 2 & 3
 
 try:
     from ruamel.yaml import YAML
@@ -22,7 +24,6 @@ if os.path.abspath(".") is "/":
     env_path = "/home/pi/.env"
 load_dotenv(env_path)
 BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
-from subprocess import call
 
 from . import Shadow
 from . import constants
@@ -323,7 +324,8 @@ class Canvas():
     def updateRegisteredUsers(self):
         # make a list of usernames
         if "canvas-users" in self.hub_yaml:
-            list_of_users = map(lambda user: {key: user[key] for key in ["username"]}, self.hub_yaml["canvas-users"].values())
+            usersValueList = listvalues(self.hub_yaml["canvas-users"]) ## for Python 2 & 3
+            list_of_users = lmap(lambda user: { key: user[key] for key in ["username"] }, usersValueList) ## for Python 2 & 3
             self.updateUI({"command": "DisplayRegisteredUsers", "data": list_of_users})
             # if there are no linked users, disconnect shadow client
             if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
@@ -380,7 +382,7 @@ class Canvas():
         return actual_file
 
     def extractZipfile(self, file, project_id):
-        z = zipfile.ZipFile(StringIO.StringIO(file))
+        z = zipfile.ZipFile(BytesIO(file)) ## for Python 2 & 3
         filename = z.namelist()[0]
         watched_path = self._settings.global_get_basefolder("watched")
         self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "received"})
