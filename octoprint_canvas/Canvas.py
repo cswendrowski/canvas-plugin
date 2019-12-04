@@ -369,7 +369,6 @@ class Canvas():
 
     def streamFileProgress(self, response, filename, project_id):
         self._logger.info("Starting stream buffer")
-        total_bytes = int(response.headers.get("content-length"))
         self.updateUI({
             "command": "CANVASDownload",
              "data": {
@@ -380,6 +379,7 @@ class Canvas():
         })
 
         buffer = BytesIO()
+        total_bytes = int(response.headers.get("content-length"))
         chunk_size = total_bytes // 100 ## for Python 2 & 3
 
         for data in response.iter_content(chunk_size=chunk_size):
