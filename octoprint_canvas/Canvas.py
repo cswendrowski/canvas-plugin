@@ -288,6 +288,7 @@ class Canvas():
         url = "https://slice." + BASE_URL_API + "projects/" + project_id + "/download"
         filename = data["filename"]
         try:
+            self._logger.info("Starting CANVAS download")
             response = requests.get(url, headers=headers, stream=True)
             downloaded_file = self.streamFileProgress(response, filename, project_id)
             self.extractZipfile(downloaded_file, project_id)
@@ -362,32 +363,56 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             raise Exception(e)
 
-    def updateUI(self, data):
-        self._logger.info("Sending UIUpdate from Canvas")
+    def updateUI(self, data, displayLog = True):
+        if displayLog:
+            self._logger.info("Sending UIUpdate from Canvas Plugin")
         self._plugin_manager.send_plugin_message(self._identifier, data)
 
     def streamFileProgress(self, response, filename, project_id):
-        total_length = response.headers.get('content-length')
-        self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "starting"})
+        self._logger.info("Starting stream buffer")
+        total_bytes = int(response.headers.get("content-length"))
+        self.updateUI({
+            "command": "CANVASDownload",
+             "data": {
+                 "filename": filename,
+                 "projectId": project_id
+            },
+            "status": "starting"
+        })
 
-        actual_file = ""
-        current_downloaded = 0.00
-        total_length = int(total_length)
-        stream_size = total_length/100
+        buffer = BytesIO()
+        chunk_size = total_bytes // 100 ## for Python 2 & 3
 
-        for data in response.iter_content(chunk_size=stream_size):
-            actual_file += data
-            current_downloaded += len(data)
-            percentage_completion = int(math.floor((current_downloaded/total_length)*100))
-            self.updateUI({"command": "CANVASDownload", "data": {"current": percentage_completion, "projectId": project_id}, "status": "downloading"})
-        return actual_file
+        for data in response.iter_content(chunk_size=chunk_size):
+            buffer.write(data)
+            downloaded_bytes = len(buffer.getvalue())
+            percentage_completion = int(math.floor((downloaded_bytes / total_bytes) * 100))
+            self._logger.info("%s%% downloaded" % percentage_completion)
+            self.updateUI({
+                "command": "CANVASDownload",
+                "data": {
+                    "current": percentage_completion,
+                    "projectId": project_id
+                },
+                "status": "downloading"
+            }, False)
+        return buffer
 
-    def extractZipfile(self, file, project_id):
-        z = zipfile.ZipFile(BytesIO(file)) ## for Python 2 & 3
-        filename = z.namelist()[0]
+    def extractZipfile(self, buffer_file, project_id):
+        zip_file = zipfile.ZipFile(buffer_file)
+        filename = zip_file.namelist()[0]
         watched_path = self._settings.global_get_basefolder("watched")
-        self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "received"})
-        z.extractall(watched_path)
+        self.updateUI({
+            "command": "CANVASDownload",
+            "data": {
+                "filename": filename,
+                "projectId": project_id
+            },
+            "status": "received"
+        })
+        self._logger.info("Extracting zip file")
+        zip_file.extractall(watched_path)
+        zip_file.close()
 
     ##############
     # 5. AWS IOT / UPGRADE RELATED FUNCTIONS
