@@ -40,7 +40,7 @@ class Canvas():
         self.hub_registered = False
 
         self.hub_yaml = {}
-        self.isHubS = self.determineHubVersion()
+        self.isHubS = False
         self.registerThread = None
 
     ##############
@@ -65,6 +65,17 @@ class Canvas():
             del self.hub_yaml["canvas-hub"]["token"]
             self.updateYAMLInfo()
 
+    def loadYAMLFile(self, yaml_file_path):
+        hub_data = open(yaml_file_path, "r")
+        hub_yaml = yaml.load(hub_data)
+        hub_data.close()
+        return hub_yaml
+
+    def writeYAMLFile(self, yaml_file_path, data):
+        yaml_file = open(yaml_file_path, "w")
+        yaml.dump(data, yaml_file)
+        yaml_file.close()
+
     def loadHubData(self):
         self._logger.info("Loading HUB data")
         hub_dir_path = os.path.expanduser('~') + "/.mosaicdata"
@@ -76,25 +87,21 @@ class Canvas():
 
         # if the YML file doesn't exist, make the file
         if not os.path.isfile(hub_file_path):
-            f = open(hub_file_path, "w")
-            hub_template = ({'versions': {'turquoise': '1.0.0', 'global': '0.1.0', 'canvas-plugin': '0.1.0',
-                                          'palette-plugin': '0.2.0', 'data-version': '0.0.1'},
-                             'canvas-hub': {},
-                             'canvas-users': {}})
-            yaml.dump(hub_template, f)
-            f.close()
+            self.writeYAMLFile(hub_file_path, constants.DEFAULT_YAML)
 
         # access yaml file with all the info
-        hub_data = open(hub_file_path, "r")
-        hub_yaml = yaml.load(hub_data) or {}
-        hub_data.close()
+        hub_yaml = self.loadYAMLFile(hub_file_path)
 
-        # if the yaml file doesn't have a "canvas-users" key
-        if not "canvas-users" in hub_yaml:
+        # for compatibility with older hub zero, if the yaml file doesn't have a "canvas-users" key
+        if not "canvas-users" in hub_yaml and all (key in hub_yaml for key in ("canvas-hub", "versions")):
             hub_yaml["canvas-users"] = {}
-            hub_data = open(hub_file_path, "w")
-            yaml.dump(hub_yaml, hub_data)
-            hub_data.close()
+            self.writeYAMLFile(hub_file_path, hub_yaml)
+
+        # if, for some reason, yaml file is empty or missing a property
+        if not hub_yaml or not all (key in hub_yaml for key in ("canvas-users", "canvas-hub", "versions")):
+            self._logger.info("Resetting YAML file to default")
+            self.writeYAMLFile(hub_file_path, constants.DEFAULT_YAML)
+            hub_yaml = self.loadYAMLFile(hub_file_path)
 
         return hub_yaml
 
@@ -195,9 +202,7 @@ class Canvas():
         hub_file_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
 
         if os.path.exists(hub_file_path):
-            hub_data = open(hub_file_path, "r")
-            hub_yaml = yaml.load(hub_data)
-            hub_data.close()
+            hub_yaml = self.loadYAMLFile(hub_file_path)
 
             hub_rank = hub_yaml["versions"]["global"]
             if hub_rank == "0.2.0":
@@ -324,9 +329,7 @@ class Canvas():
 
     def updateYAMLInfo(self):
         hub_data_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
-        hub_data = open(hub_data_path, "w")
-        yaml.dump(self.hub_yaml, hub_data)
-        hub_data.close()
+        self.writeYAMLFile(hub_data_path, self.hub_yaml)
 
     def registerUserAndHub(self, data):
         hub_id = self.hub_yaml["canvas-hub"]["id"]
