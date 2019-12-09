@@ -1,6 +1,7 @@
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 import os
 import json
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
+from . import constants
 
 
 class Shadow():
@@ -9,7 +10,6 @@ class Shadow():
         self.canvas = canvas
 
         hub_id = self.canvas.hub_yaml["canvas-hub"]["id"]
-        host = "a6xr6l0abc72a-ats.iot.us-east-1.amazonaws.com"
         mosaic_path = os.path.expanduser('~') + "/.mosaicdata/"
         root_ca_path = mosaic_path + "root-ca.crt"
         private_key_path = mosaic_path + "private.pem.key"
@@ -17,7 +17,7 @@ class Shadow():
 
         # Initialization
         self.myShadowClient = AWSIoTMQTTShadowClient(hub_id)
-        self.myShadowClient.configureEndpoint(host, 8883)
+        self.myShadowClient.configureEndpoint(constants.SHADOW_CLIENT_HOST, 8883)
         self.myShadowClient.configureCredentials(root_ca_path, private_key_path, certificate_path)
 
         # Configuration

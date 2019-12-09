@@ -195,7 +195,7 @@ function CanvasViewModel(parameters) {
   self.changeImportantUpdateSettings = condition => {
     displayImportantUpdateAlert = !condition;
 
-    let payload = {
+    const payload = {
       command: "changeImportantUpdateSettings",
       condition: displayImportantUpdateAlert
     };
@@ -218,33 +218,45 @@ function CanvasViewModel(parameters) {
   // Receive messages from the OctoPrint server
   self.onDataUpdaterPluginMessage = (pluginIdent, message) => {
     if (pluginIdent === "canvas") {
-      if (message.command === "DisplayRegisteredUsers") {
-        self.users(message.data);
-      } else if (message.command === "AWS") {
-        self.handleAWSConnection(message);
-      } else if (message.command === "UserConnectedToHUB") {
-        CanvasAlerts.userAddedSuccess(message.data.username);
-      } else if (message.command === "UserAlreadyExists") {
-        CanvasAlerts.userExistsAlready(message.data.username);
-      } else if (message.command === "invalidUserCredentials") {
-        CanvasAlerts.userInvalidCredentials();
-      } else if (message.command === "UserDeleted") {
-        CanvasAlerts.userDeletedSuccess(message.data);
-      } else if (message.command === "CANVASDownload") {
-        if (message.status === "starting") {
-          CanvasUI.displayNotification(message.data);
-        } else if (message.status === "downloading") {
-          CanvasUI.updateDownloadProgress(message.data);
-        } else if (message.status === "received") {
-          CanvasUI.updateFileReceived(message.data);
-        }
-      } else if (message.command === "importantUpdate") {
-        $("body").on("click", ".update-checkbox input", event => {
-          self.changeImportantUpdateSettings(event.target.checked);
-        });
-        CanvasAlerts.importantUpdate(message.data);
-      } else if (message.command === "hubNotRegistered") {
-        CanvasAlerts.hubNotRegistered();
+      switch (message.command) {
+        case "DisplayRegisteredUsers":
+          self.users(message.data);
+          break;
+        case "AWS":
+          self.handleAWSConnection(message);
+          break;
+        case "UserConnectedToHUB":
+          CanvasAlerts.userAddedSuccess(message.data.username);
+          break;
+        case "UserAlreadyExists":
+          CanvasAlerts.userExistsAlready(message.data.username);
+          break;
+        case "invalidUserCredentials":
+          CanvasAlerts.userInvalidCredentials();
+          break;
+        case "UserDeleted":
+          CanvasAlerts.userDeletedSuccess(message.data);
+          break;
+        case "hubNotRegistered":
+          CanvasAlerts.hubNotRegistered();
+          break;
+        case "CANVASDownload":
+          if (message.status === "starting") {
+            CanvasUI.displayNotification(message.data);
+          } else if (message.status === "downloading") {
+            CanvasUI.updateDownloadProgress(message.data);
+          } else if (message.status === "received") {
+            CanvasUI.updateFileReceived(message.data);
+          }
+          break;
+        case "importantUpdate":
+          $("body").on("click", ".update-checkbox input", event => {
+            self.changeImportantUpdateSettings(event.target.checked);
+          });
+          CanvasAlerts.importantUpdate(message.data);
+          break;
+        default:
+        // do nothing
       }
     }
   };

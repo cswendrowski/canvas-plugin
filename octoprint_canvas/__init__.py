@@ -48,7 +48,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         return dict(applyTheme=True, importantUpdate=True)
 
     def get_latest(self, target, check, full_data=False, online=True):
-        resp = requests.get("http://emerald.mosaicmanufacturing.com/canvas-hub-canvas/latest")
+        resp = requests.get(constants.LATEST_VERSION_URL)
         version_data = resp.json()
         version = version_data["versions"][0]["version"]
         current_version = check.get("current")
@@ -88,7 +88,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 command="/home/pi/test-version.sh",
 
                 # update method: pip
-                pip="https://gitlab.com/mosaic-mfg/canvas-plugin/-/archive/master/canvas-plugin-master.zip"
+                pip=constants.PLUGIN_UPDATE_URL,
             )
         )
 
