@@ -74,7 +74,7 @@ class Shadow():
 
     def handleUserListChanges(self, payload):
         self._logger.info("Handling user list delta")
-        current_yaml_users = self.canvas.hub_yaml["canvas-users"].keys()
+        current_yaml_users = list(self.canvas.hub_yaml["canvas-users"]) ## for Python 2 & 3
         delta_users = payload["userIds"]
 
         self._logger.info("YAML: %s" % current_yaml_users)

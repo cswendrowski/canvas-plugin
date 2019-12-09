@@ -1,13 +1,14 @@
 import os
 import zipfile
-import StringIO
 import json
 import requests
 import ssl
 import time
-import math
 import socket
 import threading
+from subprocess import call
+from io import BytesIO, open ## for Python 2 & 3
+from future.utils import listvalues, lmap ## for Python 2 & 3
 
 try:
     from ruamel.yaml import YAML
@@ -22,7 +23,6 @@ if os.path.abspath(".") is "/":
     env_path = "/home/pi/.env"
 load_dotenv(env_path)
 BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
-from subprocess import call
 
 from . import Shadow
 from . import constants
@@ -146,12 +146,13 @@ class Canvas():
 
             url = "https://" + BASE_URL_API + "hubs"
             try:
-                response = requests.put(url, json=payload).json()
-                if response.get("status") >= 400:
-                    self._logger.info(response)
+                response = requests.put(url, json=payload)
+                response_body = response.json()
+                if response.status_code >= 400:
+                    self._logger.info(response_body)
                     time.sleep(30)
                 else:
-                    self.saveUpgradeResponse(response)
+                    self.saveUpgradeResponse(response_body)
                     self.hub_registered = True
             except requests.exceptions.RequestException as e:
                 self._logger.info(e)
@@ -226,10 +227,11 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.get(url, headers=headers).json()
-            if "users" in response:
+            response = requests.get(url, headers=headers)
+            response_body = response.json()
+            if "users" in response_body:
                 self._logger.info("Got list of registered users.")
-                users = response["users"]
+                users = response_body["users"]
                 updated_users = {}
                 for user in users:
                     updated_users[user["id"]] = user
@@ -264,12 +266,13 @@ class Canvas():
                         "password": loginInfo["data"]["password"]}
             url = "https://" + BASE_URL_API + "users/login"
             try:
-                response = requests.post(url, json=data).json()
-                if response.get("status") >= 400:
+                response = requests.post(url, json=data)
+                response_body = response.json()
+                if response.status_code >= 400:
                     self.updateUI({"command": "invalidUserCredentials"})
                     raise Exception(constants.INVALID_USER_CREDENTIALS)
                 else:
-                    self.verifyUserInYAML(response)
+                    self.verifyUserInYAML(response_body)
             except requests.exceptions.RequestException as e:
                 raise Exception(e)
         else:
@@ -284,6 +287,7 @@ class Canvas():
         url = "https://slice." + BASE_URL_API + "projects/" + project_id + "/download"
         filename = data["filename"]
         try:
+            self._logger.info("Starting CANVAS download")
             response = requests.get(url, headers=headers, stream=True)
             downloaded_file = self.streamFileProgress(response, filename, project_id)
             self.extractZipfile(downloaded_file, project_id)
@@ -321,7 +325,8 @@ class Canvas():
     def updateRegisteredUsers(self):
         # make a list of usernames
         if "canvas-users" in self.hub_yaml:
-            list_of_users = map(lambda user: {key: user[key] for key in ["username"]}, self.hub_yaml["canvas-users"].values())
+            usersValueList = listvalues(self.hub_yaml["canvas-users"]) ## for Python 2 & 3
+            list_of_users = lmap(lambda user: { key: user[key] for key in ["username"] }, usersValueList) ## for Python 2 & 3
             self.updateUI({"command": "DisplayRegisteredUsers", "data": list_of_users})
             # if there are no linked users, disconnect shadow client
             if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
@@ -341,9 +346,10 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.post(url, json=payload, headers=headers).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
+            if response.status_code >= 400:
+                self._logger.info(response_body)
             else:
                 if "token" in data:
                     del data["token"]
@@ -356,32 +362,56 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             raise Exception(e)
 
-    def updateUI(self, data):
-        self._logger.info("Sending UIUpdate from Canvas")
+    def updateUI(self, data, displayLog = True):
+        if displayLog:
+            self._logger.info("Sending UIUpdate from Canvas Plugin")
         self._plugin_manager.send_plugin_message(self._identifier, data)
 
     def streamFileProgress(self, response, filename, project_id):
-        total_length = response.headers.get('content-length')
-        self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "starting"})
+        self._logger.info("Starting stream buffer")
+        self.updateUI({
+            "command": "CANVASDownload",
+             "data": {
+                 "filename": filename,
+                 "projectId": project_id
+            },
+            "status": "starting"
+        })
 
-        actual_file = ""
-        current_downloaded = 0.00
-        total_length = int(total_length)
-        stream_size = total_length/100
+        buffer = BytesIO()
+        total_bytes = int(response.headers.get("content-length"))
+        chunk_size = total_bytes // 100 ## for Python 2 & 3
 
-        for data in response.iter_content(chunk_size=stream_size):
-            actual_file += data
-            current_downloaded += len(data)
-            percentage_completion = int(math.floor((current_downloaded/total_length)*100))
-            self.updateUI({"command": "CANVASDownload", "data": {"current": percentage_completion, "projectId": project_id}, "status": "downloading"})
-        return actual_file
+        for data in response.iter_content(chunk_size=chunk_size):
+            buffer.write(data)
+            downloaded_bytes = float(len(buffer.getvalue()))
+            percentage_completion = int((downloaded_bytes / total_bytes) * 100)
+            self._logger.info("%s%% downloaded" % percentage_completion)
+            self.updateUI({
+                "command": "CANVASDownload",
+                "data": {
+                    "current": percentage_completion,
+                    "projectId": project_id
+                },
+                "status": "downloading"
+            }, False)
+        return buffer
 
-    def extractZipfile(self, file, project_id):
-        z = zipfile.ZipFile(StringIO.StringIO(file))
-        filename = z.namelist()[0]
+    def extractZipfile(self, buffer_file, project_id):
+        zip_file = zipfile.ZipFile(buffer_file)
+        filename = zip_file.namelist()[0]
         watched_path = self._settings.global_get_basefolder("watched")
-        self.updateUI({"command": "CANVASDownload", "data": {"filename": filename, "projectId": project_id}, "status": "received"})
-        z.extractall(watched_path)
+        self.updateUI({
+            "command": "CANVASDownload",
+            "data": {
+                "filename": filename,
+                "projectId": project_id
+            },
+            "status": "received"
+        })
+        self._logger.info("Extracting zip file")
+        zip_file.extractall(watched_path)
+        zip_file.close()
 
     ##############
     # 5. AWS IOT / UPGRADE RELATED FUNCTIONS
@@ -412,11 +442,12 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.post(url, json=payload, headers=headers).json()
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
             if response.get("status") >= 400:
-                self._logger.info(response)
+                self._logger.info(response_body)
             else:
-                self.saveUpgradeResponse(response)
+                self.saveUpgradeResponse(response_body)
                 if not self.aws_connection and self.hub_yaml["canvas-users"]:
                     self.makeShadowDeviceClient()
         except requests.exceptions.RequestException as e:
@@ -463,9 +494,10 @@ class Canvas():
         authorization = "Bearer " + hub_token
         headers = {"Authorization": authorization}
         try:
-            response = requests.post(url, json=payload, headers=headers).json()
-            if response.get("status") >= 400:
-                self._logger.info(response)
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
+            if response.status_code >= 400:
+                self._logger.info(response_body)
             else:
                 if new_hostname:
                     self._logger.info("Hostname updated: %s" % new_hostname)
