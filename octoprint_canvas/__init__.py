@@ -126,7 +126,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                     self.canvas.getRegisteredUsers()
                 if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
                     try:
-                        self.canvas.myShadow.shadowGet()
+                        self.canvas.myShadow.getData()
                     except:
                         self._logger.info("Shadow Device not created yet")
             elif "Shutdown" in event:
@@ -142,6 +142,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 __plugin_name__ = "CANVAS"
 __plugin_description__ = "A plugin to handle communication with CANVAS"
 __plugin_pythoncompat__ = ">=2.7,<4"
+
 
 def __plugin_load__():
     global __plugin_implementation__
