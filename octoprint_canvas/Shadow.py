@@ -47,7 +47,7 @@ class Shadow():
             self._myShadowClient.connect(30)
             self._subscribeShadowDeviceToTopic()
         except:
-            self._logger.info("Could connect shadow client")
+            self._logger.info("Could not connect shadow client")
 
     def _subscribeShadowDeviceToTopic(self):
         # Create device shadow with persistent subscription to the topic (i.e current hub)
