@@ -6,8 +6,11 @@ import time
 import socket
 import threading
 from subprocess import call
-from io import BytesIO, open ## for Python 2 & 3
-from future.utils import listvalues, lmap ## for Python 2 & 3
+from dotenv import load_dotenv
+from io import BytesIO, open  # for Python 2 & 3
+from future.utils import listvalues, lmap  # for Python 2 & 3
+from . import constants
+from . import Shadow
 
 try:
     from ruamel.yaml import YAML
@@ -16,15 +19,11 @@ except ImportError:
 yaml = YAML(typ="safe")
 yaml.default_flow_style = False
 
-from dotenv import load_dotenv
 env_path = os.path.abspath(".") + "/.env"
 if os.path.abspath(".") is "/":
     env_path = "/home/pi/.env"
 load_dotenv(env_path)
 BASE_URL_API = os.getenv("DEV_BASE_URL_API", "api.canvas3d.io/")
-
-from . import Shadow
-from . import constants
 
 
 class Canvas():
@@ -93,12 +92,12 @@ class Canvas():
         hub_yaml = self.loadYAMLFile(hub_file_path)
 
         # for compatibility with older hub zero, if the yaml file doesn't have a "canvas-users" key
-        if not "canvas-users" in hub_yaml and all (key in hub_yaml for key in ("canvas-hub", "versions")):
+        if not "canvas-users" in hub_yaml and all(key in hub_yaml for key in ("canvas-hub", "versions")):
             hub_yaml["canvas-users"] = {}
             self.writeYAMLFile(hub_file_path, hub_yaml)
 
         # if, for some reason, yaml file is empty or missing a property
-        if not hub_yaml or not all (key in hub_yaml for key in ("canvas-users", "canvas-hub", "versions")):
+        if not hub_yaml or not all(key in hub_yaml for key in ("canvas-users", "canvas-hub", "versions")):
             self._logger.info("Resetting YAML file to default")
             self.writeYAMLFile(hub_file_path, constants.DEFAULT_YAML)
             hub_yaml = self.loadYAMLFile(hub_file_path)
@@ -236,6 +235,9 @@ class Canvas():
                     updated_users[user["id"]] = user
                 self.hub_yaml["canvas-users"] = updated_users
                 self.updateYAMLInfo()
+                # if there are no linked users, disconnect shadow client
+                if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
+                    self.myShadow.disconnect()
             else:
                 self._logger.info("Could not get updated list of registered users.")
             self.updateRegisteredUsers()
@@ -324,12 +326,9 @@ class Canvas():
     def updateRegisteredUsers(self):
         # make a list of usernames
         if "canvas-users" in self.hub_yaml:
-            usersValueList = listvalues(self.hub_yaml["canvas-users"]) ## for Python 2 & 3
-            list_of_users = lmap(lambda user: { key: user[key] for key in ["username"] }, usersValueList) ## for Python 2 & 3
+            usersValueList = listvalues(self.hub_yaml["canvas-users"])  # for Python 2 & 3
+            list_of_users = lmap(lambda user: {key: user[key] for key in ["username"]}, usersValueList)  # for Python 2 & 3
             self.updateUI({"command": "DisplayRegisteredUsers", "data": list_of_users})
-            # if there are no linked users, disconnect shadow client
-            if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
-                self.myShadow.disconnect()
 
     def updateYAMLInfo(self):
         hub_data_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
@@ -361,7 +360,7 @@ class Canvas():
         except requests.exceptions.RequestException as e:
             raise Exception(e)
 
-    def updateUI(self, data, displayLog = True):
+    def updateUI(self, data, displayLog=True):
         if displayLog:
             self._logger.info("Sending UIUpdate from Canvas Plugin")
         self._plugin_manager.send_plugin_message(self._identifier, data)
@@ -370,16 +369,16 @@ class Canvas():
         self._logger.info("Starting stream buffer")
         self.updateUI({
             "command": "CANVASDownload",
-             "data": {
-                 "filename": filename,
-                 "projectId": project_id
+            "data": {
+                "filename": filename,
+                "projectId": project_id
             },
             "status": "starting"
         })
 
         buffer = BytesIO()
         total_bytes = int(response.headers.get("content-length"))
-        chunk_size = total_bytes // 100 ## for Python 2 & 3
+        chunk_size = total_bytes // 100  # for Python 2 & 3
 
         for data in response.iter_content(chunk_size=chunk_size):
             buffer.write(data)
@@ -509,5 +508,6 @@ class Canvas():
             self._logger.info(e)
 
     def makeShadowDeviceClient(self):
-        self._logger.info("Making Shadow Client & Device")
+        self._logger.info("Connecting Hub to CANVAS...")
         self.myShadow = Shadow.Shadow(self)
+        self.myShadow.connect()
