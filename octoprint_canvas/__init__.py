@@ -50,7 +50,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
     def get_latest(self, target, check, full_data=False, online=True):
         resp = requests.get(constants.LATEST_VERSION_URL)
         version_data = resp.json()
-        version = version_data["versions"][0]["version"]
+        version = version_data[0]['name']
         current_version = check.get("current")
         information = dict(
             local=dict(
