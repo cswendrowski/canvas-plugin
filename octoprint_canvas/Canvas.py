@@ -51,10 +51,10 @@ class Canvas():
         data.close()
 
     def _loadYAMLFile(self, yaml_file_path):
-        hub_data = open(yaml_file_path, "r")
-        hub_yaml = yaml.load(hub_data)
-        hub_data.close()
-        return hub_yaml
+        yaml_file = open(yaml_file_path, "r")
+        yaml_data = yaml.load(yaml_file)
+        yaml_file.close()
+        return yaml_data
 
     def _writeYAMLFile(self, yaml_file_path, data):
         yaml_file = open(yaml_file_path, "w")
