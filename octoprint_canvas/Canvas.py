@@ -393,7 +393,7 @@ class Canvas():
                     self._makeShadowDeviceClient()
                 else:
                     self._logger.info("There are no linked Canvas accounts yet. Connection not established.")
-        if self.hub_registered is False:
+        if not self.hub_registered:
             self._logger.info("HUB not registered yet. Registering...")
             self._startRegisterThread()
 
@@ -437,7 +437,7 @@ class Canvas():
                 self.hub_yaml["canvas-users"] = updated_users
                 self._updateYAMLInfo()
                 # if there are no linked users, disconnect shadow client
-                if not self.hub_yaml["canvas-users"] and self.aws_connection is True:
+                if not self.hub_yaml["canvas-users"] and self.aws_connection:
                     self.myShadow.disconnect()
             else:
                 self._logger.info("Could not get updated list of registered users.")
@@ -446,7 +446,7 @@ class Canvas():
             self._logger.info(e)
 
     def checkAWSConnection(self):
-        if self.aws_connection is True:
+        if self.aws_connection:
             self.updateUI({"command": "AWS", "data": True})
         else:
             reason = "server" if self.hub_yaml["canvas-users"] else "account"
