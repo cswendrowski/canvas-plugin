@@ -41,6 +41,15 @@ class Canvas():
         self.isHubS = False
         self.registerThread = None
 
+    ##############
+    # PRIVATE
+    ##############
+
+    def _writeFile(self, path, content):
+        data = open(path, "w")
+        data.write(path)
+        data.close()
+
     def _loadYAMLFile(self, yaml_file_path):
         hub_data = open(yaml_file_path, "r")
         hub_yaml = yaml.load(hub_data)
@@ -51,6 +60,21 @@ class Canvas():
         yaml_file = open(yaml_file_path, "w")
         yaml.dump(data, yaml_file)
         yaml_file.close()
+
+    def _updateYAMLInfo(self):
+        hub_data_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
+        self._writeYAMLFile(hub_data_path, self.hub_yaml)
+
+    def _getAuthorizationHeader(self):
+        hub_token = self.hub_yaml["canvas-hub"]["token"]
+        headers = {"Authorization": "Bearer %s" % hub_token}
+        return headers
+
+    def _startRegisterThread(self):
+        if self.registerThread is None:
+            self.registerThread = threading.Thread(target=self._registerHub)
+            self.registerThread.daemon = True
+            self.registerThread.start()
 
     def _registerHub(self):
         while not self.hub_registered:
@@ -81,38 +105,28 @@ class Canvas():
                     self._logger.info(response_body)
                     time.sleep(30)
                 else:
-                    self._saveUpgradeResponse(response_body)
+                    self._saveRegistrationResponse(response_body)
                     self.hub_registered = True
             except requests.exceptions.RequestException as e:
                 self._logger.info(e)
                 time.sleep(30)
         return
 
-    def _startRegisterThread(self):
-        if self.registerThread is None:
-            self.registerThread = threading.Thread(target=self._registerHub)
-            self.registerThread.daemon = True
-            self.registerThread.start()
-
-    def _verifyUserInYAML(self, data):
-        registeredUsers = self.hub_yaml["canvas-users"]
-        if data["id"] not in registeredUsers:
-            self._logger.info("User is not registered to HUB yet.")
-            self._registerUserToHub(data)
+    def _saveRegistrationResponse(self, response):
+        if "token" in response:
+            self.hub_yaml["canvas-hub"].update(response["hub"], token=response["token"])
         else:
-            self.updateUI({"command": "UserAlreadyExists", "data": data})
-            raise Exception(constants.USER_ALREADY_LINKED)
+            self.hub_yaml["canvas-hub"].update(response["hub"])
+        self._updateYAMLInfo()
 
-    def _updateUsersOnUI(self):
-        # make a list of usernames
-        if "canvas-users" in self.hub_yaml:
-            usersValueList = listvalues(self.hub_yaml["canvas-users"])  # for Python 2 & 3
-            list_of_users = lmap(lambda user: {key: user[key] for key in ["username"]}, usersValueList)  # for Python 2 & 3
-            self.updateUI({"command": "DisplayRegisteredUsers", "data": list_of_users})
+        # determine paths
+        path = os.path.expanduser('~') + "/.mosaicdata/"
+        cert_path = path + "certificate.pem.crt"
+        private_path = path + "private.pem.key"
 
-    def _updateYAMLInfo(self):
-        hub_data_path = os.path.expanduser('~') + "/.mosaicdata/canvas-hub-data.yml"
-        self._writeYAMLFile(hub_data_path, self.hub_yaml)
+        # write files
+        self._writeData(cert_path, response["certificatePem"])
+        self._writeData(private_path, response["privateKey"])
 
     def _registerUserToHub(self, data):
         hub_id = self.hub_yaml["canvas-hub"]["id"]
@@ -135,6 +149,44 @@ class Canvas():
                 self.updateUI({"command": "UserConnectedToHUB", "data": data})
         except requests.exceptions.RequestException as e:
             raise Exception(e)
+
+    def _verifyUserInYAML(self, data):
+        registeredUsers = self.hub_yaml["canvas-users"]
+        if data["id"] not in registeredUsers:
+            self._logger.info("User is not registered to HUB yet.")
+            self._registerUserToHub(data)
+        else:
+            self.updateUI({"command": "UserAlreadyExists", "data": data})
+            raise Exception(constants.USER_ALREADY_LINKED)
+
+    def _registerUserToHub(self, data):
+        hub_id = self.hub_yaml["canvas-hub"]["id"]
+        url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/register"
+        headers = self._getAuthorizationHeader()
+        payload = {"userToken": data["token"]}
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            response_body = response.json()
+            if response.status_code >= 400:
+                self._logger.info(response_body)
+            else:
+                if "token" in data:
+                    del data["token"]
+                self.hub_yaml["canvas-users"][data["id"]] = data
+                self._updateYAMLInfo()
+                self._updateUsersOnUI()
+                if not self.aws_connection:
+                    self._makeShadowDeviceClient()
+                self.updateUI({"command": "UserConnectedToHUB", "data": data})
+        except requests.exceptions.RequestException as e:
+            raise Exception(e)
+
+    def _updateUsersOnUI(self):
+        # make a list of usernames
+        if "canvas-users" in self.hub_yaml:
+            usersValueList = listvalues(self.hub_yaml["canvas-users"])  # for Python 2 & 3
+            list_of_users = lmap(lambda user: {key: user[key] for key in ["username"]}, usersValueList)  # for Python 2 & 3
+            self.updateUI({"command": "DisplayRegisteredUsers", "data": list_of_users})
 
     def _streamFileProgress(self, response, filename, project_id):
         self._logger.info("Starting stream buffer")
@@ -209,27 +261,11 @@ class Canvas():
             if response.get("status") >= 400:
                 self._logger.info(response_body)
             else:
-                self._saveUpgradeResponse(response_body)
+                self._saveRegistrationResponse(response_body)
                 if not self.aws_connection and self.hub_yaml["canvas-users"]:
                     self._makeShadowDeviceClient()
         except requests.exceptions.RequestException as e:
             self._logger.info(e)
-
-    def _saveUpgradeResponse(self, response):
-        if "token" in response:
-            self.hub_yaml["canvas-hub"].update(response["hub"], token=response["token"])
-        else:
-            self.hub_yaml["canvas-hub"].update(response["hub"])
-        self._updateYAMLInfo()
-
-        # determine paths
-        path = os.path.expanduser('~') + "/.mosaicdata/"
-        cert_path = path + "certificate.pem.crt"
-        private_path = path + "private.pem.key"
-
-        # write files
-        self._writeData(cert_path, response["certificatePem"])
-        self._writeData(private_path, response["privateKey"])
 
     def _getHostname(self):
         try:
@@ -269,20 +305,11 @@ class Canvas():
         self.myShadow = Shadow.Shadow(self)
         self.myShadow.connect()
 
-    def _getAuthorizationHeader(self):
-        hub_token = self.hub_yaml["canvas-hub"]["token"]
-        headers = {"Authorization": "Bearer %s" % hub_token}
-        return headers
-
-    def _writeFile(self, path, content):
-        data = open(path, "w")
-        data.write(path)
-        data.close()
-
     ##############
+    # PUBLIC
+    ##############
+
     # 1. SERVER STARTUP FUNCTIONS
-    ##############
-
     def checkForRuamelVersion(self):
         for path in constants.PROBLEMATIC_YAML_FILES_PATHS:
             if os.path.exists(path):
@@ -393,10 +420,7 @@ class Canvas():
                 return True
         return False
 
-    ##############
-    # 2. CLIENT UI STARTUP FUNCTIONS
-    ##############
-
+    # 2. UI FUNCTIONS
     def getRegisteredUsers(self):
         hub_id = self.hub_yaml["canvas-hub"]["id"]
         url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/users"
@@ -428,10 +452,7 @@ class Canvas():
             reason = "server" if self.hub_yaml["canvas-users"] else "account"
             self.updateUI({"command": "AWS", "data": False, "reason": reason})
 
-    ##############
     # 3. USER FUNCTIONS
-    ##############
-
     def addUser(self, loginInfo):
         if self.hub_registered:
             loginData = loginInfo["data"]
@@ -473,10 +494,7 @@ class Canvas():
         self._settings.set(["importantUpdate"], condition, force=True)
         self._logger.info(self._settings.get(["importantUpdate"]))
 
-    ##############
     # 4. HELPER FUNCTIONS
-    ##############
-
     def removeUserFromYAML(self, user_id):
         username = self.hub_yaml["canvas-users"][user_id]["username"]
         del self.hub_yaml["canvas-users"][user_id]
@@ -488,7 +506,3 @@ class Canvas():
         if displayLog:
             self._logger.info("Sending UIUpdate from Canvas Plugin")
         self._plugin_manager.send_plugin_message(self._identifier, data)
-
-    ##############
-    # 5. AWS IOT / UPGRADE RELATED FUNCTIONS
-    ##############
