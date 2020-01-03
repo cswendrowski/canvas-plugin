@@ -125,8 +125,8 @@ class Canvas():
         private_path = path + "private.pem.key"
 
         # write files
-        self._writeData(cert_path, response["certificatePem"])
-        self._writeData(private_path, response["privateKey"])
+        self._writeFile(cert_path, response["certificatePem"])
+        self._writeFile(private_path, response["privateKey"])
 
     def _registerUserToHub(self, data):
         hub_id = self.hub_yaml["canvas-hub"]["id"]
