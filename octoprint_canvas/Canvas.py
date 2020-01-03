@@ -47,7 +47,7 @@ class Canvas():
 
     def _writeFile(self, path, content):
         data = open(path, "w")
-        data.write(path)
+        data.write(content)
         data.close()
 
     def _loadYAMLFile(self, yaml_file_path):
@@ -364,7 +364,7 @@ class Canvas():
             self._logger.info("DOWNLOADING ROOT-CA CERT")
             try:
                 response = requests.get(constants.ROOT_CA_CERTIFICATE)
-                self._writeFile(root_ca_path, response.content)
+                self._writeFile(root_ca_path, response.content.decode())
                 self._logger.info("ROOT-CA DOWNLOADED")
             except requests.exceptions.RequestException as e:
                 self._logger.info(e)
