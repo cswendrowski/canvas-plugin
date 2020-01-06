@@ -121,16 +121,17 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             elif "ClientOpened" in event:
                 if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
                     self.canvas.updateUI({"command": "importantUpdate", "data": "x.x.x"})
-                self.canvas.checkAWSConnection()
-                if self.canvas.hub_registered is True:
-                    self.canvas.getRegisteredUsers()
-                if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
-                    try:
-                        self.canvas.myShadow.getData()
-                    except:
-                        self._logger.info("Shadow Device not created yet")
+                if self.canvas:
+                    self.canvas.checkAWSConnection()
+                    if self.canvas.hub_registered:
+                        self.canvas.getRegisteredUsers()
+                    if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection:
+                        try:
+                            self.canvas.myShadow.getData()
+                        except:
+                            self._logger.info("Shadow Device not created yet")
             elif "Shutdown" in event:
-                if self.canvas.aws_connection is True:
+                if self.canvas.aws_connection:
                     self.canvas.myShadow.disconnect()
         except Exception as e:
             self._logger.info(e)
