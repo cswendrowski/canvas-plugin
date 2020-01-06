@@ -128,28 +128,6 @@ class Canvas():
         self._writeFile(cert_path, response["certificatePem"])
         self._writeFile(private_path, response["privateKey"])
 
-    def _registerUserToHub(self, data):
-        hub_id = self.hub_yaml["canvas-hub"]["id"]
-        url = "https://" + BASE_URL_API + "hubs/" + hub_id + "/register"
-        headers = self._getAuthorizationHeader()
-        payload = {"userToken": data["token"]}
-        try:
-            response = requests.post(url, json=payload, headers=headers)
-            response_body = response.json()
-            if response.status_code >= 400:
-                self._logger.info(response_body)
-            else:
-                if "token" in data:
-                    del data["token"]
-                self.hub_yaml["canvas-users"][data["id"]] = data
-                self._updateYAMLInfo()
-                self._updateUsersOnUI()
-                if not self.aws_connection:
-                    self._makeShadowDeviceClient()
-                self.updateUI({"command": "UserConnectedToHUB", "data": data})
-        except requests.exceptions.RequestException as e:
-            raise Exception(e)
-
     def _verifyUserInYAML(self, data):
         registeredUsers = self.hub_yaml["canvas-users"]
         if data["id"] not in registeredUsers:
