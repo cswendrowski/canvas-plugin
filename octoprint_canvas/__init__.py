@@ -23,6 +23,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         self.canvas = Canvas.Canvas(self)
         self.canvas.checkForRuamelVersion()
         self.canvas.hub_yaml = self.canvas.loadHubData()
+        self.canvas.isHubS = self.canvas.determineHubVersion()
         self.canvas.checkFor0cf0()
         self.canvas.checkIfRootCertExists()
         self.canvas.updatePluginVersions()
@@ -47,9 +48,9 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
         return dict(applyTheme=True, importantUpdate=True)
 
     def get_latest(self, target, check, full_data=False, online=True):
-        resp = requests.get("http://emerald.mosaicmanufacturing.com/canvas-hub-canvas/latest")
+        resp = requests.get(constants.LATEST_VERSION_URL)
         version_data = resp.json()
-        version = version_data["versions"][0]["version"]
+        version = version_data[0]['name']
         current_version = check.get("current")
         information = dict(
             local=dict(
@@ -87,7 +88,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
                 command="/home/pi/test-version.sh",
 
                 # update method: pip
-                pip="https://gitlab.com/mosaic-mfg/canvas-plugin/-/archive/master/canvas-plugin-master.zip"
+                pip=constants.PLUGIN_UPDATE_URL,
             )
         )
 
@@ -120,16 +121,17 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
             elif "ClientOpened" in event:
                 if self.displayImportantUpdateAlert and self._settings.get(["importantUpdate"]):
                     self.canvas.updateUI({"command": "importantUpdate", "data": "x.x.x"})
-                self.canvas.checkAWSConnection()
-                if self.canvas.hub_registered is True:
-                    self.canvas.getRegisteredUsers()
-                if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection is True:
-                    try:
-                        self.canvas.myShadow.shadowGet()
-                    except:
-                        self._logger.info("Shadow Device not created yet")
+                if self.canvas:
+                    self.canvas.checkAWSConnection()
+                    if self.canvas.hub_registered:
+                        self.canvas.getRegisteredUsers()
+                    if self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection:
+                        try:
+                            self.canvas.myShadow.getData()
+                        except:
+                            self._logger.info("Shadow Device not created yet")
             elif "Shutdown" in event:
-                if self.canvas.aws_connection is True:
+                if self.canvas.aws_connection:
                     self.canvas.myShadow.disconnect()
         except Exception as e:
             self._logger.info(e)
@@ -140,6 +142,7 @@ class CanvasPlugin(octoprint.plugin.TemplatePlugin,
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "CANVAS"
 __plugin_description__ = "A plugin to handle communication with CANVAS"
+__plugin_pythoncompat__ = ">=2.7,<4"
 
 
 def __plugin_load__():

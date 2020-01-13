@@ -1,64 +1,88 @@
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 import os
 import json
+import time
+import threading
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
+from . import constants
 
 
 class Shadow():
     def __init__(self, canvas):
-        self._logger = canvas._logger
         self.canvas = canvas
+        self._logger = canvas._logger
+        self._hub_id = canvas.hub_yaml["canvas-hub"]["id"]
+        self._myShadowClient = None
+        self._myDeviceShadow = None
+        self._connectThread = None
 
-        hub_id = self.canvas.hub_yaml["canvas-hub"]["id"]
-        host = "a6xr6l0abc72a-ats.iot.us-east-1.amazonaws.com"
+        self._initialize()
+
+    ##############
+    # PRIVATE
+    ##############
+
+    def _initialize(self):
         mosaic_path = os.path.expanduser('~') + "/.mosaicdata/"
         root_ca_path = mosaic_path + "root-ca.crt"
         private_key_path = mosaic_path + "private.pem.key"
         certificate_path = mosaic_path + "certificate.pem.crt"
 
         # Initialization
-        self.myShadowClient = AWSIoTMQTTShadowClient(hub_id)
-        self.myShadowClient.configureEndpoint(host, 8883)
-        self.myShadowClient.configureCredentials(root_ca_path, private_key_path, certificate_path)
+        self._myShadowClient = AWSIoTMQTTShadowClient(self._hub_id)
+        self._myShadowClient.configureEndpoint(constants.SHADOW_CLIENT_HOST, 8883)
+        self._myShadowClient.configureCredentials(root_ca_path, private_key_path, certificate_path)
 
         # Configuration
-        self.myShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
-        self.myShadowClient.configureConnectDisconnectTimeout(15)  # 10 sec
-        self.myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
-        self.myShadowClient.onOnline = self.onOnline
-        self.myShadowClient.onOffline = self.onOffline
-        self._logger.info("Shadow Client initialized")
+        self._myShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
+        self._myShadowClient.configureConnectDisconnectTimeout(15)  # 15 sec
+        self._myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
+        self._myShadowClient.onOnline = self._onOnline
+        self._myShadowClient.onOffline = self._onOffline
+        self._logger.info("Shadow client initialized")
 
+    def _connectShadowClient(self):
         # Connect to AWS IoT
-        self.myShadowClient.connect(30)
+        try:
+            self._logger.info("Connecting shadow client...")
+            self._myShadowClient.connect(30)
+            self._subscribeShadowDeviceToTopic()
+        except:
+            self._logger.info("Could not connect shadow client")
 
-        # Topic to subscribe to
-        hub_id = self.canvas.hub_yaml["canvas-hub"]["id"]
-        shadow_topic = "canvas-hub-" + hub_id
+    def _subscribeShadowDeviceToTopic(self):
+        # Create device shadow with persistent subscription to the topic (i.e current hub)
+        try:
+            self._logger.info("Device shadow subscribing to current hub topic...")
+            shadow_topic = "canvas-hub-" + self._hub_id
+            self._myDeviceShadow = self._myShadowClient.createShadowHandlerWithName(shadow_topic, True)
+            self._myDeviceShadow.shadowRegisterDeltaCallback(self._onDelta)  # initialize listener for device shadow deltas
+            self._logger.info("Device shadow successfully subscribed to topic")
+            self.getData()
+        except:
+            self._logger.info("Could not subscribe device shadow to the current hub topic")
 
-        # Create device shadow with persistent subscription to the above topic
-        self.myDeviceShadow = self.myShadowClient.createShadowHandlerWithName(shadow_topic, True)
-        self._logger.info("Device Shadow created")
+    def _startConnectThread(self):
+        if self._connectThread is not None:
+            self._stopConnectThread()
 
-        # initialize listener for device shadow deltas + get object upon connection
-        self.myDeviceShadow.shadowRegisterDeltaCallback(self.onDelta)
-        self.myDeviceShadow.shadowGet(self.onGetShadowObj, 10)
+        self._connectThreadStop = False
+        self._connectThread = threading.Thread(target=self._connectToAWS)
+        self._connectThread.daemon = True
+        self._connectThread.start()
 
-    def shadowGet(self):
-        self.myDeviceShadow.shadowGet(self.onGetShadowObj, 10)
+    def _connectToAWS(self):
+        while not self._connectThreadStop:
+            self._connectShadowClient()
+            time.sleep(30)
 
-    def disconnect(self):
-        self.myShadowClient.disconnect()
+    def _stopConnectThread(self):
+        self._connectThreadStop = True
+        if self._connectThread and threading.current_thread() != self._connectThread:
+            self._connectThread.join()
+        self._connectThread = None
 
-    def handleDeltaFromGet(self, delta):
-        self._logger.info("Handling Delta From Get")
-        if "userIds" in delta:
-            self.handleUserListChanges(delta)
-        if "queuedPrint" in delta:
-            self.handlePrint(delta)
-
-    def handlePrint(self, payload):
-        self._logger.info("Handling Prints")
-        self._logger.info(payload)
+    def _handlePrint(self, payload):
+        self._logger.info("Handling print download")
         self.canvas.downloadPrintFiles(payload["queuedPrint"])
         state_to_send_back = {
             "state": {
@@ -70,25 +94,19 @@ class Shadow():
                 }
             }
         }
-        self.myDeviceShadow.shadowUpdate(json.dumps(state_to_send_back), self.onUpdate, 10)
+        self._myDeviceShadow.shadowUpdate(json.dumps(state_to_send_back), self._onUpdate, 10)
 
-    def handleUserListChanges(self, payload):
+    def _handleUserListChanges(self, payload):
         self._logger.info("Handling user list delta")
-        current_yaml_users = self.canvas.hub_yaml["canvas-users"].keys()
+        current_yaml_users = list(self.canvas.hub_yaml["canvas-users"])  # for Python 2 & 3
         delta_users = payload["userIds"]
 
-        self._logger.info("YAML: %s" % current_yaml_users)
-        self._logger.info("DELTA: %s" % delta_users)
-
-        sameListContent = set(current_yaml_users) == set(delta_users)
-
         # if contents are not the same, get new list of registered users
-        if not sameListContent:
+        if not set(current_yaml_users) == set(delta_users):
             self._logger.info("Content not the same. Updating yaml user list first.")
             if len(delta_users) < len(current_yaml_users):
                 removed_user = str(set(current_yaml_users).difference(set(delta_users)).pop())
                 self.canvas.removeUserFromYAML(removed_user)
-            self.canvas.getRegisteredUsers()
 
         users_to_report = delta_users
         reportedState = {
@@ -98,53 +116,56 @@ class Shadow():
                 }
             }
         }
-        self.myDeviceShadow.shadowUpdate(json.dumps(reportedState), self.onUpdate, 10)
+        self._myDeviceShadow.shadowUpdate(json.dumps(reportedState), self._onUpdate, 10)
+        # if there are no linked users, disconnect shadow client
+        if not self.canvas.hub_yaml["canvas-users"] and self.canvas.aws_connection:
+            self._myShadowClient.disconnect()
 
-    ##############
+    def _handleChanges(self, payload):
+        if "userIds" in payload:
+            self._handleUserListChanges(payload)
+        if "queuedPrint" in payload:
+            self._handlePrint(payload)
+
     # CALLBACKS
-    ##############
 
-    def onGetShadowObj(self, payload, responseStatus, token):
+    def _onGetShadowObj(self, payload, responseStatus, token):
         self._logger.info("GOT SHADOW OBJECT")
-        self._logger.info("Payload: %s" % payload)
-        self._logger.info("Status: %s" % responseStatus)
-        self._logger.info("Token: %s" % token)
-
         payload = json.loads(payload)
         if responseStatus == "accepted" and "delta" in payload["state"]:
             delta = payload["state"]["delta"]
-
-            if "userIds" in delta:
-                self.handleUserListChanges(delta)
-            if "queuedPrint" in delta:
-                self.handlePrint(delta)
+            self._handleChanges(delta)
         else:
             self._logger.info("No delta found in object. No action needed.")
 
-    def onDelta(self, payload, responseStatus, token):
+    def _onDelta(self, payload, responseStatus, token):
         self._logger.info("RECEIVED DELTA")
-        self._logger.info("Payload: %s" % payload)
-        self._logger.info("Status: %s" % responseStatus)
-        self._logger.info("Token: %s" % token)
-
         payload = json.loads(payload)
-        if "userIds" in payload["state"]:
-            self.handleUserListChanges(payload["state"])
-        if "queuedPrint" in payload["state"]:
-            self.handlePrint(payload["state"])
+        self._handleChanges(payload["state"])
 
-    def onUpdate(self, payload, responseStatus, token):
+    def _onUpdate(self, payload, responseStatus, token):
         self._logger.info("SHADOW UPDATE RESPONSE")
-        self._logger.info("Payload: %s" % payload)
-        self._logger.info("Status: %s" % responseStatus)
-        self._logger.info("Token: %s" % token)
 
-    def onOnline(self):
-        self._logger.info("Shadow Client is online")
+    def _onOnline(self):
+        self._logger.info("Shadow client is online")
         self.canvas.aws_connection = True
         self.canvas.checkAWSConnection()
+        self._connectThreadStop = True
 
-    def onOffline(self):
-        self._logger.info("Shadow Client is offline")
+    def _onOffline(self):
+        self._logger.info("Shadow client is offline")
         self.canvas.aws_connection = False
         self.canvas.checkAWSConnection()
+
+    ##############
+    # PUBLIC
+    ##############
+
+    def connect(self):
+        self._startConnectThread()
+
+    def getData(self):
+        self._myDeviceShadow.shadowGet(self._onGetShadowObj, 10)
+
+    def disconnect(self):
+        self._myShadowClient.disconnect()
