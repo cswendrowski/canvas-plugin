@@ -323,13 +323,19 @@ class Canvas():
         # access yaml file with all the info
         hub_yaml = self._loadYAMLFile(hub_file_path)
 
+        # if the yaml file is somehow empty
+        if not hub_yaml:
+            self._writeYAMLFile(hub_file_path, constants.DEFAULT_YAML)
+            hub_yaml = self._loadYAMLFile(hub_file_path)
+
         # for compatibility with older hub zero, if the yaml file doesn't have a "canvas-users" key
         if not "canvas-users" in hub_yaml and all(key in hub_yaml for key in ("canvas-hub", "versions")):
             hub_yaml["canvas-users"] = {}
             self._writeYAMLFile(hub_file_path, hub_yaml)
+            hub_yaml = self._loadYAMLFile(hub_file_path)
 
-        # if, for some reason, yaml file is empty or missing a property
-        if not hub_yaml or not all(key in hub_yaml for key in ("canvas-users", "canvas-hub", "versions")):
+        # if, for some reason, yaml file is still missing a property
+        if not all(key in hub_yaml for key in ("canvas-users", "canvas-hub", "versions")):
             self._logger.info("Resetting YAML file to default")
             self._writeYAMLFile(hub_file_path, constants.DEFAULT_YAML)
             hub_yaml = self._loadYAMLFile(hub_file_path)
