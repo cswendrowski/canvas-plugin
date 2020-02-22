@@ -6,7 +6,7 @@ This OctoPrint plugin enables connection and communication between OctoPrint and
 
 On your OctoPrint server, manually install this plugin via the Plugin Manager using the following URL:
 
-`https://gitlab.com/mosaic-mfg/canvas-plugin/-/archive/master/canvas-plugin-master.zip`
+`https://github.com/cswendrowski/canvas-plugin/archive/master.zip`
 
 ## Functionalities
 
